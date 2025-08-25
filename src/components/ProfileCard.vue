@@ -26,7 +26,8 @@
 
 <style scoped>
 .profile-card {
-  width: 300px;
+  width: 350px;
+  box-sizing: border-box; /* 确保宽度包含内边距和边框 */
   border-radius: 15px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   text-align: center;

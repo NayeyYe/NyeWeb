@@ -1,6 +1,9 @@
 <template>
   <div class="home-container">
-    <ProfileCard class="profile-card-container" />
+    <div class="left-column">
+      <ProfileCard class="profile-card-container" />
+      <TimelineEditor class="timeline-editor-container" />
+    </div>
     <el-card class="intro-card">
       <!-- 英雄区域 -->
       <div class="hero-section">
@@ -46,6 +49,7 @@
 
 <script setup>
 import ProfileCard from '@/components/ProfileCard.vue'
+import TimelineEditor from '@/components/TimelineEditor.vue'
 </script>
 
 <style scoped>
@@ -61,14 +65,28 @@ import ProfileCard from '@/components/ProfileCard.vue'
   padding-right: 20px;
 }
 
+.left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 350px; /* 您可以根据ProfileCard的宽度进行调整 */
+  flex-shrink: 0;
+}
+
 .profile-card-container {
   position: sticky;
   top: 80px; /* 80px 是顶栏高度 */
+  width: 100%;
+}
+
+.timeline-editor-container {
+  width: 100%;
 }
 
 .intro-card {
   flex: 1;
   padding: 20px;
+  border-radius: 15px;
 }
 
 .hero-section h1 {
