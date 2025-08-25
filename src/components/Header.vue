@@ -20,12 +20,9 @@ import '@/assets/styles/header.css';
             <el-menu-item index="/">首页</el-menu-item>
             <el-menu-item index="/projects">项目</el-menu-item>
             <el-menu-item index="/knowledge">知识</el-menu-item>
-            <el-sub-menu index="/more">
-              <template #title>更多</template>
-              <el-menu-item index="/tools">小工具</el-menu-item>
-              <el-menu-item index="/resources">资源</el-menu-item>
-              <el-menu-item index="/etc">杂项知识</el-menu-item>
-            </el-sub-menu>
+            <el-menu-item index="/tools">小工具</el-menu-item>
+            <el-menu-item index="/resources">资源</el-menu-item>
+            <el-menu-item index="/etc">杂项知识</el-menu-item>
           </el-menu>
         </div>
       </el-col>

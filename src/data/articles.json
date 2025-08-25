@@ -1,0 +1,23 @@
+[
+  {
+    "title": "Logistic Regression 笔记",
+    "slug": "Logistic",
+    "tags": ["machine learning", "classification", "statistics"],
+    "date": "2023-09-15",
+    "summary": "本文详细介绍了逻辑回归的原理、数学推导以及在二分类问题中的应用，是机器学习入门的重要概念。"
+  },
+  {
+    "title": "SVM 学习笔记",
+    "slug": "SVM",
+    "tags": ["machine learning", "classification", "kernel methods"],
+    "date": "2023-09-28",
+    "summary": "支持向量机（SVM）是一种强大的分类算法。本文探讨了其核心思想，包括最大间隔、核技巧和软间隔等。"
+  },
+  {
+    "title": "Introduction to Python Programming",
+    "slug": "Introduction to Python Programming",
+    "tags": ["python", "programming", "tutorial"],
+    "date": "2023-10-05",
+    "summary": "一篇面向初学者的Python入门教程，涵盖了基本语法、数据类型、控制流以及函数等核心编程概念。"
+  }
+]

@@ -57,6 +57,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
+import timelineData from '@/data/timeline.json'
 
 // 对话框可见性
 const dialogVisible = ref(false)
@@ -68,12 +69,8 @@ const newItem = ref({
 })
 
 // 时间线数据
-const timelineItems = ref([
-  {
-    timestamp: '2025-8-25',
-    content: '网站开始搭建'
-  }
-])
+// todo: 这里应该加入数据库内容
+const timelineItems = ref(timelineData)
 
 // 计算属性，用于对时间线项目按日期降序排序
 const sortedTimelineItems = computed(() => {

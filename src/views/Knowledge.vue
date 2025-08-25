@@ -1,64 +1,49 @@
 <template>
   <div class="knowledge-container">
-    <el-card class="list-card">
-      <template #header>
-        <div class="card-header">
-          <span>知识文章</span>
-        </div>
-      </template>
-      <div v-for="article in articles" :key="article.slug" class="article-item">
-        <router-link :to="`/knowledge/${article.slug}`" class="article-link">
-          {{ article.title }}
-        </router-link>
-      </div>
-    </el-card>
+    <div class="header">
+      <h1>知识文章</h1>
+      <p>探索、学习、分享。这里是我关于技术、科学和思考的笔记。</p>
+    </div>
+    <div class="articles-grid">
+      <ArticleCard v-for="article in articles" :key="article.slug" :article="article" />
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import articleData from '@/data/articles.json'
+import ArticleCard from '@/components/ArticleCard.vue'
 
-// 请将这里的 title 和 slug 替换为您 public/articles/knowledge 文件夹中实际的文件名。
-// slug 的值必须是您的文件名（不包含 .md 后缀）。
-const articles = ref([
-  { title: 'Logistic Regression 笔记', slug: 'Logistic' }, // 对应 public/articles/knowledge/Logistic.md
-  { title: 'SVM 学习笔记', slug: 'SVM' }  // 对应 public/articles/knowledge/SVM.md
-])
+// todo: 这里应该加入数据库内容
+const articles = ref(articleData)
 </script>
 
 <style scoped>
 .knowledge-container {
   padding: 100px 20px 20px;
-  max-width: 900px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
-.list-card {
-  border-radius: 15px;
+.header {
+  text-align: center;
+  margin-bottom: 40px;
 }
 
-.card-header {
-  font-size: 18px;
-  font-weight: bold;
+.header h1 {
+  font-size: 2.5em;
+  margin-bottom: 10px;
 }
 
-.article-item {
-  padding: 15px 0;
-  border-bottom: 1px solid #ebeef5;
+.header p {
+  font-size: 1.1em;
+  color: #606266;
 }
 
-.article-item:last-child {
-  border-bottom: none;
-}
-
-.article-link {
-  text-decoration: none;
-  color: #303133;
-  font-size: 16px;
-  transition: color 0.3s;
-}
-
-.article-link:hover {
-  color: #409eff;
+.articles-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 </style>
