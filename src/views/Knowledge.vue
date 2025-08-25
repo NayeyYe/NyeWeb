@@ -6,7 +6,7 @@
     </div>
     <div class="main-content">
       <aside class="timeline-sidebar">
-        <ArticleTimeline :articles="sortedArticles" @scroll-to-article="handleScrollToArticle" />
+        <ArticleTimeline :articles="filteredArticles" @scroll-to-article="handleScrollToArticle" />
       </aside>
       <main class="articles-main">
         <TagFilter :tags="allTags" @tag-selected="handleTagSelected" />
