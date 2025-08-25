@@ -16,15 +16,15 @@ import '@/assets/styles/header.css';
       <!-- 中间导航选项 -->
       <el-col :span="16">
         <div class="nav-center">
-          <el-menu mode="horizontal" class="nav-menu" :ellipsis="false">
-            <el-menu-item index="1">首页</el-menu-item>
-            <el-menu-item index="2">项目</el-menu-item>
-            <el-menu-item index="3">知识</el-menu-item>
-            <el-sub-menu index="4">
+          <el-menu mode="horizontal" class="nav-menu" :ellipsis="false" router>
+            <el-menu-item index="/">首页</el-menu-item>
+            <el-menu-item index="/projects">项目</el-menu-item>
+            <el-menu-item index="/knowledge">知识</el-menu-item>
+            <el-sub-menu index="/more">
               <template #title>更多</template>
-              <el-menu-item index="4-1">小工具</el-menu-item>
-              <el-menu-item index="4-2">资源</el-menu-item>
-              <el-menu-item index="4-3">杂项知识</el-menu-item>
+              <el-menu-item index="/tools">小工具</el-menu-item>
+              <el-menu-item index="/resources">资源</el-menu-item>
+              <el-menu-item index="/etc">杂项知识</el-menu-item>
             </el-sub-menu>
           </el-menu>
         </div>
