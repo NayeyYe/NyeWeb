@@ -58,6 +58,8 @@ const handleScrollToArticle = (slug) => {
   const element = document.getElementById(slug)
   if (element) {
     element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }else {
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
   }
 }
 </script>
