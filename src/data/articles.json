@@ -2,37 +2,79 @@
   {
     "title": "Logistic Regression 笔记",
     "slug": "Logistic",
-    "tags": ["machine learning", "classification", "statistics"],
+    "tags": ["tag1", "tag2", "tag3"],
     "date": "2023-09-15",
     "summary": "本文详细介绍了逻辑回归的原理、数学推导以及在二分类问题中的应用，是机器学习入门的重要概念。"
   },
   {
     "title": "SVM 学习笔记",
     "slug": "SVM",
-    "tags": ["machine learning", "classification", "kernel methods"],
+    "tags": ["tag2", "tag3", "tag4"],
     "date": "2023-09-28",
     "summary": "支持向量机（SVM）是一种强大的分类算法。本文探讨了其核心思想，包括最大间隔、核技巧和软间隔等。"
   },
   {
     "title": "Introduction to Python Programming",
     "slug": "Introduction to Python Programming",
-    "tags": ["python", "programming", "tutorial"],
+    "tags": ["tag3", "tag4", "tag5"],
     "date": "2023-10-05",
     "summary": "一篇面向初学者的Python入门教程，涵盖了基本语法、数据类型、控制流以及函数等核心编程概念。"
   },
   {
     "title": "人工智能简介",
     "slug": "人工智能简介",
-    "tags": ["AI", "技术", "未来", "机器学习"],
+    "tags": ["tag4", "tag5", "tag6"],
     "date": "2023-10-10",
     "summary": "本文简要介绍人工智能的基本概念、发展历史、应用领域以及未来趋势，帮助读者快速了解AI技术。"
   },
   {
     "title": "Web开发入门",
     "slug": "Web开发入门",
-    "tags": ["web开发", "HTML", "CSS", "JavaScript", "教程"],
+    "tags": ["tag5", "tag6", "tag7"],
     "date": "2023-10-12",
     "summary": "本文介绍Web开发的基础知识，包括HTML、CSS和JavaScript的核心概念、简单示例以及学习资源，适合初学者快速上手。"
+  },
+  {
+    "title": "个人博客搭建指南",
+    "tags": ["tag6", "tag7", "tag1"],
+    "date": "2023-10-22",
+    "summary": "本文详细介绍如何从零开始搭建个人博客，包括平台选择、域名注册、内容创作、SEO优化和流量变现等完整流程，适合初学者快速入门。",
+    "slug": "personal-blogging-guide"
+  },
+  {
+    "title": "机器学习入门与实践",
+    "tags": ["tag7", "tag1", "tag2"],
+    "date": "2023-10-25",
+    "summary": "本文全面介绍机器学习的基本概念、常用算法、实践步骤以及Python代码示例，帮助初学者系统掌握机器学习基础并能够动手实践。",
+    "slug": "machine-learning-introduction"
+  },
+  {
+    "title": "云计算入门",
+    "tags": ["tag1", "tag2", "tag3"],
+    "date": "2023-10-18",
+    "summary": "本文介绍云计算的基本概念、主要服务提供商（如AWS和Azure）、核心服务模型以及入门实践，帮助读者快速理解云技术并开始使用。",
+    "slug": "introduction-to-cloud-computing"
+  },
+  {
+    "title": "DevOps实践指南",
+    "tags": ["tag2", "tag3", "tag4"],
+    "date": "2023-10-28",
+    "summary": "本文深入介绍DevOps的核心概念、工具链、实践方法和完整流水线搭建，包含详细的代码示例和最佳实践，帮助团队实现高效的软件交付。",
+    "slug": "devops-practical-guide"
+  },
+  {
+    "title": "数据科学基础",
+    "tags": ["tag3", "tag4", "tag5"],
+    "date": "2023-10-15",
+    "summary": "本文介绍数据科学的基本概念、常用工具（如Python和pandas）、简单数据分析示例，以及学习资源，帮助初学者快速入门。",
+    "slug": "data-science-basics"
+  },
+  {
+    "title": "网络安全基础",
+    "tags": ["tag4", "tag5", "tag6"],
+    "date": "2023-10-20",
+    "summary": "本文介绍网络安全的基本概念、常见威胁类型、防护措施以及实用工具，帮助读者建立基础安全意识和防护能力。",
+    "slug": "cybersecurity-fundamentals"
   }
 
 ]

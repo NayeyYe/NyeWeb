@@ -6,13 +6,17 @@
     </div>
     <div class="main-content">
       <aside class="timeline-sidebar">
-        <ArticleTimeline :articles="sortedArticles" @scroll-to-article="handleScrollToArticle" />
+        <ArticleTimeline :articles="filteredArticles" />
       </aside>
       <main class="articles-main">
         <div class="articles-grid">
+          <TagCloud
+            :articles="articles"
+            :selectedTag="selectedTag"
+            @tag-selected="selectTag"
+          />
           <ArticleCard
-            v-for="article in displayedArticles"
-            :id="article.slug"
+            v-for="article in visibleFilteredArticles"
             :key="article.slug"
             :article="article"
           />
@@ -25,41 +29,62 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed } from 'vue'
-import articleData from '@/data/articles.json'
-import ArticleCard from '@/components/ArticleCard.vue'
-import ArticleTimeline from '@/components/ArticleTimeline.vue'
+<script>
+import ArticleTimeline from '../components/ArticleTimeline.vue';
+import ArticleCard from '../components/ArticleCard.vue';
+import TagCloud from '../components/TagCloud.vue';
 
-// 所有文章，按日期降序排序
-const sortedArticles = computed(() => {
-  return [...articleData].sort((a, b) => new Date(b.date) - new Date(a.date))
-})
-
-// 要显示的文章数量
-const displayCount = ref(5)
-
-// 实际显示在页面上的文章
-const displayedArticles = computed(() => {
-  return sortedArticles.value.slice(0, displayCount.value)
-})
-
-// 检查是否还有更多文章可以加载
-const hasMoreArticles = computed(() => {
-  return displayCount.value < sortedArticles.value.length
-})
-
-// 加载更多文章
-const loadMore = () => {
-  displayCount.value += 5
-}
-
-const handleScrollToArticle = (slug) => {
-  const element = document.getElementById(slug)
-  if (element) {
-    element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
-}
+export default {
+  components: {
+    ArticleTimeline,
+    ArticleCard,
+    TagCloud,
+  },
+  data() {
+    return {
+      articles: [],
+      visibleArticles: [],
+      articlesPerLoad: 5,
+      selectedTag: null,
+    };
+  },
+  mounted() {
+    import('../data/articles.json').then((module) => {
+      this.articles = module.default;
+      this.visibleArticles = this.articles.slice(0, 5);
+    });
+  },
+  computed: {
+    filteredArticles() {
+      if (!this.selectedTag) {
+        return this.articles;
+      }
+      return this.articles.filter((article) =>
+        article.tags.includes(this.selectedTag)
+      );
+    },
+    visibleFilteredArticles() {
+      return this.filteredArticles.slice(0, this.visibleArticles.length);
+    },
+    hasMoreArticles() {
+      return this.visibleArticles.length < this.filteredArticles.length;
+    },
+  },
+  methods: {
+    loadMore() {
+      const nextIndex = this.visibleArticles.length;
+      const nextVisibleArticles = this.filteredArticles.slice(
+        nextIndex,
+        nextIndex + this.articlesPerLoad
+      );
+      this.visibleArticles = this.visibleArticles.concat(nextVisibleArticles);
+    },
+    selectTag(tag) {
+      this.selectedTag = tag;
+      this.visibleArticles = this.filteredArticles.slice(0, 5);
+    },
+  },
+};
 </script>
 
 <style scoped>
