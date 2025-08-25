@@ -67,18 +67,18 @@ L(w,b,\alpha) = \frac{1}{2}||w||^2 + \sum_{i=1}^m \alpha_i(1-y_i(w^Tx_i+b))
 $$
 其中$\alpha \in \mathbb{R}^m$，令$L(w,b,\alpha)$对$w$和$b$求导为0得到
 $$
-\begin{align}
+\begin{aligned}
 \frac{\partial L}{\partial w} &= w - \sum_{i=1}^m \alpha_iy_ix_i = 0 \\
 \frac{\partial L}{\partial b} &= \sum_{i=1}^m \alpha_iy_i = 0
-\end{align}
+\end{aligned}
 $$
 将上式**回代到Lagrange函数消去$w$和$b$**得到原问题的对偶问题
 $$
-\begin{align}
+\begin{aligned}
 \max_\alpha &  \,\, \sum_{i=1}^m \alpha_i - \frac{1}{2}\sum_{i=1}^m \sum_{j=1}^m \alpha_i \alpha_j y_i y_j x_i^T x_j \\
 s.t.& \,\,\, \sum_{i=1}^{m}\alpha_i y_j = 0, \\
 & \,\, \alpha_i \geq 0, i = 1, 2, \dots, m
-\end{align}
+\end{aligned}
 $$
 解出$\alpha$后，求出$w$和$b$即可得到模型
 $$
@@ -97,11 +97,11 @@ $$
 
 在对偶问题中
 $$
-\begin{align}
+\begin{aligned}
 \max_\alpha &  \,\, \sum_{i=1}^m \alpha_i - \frac{1}{2}\sum_{i=1}^m \sum_{j=1}^m \alpha_i \alpha_j y_i y_j x_i^T x_j \\
 s.t.& \,\,\, \sum_{i=1}^{m}\alpha_i y_j = 0, \\
 & \,\, \alpha_i \geq 0, i = 1, 2, \dots, m
-\end{align}
+\end{aligned}
 $$
 这里出现了内积$<x_i, x_j>$，我们将$x$映射到$\phi(x)$上，得到特征空间$\Phi$上的超平面，模型表示为
 $$
@@ -137,11 +137,11 @@ $$
 $$
 引入**松弛变量**$\xi_i = \max(0, 1 - y_i (w^T x_i +b))\geq 0$， 问题变成
 $$
-\begin{align}
+\begin{aligned}
 \max_{w,b,\xi_i}  \,\,\, &\frac{1}{2}||w||^2 + C\sum_{i=1}^{m}\xi_i \\
 \text{s.t.}  \,\,\, & y_i (w^T x_i +b) \geq 1 - \xi_i \\
 & \xi_i \geq 0, i = 1, 2, \dots , m
-\end{align}
+\end{aligned}
 $$
 然后构造**Lagrange函数**
 $$
@@ -149,19 +149,19 @@ L(w,b,\alpha, \xi, \mu) = \frac{1}{2}||w||^2 + C\sum_{i=1}^m\xi_i + \sum_{i=1}^m
 $$
 其中$\alpha_i \geq 0, \mu_i \geq 0$为Lagrange乘子，令$L(w,b,\alpha,\xi,\mu)$对$2,b,\xi_i$求偏导为0可以得到
 $$
-\begin{align}
+\begin{aligned}
 \frac{\partial L}{\partial w} &= w - \sum_{i=1}^m \alpha_iy_ix_i  = 0 \\
 \frac{\partial L}{\partial b} &= \sum_{i=1}^m \alpha_iy_i = 0\\
 \frac{\partial L}{\partial \xi_i} &= C - \alpha_i - \mu_i , i = 1, 2, \dots, m
-\end{align}
+\end{aligned}
 $$
 **回代到Lagrange函数**，消去$w,b,\xi_i$得到**对偶问题**
 $$
-\begin{align}
+\begin{aligned}
 \max_\alpha \,\,\, & \sum_{i=1}^m \alpha_i - \frac{1}{2}\sum_{i=1}^m\sum_{j=1}^m \alpha_i \alpha_j y_i y_j x_i^T x_j \\
 \text{s.t.} \,\,\,& \sum_{i=1}^m \alpha_iy_i = 0, \\
 & 0 \leq \alpha_i \leq C, i = 1, 2, \dots, m
-\end{align}
+\end{aligned}
 $$
 同样要满足**KKT条件**
 $$
@@ -172,5 +172,4 @@ y_i f(x_i) - 1 + \xi_i \geq 0 \\
 \xi_i \geq 0, \mu_i\xi_i =0
 \end{cases}
 $$
-
 
