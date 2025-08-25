@@ -1,5 +1,6 @@
 <template>
   <div class="home-container">
+    <ProfileCard class="profile-card-container" />
     <el-card class="intro-card">
       <!-- 英雄区域 -->
       <div class="hero-section">
@@ -44,18 +45,29 @@
 </template>
 
 <script setup>
-// 此模板暂时不需要脚本
+import ProfileCard from '@/components/ProfileCard.vue'
 </script>
 
 <style scoped>
 .home-container {
   padding-top: 80px; /* 为固定的顶栏留出空间 */
   padding-bottom: 40px;
-  max-width: 960px;
+  max-width: 1280px;
   margin: 0 auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.profile-card-container {
+  position: sticky;
+  top: 80px; /* 80px 是顶栏高度 */
 }
 
 .intro-card {
+  flex: 1;
   padding: 20px;
 }
 
@@ -95,4 +107,3 @@ p {
   margin: 5px;
 }
 </style>
-
