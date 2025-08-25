@@ -4,19 +4,62 @@
       <h1>知识文章</h1>
       <p>探索、学习、分享。这里是我关于技术、科学和思考的笔记。</p>
     </div>
-    <div class="articles-grid">
-      <ArticleCard v-for="article in articles" :key="article.slug" :article="article" />
+    <div class="main-content">
+      <aside class="timeline-sidebar">
+        <ArticleTimeline :articles="sortedArticles" @scroll-to-article="handleScrollToArticle" />
+      </aside>
+      <main class="articles-main">
+        <div class="articles-grid">
+          <ArticleCard
+            v-for="article in displayedArticles"
+            :id="article.slug"
+            :key="article.slug"
+            :article="article"
+          />
+        </div>
+        <div v-if="hasMoreArticles" class="load-more-container">
+          <el-button type="primary" plain @click="loadMore">查看更多</el-button>
+        </div>
+      </main>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import articleData from '@/data/articles.json'
 import ArticleCard from '@/components/ArticleCard.vue'
+import ArticleTimeline from '@/components/ArticleTimeline.vue'
 
-// todo: 这里应该加入数据库内容
-const articles = ref(articleData)
+// 所有文章，按日期降序排序
+const sortedArticles = computed(() => {
+  return [...articleData].sort((a, b) => new Date(b.date) - new Date(a.date))
+})
+
+// 要显示的文章数量
+const displayCount = ref(5)
+
+// 实际显示在页面上的文章
+const displayedArticles = computed(() => {
+  return sortedArticles.value.slice(0, displayCount.value)
+})
+
+// 检查是否还有更多文章可以加载
+const hasMoreArticles = computed(() => {
+  return displayCount.value < sortedArticles.value.length
+})
+
+// 加载更多文章
+const loadMore = () => {
+  displayCount.value += 5
+}
+
+const handleScrollToArticle = (slug) => {
+  const element = document.getElementById(slug)
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+}
 </script>
 
 <style scoped>
@@ -41,9 +84,29 @@ const articles = ref(articleData)
   color: #606266;
 }
 
+.main-content {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.timeline-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+}
+
+.articles-main {
+  flex-grow: 1;
+}
+
 .articles-grid {
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+.load-more-container {
+  margin-top: 20px;
+  text-align: center;
 }
 </style>
