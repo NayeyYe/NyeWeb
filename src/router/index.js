@@ -15,7 +15,7 @@ const routes = [
     component: Knowledge
   },
   {
-    path: '/knowledge/:path+', // 使用 :path+ 匹配层级路径，如 /knowledge/category/slug
+    path: '/knowledge/:slug', // 使用简洁的 slug 作为文章路由
     name: 'Article',
     component: Article
   }

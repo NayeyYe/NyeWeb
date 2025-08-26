@@ -1,5 +1,5 @@
 <template>
-  <router-link :to="`/knowledge/${article.category}/${article.slug}`" class="card-link">
+  <router-link :to="articleLink" class="card-link">
     <el-card class="article-card" shadow="hover">
       <template #header>
         <div class="card-header">
@@ -29,11 +29,18 @@
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue'
+
+const props = defineProps({
   article: {
     type: Object,
     required: true
   }
+})
+
+const articleLink = computed(() => {
+  // 链接直接使用文章的 slug
+  return `/knowledge/${props.article.slug}`
 })
 </script>
 

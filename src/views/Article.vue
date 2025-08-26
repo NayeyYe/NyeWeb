@@ -54,9 +54,10 @@ md.renderer.rules.image = function (tokens, idx, options, env, self) {
   const token = tokens[idx]
   const src = token.attrGet('src')
   if (src && src.startsWith('./')) {
-    // 假设资源文件夹位于 `src/articles/knowledge/assets`
-    // 将 './assets/image.png' 转换为 Vite 在开发时能理解的绝对路径
-    token.attrSet('src', `/articles/knowledge/${src.substring(2)}`)
+    const articlePath = env.articlePath || ''
+    // 确保路径正确拼接，即使分类为空
+    const basePath = articlePath ? `/articles/knowledge/${articlePath}` : '/articles/knowledge'
+    token.attrSet('src', `${basePath}/${src.substring(2)}`)
   }
   return defaultImageRenderer(tokens, idx, options, env, self)
 }
@@ -66,35 +67,44 @@ const fetchArticle = async () => {
   articleContent.value = ''
   articleTitle.value = ''
 
-  const pathParts = route.params.path || []
+  const slug = route.params.slug
+  if (!slug) {
+    articleNotFound.value = true
+    return
+  }
 
-  if (pathParts.length > 0) {
-    const slug = pathParts[pathParts.length - 1]
-    const category = pathParts.slice(0, -1).join('/')
+  // 1. 在JSON数据中通过slug查找文章
+  const articleData = articlesData.find(a => a.slug === slug)
 
-    // 在JSON数据中查找匹配的文章
-    const articleData = articlesData.find(a => a.slug === slug && a.category === category)
+  if (articleData) {
+    articleTitle.value = articleData.title
+    const categoryPath = articleData.category
+    // 2. 根据分类和slug构建文件���公共URL路径
+    const fullPath = categoryPath ? `${categoryPath}/${articleData.slug}` : articleData.slug
 
-    if (articleData) {
-      articleTitle.value = articleData.title
-      try {
-        // 假设所有Markdown文件都平铺在 'src/articles/knowledge' 目录下
-        const module = await import(`../../articles/knowledge/${slug}.md?raw`)
-        articleContent.value = md.render(module.default)
-      } catch (e) {
-        console.error(`加载文章内容失败: ${slug}.md`, e)
-        articleNotFound.value = true
+    try {
+      // 3. 使用 fetch 从 public 目录获取文章内容
+      const response = await fetch(`/articles/knowledge/${fullPath}.md`)
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
-    } else {
+      const markdownText = await response.text()
+
+      // 4. 渲染Markdown，并传入分类路径用于图片解析
+      const env = { articlePath: categoryPath }
+      articleContent.value = md.render(markdownText, env)
+    } catch (e) {
+      console.error(`加载文章内容失败: ${fullPath}.md`, e)
       articleNotFound.value = true
     }
   } else {
+    console.error('在JSON数据中未找到文章:', { slug })
     articleNotFound.value = true
   }
 }
 
 onMounted(fetchArticle)
-watch(() => route.params.path, fetchArticle)
+watch(() => route.params.slug, fetchArticle)
 </script>
 
 <style scoped>
