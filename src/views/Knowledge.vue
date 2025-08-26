@@ -22,8 +22,8 @@
         </div>
       </main>
       <aside class="tags-sidebar">
-        <CategoryTree :articles="sortedArticles" @category-selected="handleCategorySelected" />
-        <TagFilter :tags="allTags" :counts="tagCounts" @tag-selected="handleTagSelected" />
+        <ArticleCategoryTree :articles="sortedArticles" @category-selected="handleCategorySelected" />
+        <ArticleTagFilter :tags="allTags" :counts="tagCounts" @tag-selected="handleTagSelected" />
       </aside>
     </div>
   </div>
@@ -34,8 +34,8 @@ import { ref, computed } from 'vue'
 import articleData from '@/data/articles.json'
 import ArticleCard from '@/components/ArticleCard.vue'
 import ArticleTimeline from '@/components/ArticleTimeline.vue'
-import TagFilter from '@/components/TagFilter.vue'
-import CategoryTree from '@/components/CategoryTree.vue'
+import ArticleTagFilter from '@/components/ArticleTagFilter.vue'
+import ArticleCategoryTree from '@/components/ArticleCategoryTree.vue'
 
 // 所有文章，按日期降序排序
 const sortedArticles = computed(() => {
