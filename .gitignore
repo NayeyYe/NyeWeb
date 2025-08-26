@@ -30,3 +30,4 @@ coverage
 *.tsbuildinfo
 
 public/resources
+public/favorite

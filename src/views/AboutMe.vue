@@ -2,7 +2,7 @@
   <div class="home-container">
     <div class="left-column">
       <ProfileCard class="profile-card-container" />
-      <TimelineEditor class="timeline-editor-container" />
+      <ImageCarousel class="image-carousel-container" />
     </div>
     <el-card class="intro-card">
       <!-- 英雄区域 -->
@@ -49,7 +49,7 @@
 
 <script setup>
 import ProfileCard from '@/components/ProfileCard.vue'
-import TimelineEditor from '@/components/TimelineEditor.vue'
+import ImageCarousel from '@/components/ImageCarousel.vue'
 </script>
 
 <style scoped>
@@ -79,7 +79,7 @@ import TimelineEditor from '@/components/TimelineEditor.vue'
   width: 100%;
 }
 
-.timeline-editor-container {
+.image-carousel-container {
   width: 100%;
 }
 
@@ -125,4 +125,3 @@ p {
   margin: 5px;
 }
 </style>
-
