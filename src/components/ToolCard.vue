@@ -42,6 +42,7 @@ defineProps({
   text-decoration: none;
   color: inherit;
   display: block;
+  height: 100%;
 }
 
 .tool-card {
@@ -86,4 +87,3 @@ defineProps({
   color: #606266;
 }
 </style>
-

@@ -2,7 +2,7 @@
   <div class="tools-page">
     <div class="header">
       <h1>小工具箱</h1>
-      <p>一些实用、有趣、能提升效率的在线小工具集合。</p>
+      <p>��些实用、有趣、能提升效率的在线小工具集合。</p>
     </div>
 
     <div class="filter-bar">
@@ -44,8 +44,9 @@
         :xs="24"
         :sm="12"
         :md="8"
+        class="tool-col"
       >
-        <ToolCard :tool="tool" class="tool-card-wrapper" />
+        <ToolCard :tool="tool" />
       </el-col>
     </el-row>
 
@@ -132,8 +133,7 @@ const filteredTools = computed(() => {
   user-select: none;
 }
 
-.tool-card-wrapper {
+.tool-col {
   margin-bottom: 20px;
 }
 </style>
-
