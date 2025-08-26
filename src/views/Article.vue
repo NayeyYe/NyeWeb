@@ -24,6 +24,7 @@ import { ref, watch, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import articlesData from '@/data/articles.json'
 import Outline from '@/components/Outline.vue'
+import mermaid from 'mermaid'
 
 // Markdown-it and plugins
 import markdownit from 'markdown-it'
@@ -36,6 +37,9 @@ import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css'
 import 'github-markdown-css/github-markdown.css'
 import 'katex/dist/katex.min.css'
+
+// 初始化 Mermaid
+mermaid.initialize({ startOnLoad: false, theme: 'default' })
 
 const route = useRoute()
 const articleContent = ref('')
@@ -59,19 +63,22 @@ const md = markdownit({
   }
 }).use(mdKatex)
   .use(mdAnchor, {
-    permalink: true, // 强制为所有层级应用permalink，从而确保生成ID
+    permalink: true,
     level: [1, 2, 3, 4, 5, 6],
     slugify: s => slugify(s, { lower: true, strict: true }),
-    permalinkSymbol: '¶', // 你可以自定义这个符号，或者设为空字符串''来隐藏它
+    permalinkSymbol: '¶',
     permalinkBefore: true,
     permalinkClass: 'header-anchor'
   })
 
-// 覆盖默认的代码块渲染规则，以添加自定义头部和复制按钮
+// 自定义代码块渲染，支持 Mermaid
 const defaultFenceRenderer = md.renderer.rules.fence;
 md.renderer.rules.fence = (tokens, idx, options, env, self) => {
   const token = tokens[idx];
-  const language = token.info ? token.info.split(' ')[0] : '';
+  const language = token.info.trim().split(/\s+/)[0];
+  if (language === 'mermaid') {
+    return `<div class="mermaid">${token.content}</div>`;
+  }
   const rawCode = defaultFenceRenderer(tokens, idx, options, env, self);
 
   return `
@@ -90,7 +97,7 @@ md.renderer.rules.fence = (tokens, idx, options, env, self) => {
   `;
 };
 
-// 修复图片相对路径问题
+// 修复图片相对路���问题
 const defaultImageRenderer = md.renderer.rules.image
 md.renderer.rules.image = function (tokens, idx, options, env, self) {
   const token = tokens[idx]
@@ -178,6 +185,8 @@ const fetchArticle = async () => {
       // DOM更新后设置复制按钮
       await nextTick()
       setupCopyButtons()
+      // 渲染 Mermaid 图表
+      mermaid.init(undefined, document.querySelectorAll('.mermaid'))
     } catch (e) {
       console.error(`加载文章内容失败: ${fullPath}.md`, e)
       articleNotFound.value = true

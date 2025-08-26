@@ -21,6 +21,7 @@ import { ref, watch, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import projectsData from '@/data/projects.json'
 import Outline from '@/components/Outline.vue'
+import mermaid from 'mermaid'
 
 // Markdown-it and plugins
 import markdownit from 'markdown-it'
@@ -33,6 +34,9 @@ import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css'
 import 'github-markdown-css/github-markdown.css'
 import 'katex/dist/katex.min.css'
+
+// 初始化 Mermaid
+mermaid.initialize({ startOnLoad: false, theme: 'default' })
 
 const route = useRoute()
 const projectContent = ref('')
@@ -63,11 +67,14 @@ const md = markdownit({
     permalinkClass: 'header-anchor'
   })
 
-// 覆盖默认的代码块渲染规则，以添加自定义头部和复制按钮
+// 自定义代码块渲染，支持 Mermaid
 const defaultFenceRenderer = md.renderer.rules.fence;
 md.renderer.rules.fence = (tokens, idx, options, env, self) => {
   const token = tokens[idx];
-  const language = token.info ? token.info.split(' ')[0] : '';
+  const language = token.info.trim().split(/\s+/)[0];
+  if (language === 'mermaid') {
+    return `<div class="mermaid">${token.content}</div>`;
+  }
   const rawCode = defaultFenceRenderer(tokens, idx, options, env, self);
 
   return `
@@ -165,6 +172,8 @@ const fetchProject = async () => {
       // DOM更新后设置复制按钮
       await nextTick()
       setupCopyButtons()
+      // 渲染 Mermaid 图表
+      mermaid.init(undefined, document.querySelectorAll('.mermaid'))
     } catch (e) {
       console.error(`加载项目内容失败: ${projectData.slug}.md`, e)
       projectNotFound.value = true
