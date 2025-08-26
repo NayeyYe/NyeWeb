@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import articlesData from '@/data/articles.json'
 import Outline from '@/components/Outline.vue'
@@ -67,6 +67,29 @@ const md = markdownit({
     permalinkClass: 'header-anchor'
   })
 
+// 覆盖默认的代码块渲染规则，以添加自定义头部和复制按钮
+const defaultFenceRenderer = md.renderer.rules.fence;
+md.renderer.rules.fence = (tokens, idx, options, env, self) => {
+  const token = tokens[idx];
+  const language = token.info ? token.info.split(' ')[0] : '';
+  const rawCode = defaultFenceRenderer(tokens, idx, options, env, self);
+
+  return `
+    <div class="code-block-wrapper">
+      <div class="code-block-header">
+        <div class="mac-dots">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+        </div>
+        <span class="language-name">${language}</span>
+        <button class="copy-code-btn" title="复制">复制</button>
+      </div>
+      ${rawCode}
+    </div>
+  `;
+};
+
 // 修复图片相对路径问题
 const defaultImageRenderer = md.renderer.rules.image
 md.renderer.rules.image = function (tokens, idx, options, env, self) {
@@ -80,6 +103,26 @@ md.renderer.rules.image = function (tokens, idx, options, env, self) {
   }
   return defaultImageRenderer(tokens, idx, options, env, self)
 }
+
+const setupCopyButtons = () => {
+  document.querySelectorAll('.copy-code-btn').forEach(button => {
+    button.addEventListener('click', () => {
+      const wrapper = button.closest('.code-block-wrapper');
+      const code = wrapper.querySelector('code');
+      if (code) {
+        navigator.clipboard.writeText(code.innerText).then(() => {
+          button.textContent = '已复制!';
+          setTimeout(() => {
+            button.textContent = '复制';
+          }, 2000);
+        }).catch(err => {
+          console.error('复制失败: ', err);
+          button.textContent = '失败';
+        });
+      }
+    });
+  });
+};
 
 const fetchArticle = async () => {
   articleNotFound.value = false
@@ -128,9 +171,13 @@ const fetchArticle = async () => {
       })
       headings.value = extractedHeadings
 
-      // 4. 渲染Markdown，并传入分类路径用于图片解析
+      // 4. ��染Markdown，并传入分类路径用于图片解析
       const env = { articlePath: categoryPath }
       articleContent.value = md.render(markdownText, env)
+
+      // DOM更新后设置复制按钮
+      await nextTick()
+      setupCopyButtons()
     } catch (e) {
       console.error(`加载文章内容失败: ${fullPath}.md`, e)
       articleNotFound.value = true
@@ -146,6 +193,8 @@ watch(() => route.params.slug, fetchArticle)
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap');
+
 .page-container {
   max-width: 1200px;
   margin: 100px auto 40px;
@@ -169,11 +218,14 @@ watch(() => route.params.slug, fetchArticle)
 }
 
 .markdown-body {
-  padding: 2em;
+  padding: 2em 2.5em;
   background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.05);
   position: relative; /* 为锚点定位提供上下文 */
+  line-height: 1.8;
+  color: #333;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
 }
 
 /* 隐藏默认的锚点符号，因为我们只关心ID的生成 */
@@ -198,5 +250,156 @@ watch(() => route.params.slug, fetchArticle)
   text-align: center;
   padding: 40px;
   color: #606266;
+}
+
+/* --- 美化样式 --- */
+
+/* 标题美化 */
+:deep(h1),
+:deep(h2),
+:deep(h3),
+:deep(h4),
+:deep(h5),
+:deep(h6) {
+  padding-left: 1rem;
+  border-left: 5px solid #409eff;
+  margin-top: 2.4rem;
+  margin-bottom: 1.4rem;
+  font-weight: 600;
+}
+:deep(h1) { font-size: 2em; }
+:deep(h2) { font-size: 1.6em; }
+:deep(h3) { font-size: 1.3em; }
+
+/* 代码块容器 */
+:deep(.code-block-wrapper) {
+  position: relative;
+  margin: 1.5rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #f8f9fa; /* 浅色背景 */
+  border: 1px solid #dee2e6;
+  box-shadow: none;
+}
+
+/* 代码块头部 */
+:deep(.code-block-header) {
+  display: flex;
+  align-items: center;
+  padding: 0.4em 1em; /* 减小垂直内边距 */
+  background-color: #e9ecef; /* 稍暗的头部背景 */
+  border-bottom: 1px solid #dee2e6;
+}
+
+:deep(.mac-dots) {
+  display: flex;
+  gap: 8px;
+  margin-right: 1em;
+}
+
+:deep(.dot) {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+:deep(.dot.red) { background-color: #ff5f56; }
+:deep(.dot.yellow) { background-color: #ffbd2e; }
+:deep(.dot.green) { background-color: #27c93f; }
+
+:deep(.language-name) {
+  flex-grow: 1;
+  text-align: left;
+  font-size: 13px;
+  font-family: sans-serif;
+  color: #6c757d; /* 深色文字以适应浅色背景 */
+  text-transform: uppercase;
+}
+
+/* 复制按钮 */
+:deep(.copy-code-btn) {
+  padding: 4px 10px;
+  font-size: 12px;
+  background-color: #f8f9fa;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  cursor: pointer;
+  color: #495057;
+  transition: all 0.2s;
+}
+
+:deep(.copy-code-btn:hover) {
+  background-color: #e9ecef;
+  color: #212529;
+}
+
+/* 代码块 */
+:deep(pre) {
+  background-color: transparent;
+  padding: 1em 1.5em; /* 调整内边距 */
+  margin: 0;
+  border-radius: 0;
+  overflow-x: auto;
+  border: none;
+  font-family: 'JetBrains Mono', 'Lucida Console', 'Lucida Sans Typewriter', monospace;
+}
+
+/* 行内代码 */
+:deep(:not(pre) > code) {
+  background-color: #f0f2f5;
+  color: #c7254e;
+  padding: .2em .4em;
+  margin: 0 2px;
+  font-size: 90%;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', 'Lucida Console', 'Lucida Sans Typewriter', monospace;
+}
+
+/* 引用 */
+:deep(blockquote) {
+  padding: 0.5em 1.2em;
+  color: #6a737d;
+  border-left: 0.3em solid #d0d7de;
+  margin-left: 0;
+  background-color: #f6f8fa;
+  border-radius: 0 8px 8px 0;
+}
+
+/* 链接 */
+:deep(.markdown-body a) {
+  color: #0969da;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+:deep(.markdown-body a:hover) {
+  text-decoration: underline;
+}
+
+/* 表格 */
+:deep(table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  display: block;
+  overflow: auto;
+  border-spacing: 0;
+  border-radius: 8px;
+  border: 1px solid #d0d7de;
+}
+
+:deep(th),
+:deep(td) {
+  padding: 0.75rem 1rem;
+  border: 1px solid #d0d7de;
+}
+
+:deep(th) {
+  font-weight: 600;
+  background-color: #f6f8fa;
+}
+
+:deep(tr:nth-child(2n)) {
+  background-color: #f6f8fa;
 }
 </style>
