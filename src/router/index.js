@@ -5,6 +5,7 @@ import Article from '../views/Article.vue' // 导入文章页面
 import Projects from '../views/Projects.vue'
 import Project from '../views/Project.vue'
 import Tools from '../views/Tools.vue'
+import Resources from '../views/Resources.vue'
 
 const routes = [
   {
@@ -36,6 +37,11 @@ const routes = [
     path: '/tools',
     name: 'Tools',
     component: Tools
+  },
+  {
+    path: '/resources',
+    name: 'Resources',
+    component: Resources
   }
 ]
 
