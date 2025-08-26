@@ -17,29 +17,15 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { computed } from 'vue';
+import imageFilenames from '@/data/favoriteImages.json';
 
-const allImages = ref([]);
-
-onMounted(async () => {
-  try {
-    const response = await fetch('/favoriteImages.json');
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    const imageFilenames = await response.json();
-    // 将文件名列表转换为完整的图片路径列表
-    allImages.value = imageFilenames.map(filename => `/favorite/${filename}`);
-  } catch (error) {
-    console.error('Failed to load favorite images manifest:', error);
-    allImages.value = []; // 出错时清空数组
-  }
-});
-
+// 直接从导入的JSON文件生成图片路径列表
+const allImages = imageFilenames.map(filename => `/favorite/${filename}`);
 
 // 将图片数组随机打乱
 const shuffledImages = computed(() => {
-  return [...allImages.value].sort(() => Math.random() - 0.5);
+  return [...allImages].sort(() => Math.random() - 0.5);
 });
 
 </script>
