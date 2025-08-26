@@ -4,52 +4,64 @@
       <ProfileCard class="profile-card-container" />
       <TimelineEditor class="timeline-editor-container" />
     </div>
-    <el-card class="intro-card">
-      <!-- 英雄区域 -->
-      <div class="hero-section">
-        <h1>你好，我是 [你的名字]</h1>
-        <p class="subtitle">一位热情的 [你的职业，如：前端开发者]</p>
-        <p>欢迎来到我的个人空间。在这里，你可以了解我的项目、技术栈和个人思考。</p>
-      </div>
+    <div class="right-column-content">
+      <el-card class="content-card">
+        <template #header>
+          <div class="card-header">
+            <span>最近文章</span>
+            <router-link to="/knowledge" class="more-link">查看全部 &gt;</router-link>
+          </div>
+        </template>
+        <div class="card-list">
+          <ArticleCard
+            v-for="article in recentArticles"
+            :key="article.slug"
+            :article="article"
+            class="list-item-card"
+          />
+        </div>
+      </el-card>
 
-      <el-divider />
-
-      <!-- 关于我 -->
-      <div class="about-section">
-        <h2>关于我</h2>
-        <p>我专注于 [你擅长的领域]，致力于构建高质量、用户友好的 Web 应用。我对 [你感兴趣的技术或方向] 充满热情，并乐于探索新的技术和解决方案。</p>
-      </div>
-
-      <el-divider />
-
-      <!-- 技术栈 -->
-      <div class="skills-section">
-        <h2>技术栈</h2>
-        <el-tag type="primary" class="skill-tag">Vue.js</el-tag>
-        <el-tag type="success" class="skill-tag">JavaScript</el-tag>
-        <el-tag type="info" class="skill-tag">HTML5 & CSS3</el-tag>
-        <el-tag type="warning" class="skill-tag">Node.js</el-tag>
-        <el-tag type="danger" class="skill-tag">Element Plus</el-tag>
-        <!-- 在这里添加更多技术标签 -->
-      </div>
-
-      <el-divider />
-
-      <!-- 联系方式 -->
-      <div class="contact-section">
-        <h2>联系我</h2>
-        <p>你可以在以下平台找到我：</p>
-        <el-button type="primary" plain>GitHub</el-button>
-        <el-button type="success" plain>LinkedIn</el-button>
-        <el-button type="info" plain>Email</el-button>
-      </div>
-    </el-card>
+      <el-card class="content-card">
+        <template #header>
+          <div class="card-header">
+            <span>最近项目</span>
+            <router-link to="/projects" class="more-link">查看全部 &gt;</router-link>
+          </div>
+        </template>
+        <div class="card-list">
+          <ProjectCard
+            v-for="project in recentProjects"
+            :key="project.slug"
+            :project="project"
+            class="list-item-card"
+          />
+        </div>
+      </el-card>
+    </div>
   </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import ProfileCard from '@/components/ProfileCard.vue'
 import TimelineEditor from '@/components/TimelineEditor.vue'
+import ArticleCard from '@/components/ArticleCard.vue'
+import ProjectCard from '@/components/ProjectCard.vue'
+import articlesData from '@/data/articles.json'
+import projectsData from '@/data/projects.json'
+
+const recentArticles = computed(() => {
+  return [...articlesData]
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 3)
+})
+
+const recentProjects = computed(() => {
+  return [...projectsData]
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 3)
+})
 </script>
 
 <style scoped>
@@ -83,45 +95,46 @@ import TimelineEditor from '@/components/TimelineEditor.vue'
   width: 100%;
 }
 
-.intro-card {
+.right-column-content {
   flex: 1;
-  padding: 20px;
-  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
 }
 
-.hero-section h1 {
-  font-size: 2.5em;
-  margin-bottom: 10px;
+.content-card {
+  width: 100%;
 }
 
-.subtitle {
-  font-size: 1.5em;
-  color: #606266;
-  margin-bottom: 20px;
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.about-section, .skills-section, .contact-section {
-  margin-top: 30px;
+.card-header span {
+  font-size: 1.2em;
+  font-weight: bold;
 }
 
-h2 {
-  font-size: 1.8em;
-  margin-bottom: 15px;
-  border-left: 4px solid #409eff;
-  padding-left: 10px;
-}
-
-p {
-  line-height: 1.8;
-  color: #303133;
-}
-
-.skill-tag {
-  margin: 5px;
+.more-link {
+  text-decoration: none;
+  color: #409eff;
   font-size: 14px;
 }
 
-.contact-section .el-button {
-  margin: 5px;
+.more-link:hover {
+  text-decoration: underline;
+}
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.list-item-card {
+  width: 100%;
 }
 </style>

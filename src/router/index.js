@@ -6,12 +6,18 @@ import Projects from '../views/Projects.vue'
 import Project from '../views/Project.vue'
 import Tools from '../views/Tools.vue'
 import Resources from '../views/Resources.vue'
+import AboutMe from '../views/AboutMe.vue'
 
 const routes = [
   {
     path: '/',
     name: 'Home',
     component: Home
+  },
+  {
+    path: '/about',
+    name: 'AboutMe',
+    component: AboutMe
   },
   {
     path: '/knowledge',

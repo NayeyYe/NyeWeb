@@ -30,14 +30,24 @@ import '@/assets/styles/header.css';
       <!-- 右侧头像和关于我 -->
       <el-col :span="4">
         <div class="user-section">
-          <div class="user-info">
-            <span class="about-me">关于我</span>
-            <el-avatar size="small" class="user-avatar">
-              <img src="/avatar.jpg" alt="用户头像" />
-            </el-avatar>
-          </div>
+          <router-link to="/about" class="user-info-link">
+            <div class="user-info">
+              <span class="about-me">关于我</span>
+              <el-avatar size="small" class="user-avatar">
+                <img src="/avatar.jpg" alt="用户头像" />
+              </el-avatar>
+            </div>
+          </router-link>
         </div>
       </el-col>
     </el-row>
   </el-header>
 </template>
+
+<style scoped>
+.user-info-link {
+  text-decoration: none;
+  color: inherit;
+  display: inline-block;
+}
+</style>
