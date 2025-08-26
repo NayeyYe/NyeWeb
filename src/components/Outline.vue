@@ -37,8 +37,6 @@ const scrollTo = (id) => {
   border: 1px solid var(--el-border-color-lighter);
   position: sticky;
   top: 100px; /* Adjust based on your header height */
-  max-height: calc(100vh - 120px);
-  overflow-y: auto;
 }
 
 .card-header {
