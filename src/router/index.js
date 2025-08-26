@@ -4,6 +4,7 @@ import Knowledge from '../views/Knowledge.vue'
 import Article from '../views/Article.vue' // 导入文章页面
 import Projects from '../views/Projects.vue'
 import Project from '../views/Project.vue'
+import Tools from '../views/Tools.vue'
 
 const routes = [
   {
@@ -30,6 +31,11 @@ const routes = [
     path: '/projects/:slug',
     name: 'Project',
     component: Project
+  },
+  {
+    path: '/tools',
+    name: 'Tools',
+    component: Tools
   }
 ]
 
