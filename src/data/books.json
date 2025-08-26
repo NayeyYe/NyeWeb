@@ -1,24 +1,24 @@
 [
   {
-    "title": "Pro Git (中文版)",
+    "title": "C++从入门到项目实践",
     "description": "一本关于Git版本控制系统的专业书籍，从基础到高级，内容全面。",
     "tags": ["Git", "版本控制", "开发工具"],
-    "filename": "progit.pdf",
-    "cover": "/resources/book/covers/progit-cover.png"
+    "filename": "C++从入门到项目实践",
+    "cover": "/avatar.jpg"
   },
   {
-    "title": "深入理解计算机系统",
+    "title": "C++项目开发全程实录",
     "description": "计算机科学的经典之作，帮助程序员从底层理解计算机的工作原理。",
     "tags": ["计算机系统", "底层原理", "CS经典"],
-    "filename": "csapp.pdf",
-    "cover": "/resources/book/covers/csapp-cover.png"
+    "filename": "C++项目开发全程实录",
+    "cover": "/avatar.jpg"
   },
   {
-    "title": "JavaScript高级程序设计",
+    "title": "Node.js+Express+Vue.js项目开发实战",
     "description": "全面深入地介绍了JavaScript语言的核心概念和最佳实践。",
     "tags": ["JavaScript", "前端", "Web开发"],
-    "filename": "js-red-book.pdf",
-    "cover": "/resources/book/covers/js-red-book-cover.png"
+    "filename": "Node.js+Express+Vue.js项目开发实战",
+    "cover": "/avatar.jpg"
   }
 ]
 

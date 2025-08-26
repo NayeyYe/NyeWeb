@@ -2,11 +2,8 @@
   <div class="figure-card">
     <el-image
       :src="`/resources/figure/${figure.filename}`"
-      :preview-src-list="[`/resources/figure/${figure.filename}`]"
-      :initial-index="0"
       fit="cover"
       class="figure-image"
-      hide-on-click-modal
     >
       <template #placeholder>
         <div class="image-slot">加载中<span class="dot">...</span></div>
@@ -27,10 +24,17 @@
         </div>
       </div>
     </div>
+    <el-image-viewer
+      v-if="showViewer"
+      :url-list="[`/resources/figure/${figure.filename}`]"
+      @close="showViewer = false"
+      :initial-index="0"
+    />
   </div>
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import { View, Download } from '@element-plus/icons-vue';
 
 const props = defineProps({
@@ -40,12 +44,10 @@ const props = defineProps({
   },
 });
 
-// This is a bit of a trick to trigger the el-image's internal preview
-const handlePreview = (event) => {
-  const imageElement = event.currentTarget.closest('.figure-card').querySelector('.el-image__inner');
-  if (imageElement) {
-    imageElement.click();
-  }
+const showViewer = ref(false);
+
+const handlePreview = () => {
+  showViewer.value = true;
 };
 </script>
 
@@ -108,4 +110,3 @@ const handlePreview = (event) => {
   font-size: 14px;
 }
 </style>
-
