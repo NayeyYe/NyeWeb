@@ -7,7 +7,9 @@
     </div>
     <div v-else class="content-wrapper">
       <aside class="outline-sidebar">
-        <Outline v-if="headings.length" :outline="headings" />
+        <div class="outline-fixed-container">
+          <Outline v-if="headings.length" :outline="headings" :active-id="activeHeadingId" />
+        </div>
       </aside>
       <main class="main-content">
         <article class="markdown-body">
@@ -20,7 +22,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, nextTick } from 'vue'
+import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import articlesData from '@/data/articles.json'
 import Outline from '@/components/Outline.vue'
@@ -46,6 +48,8 @@ const articleContent = ref('')
 const articleTitle = ref('')
 const articleNotFound = ref(false)
 const headings = ref([])
+const activeHeadingId = ref('')
+let observer = null
 
 const md = markdownit({
   html: true,
@@ -97,7 +101,7 @@ md.renderer.rules.fence = (tokens, idx, options, env, self) => {
   `;
 };
 
-// 修复图片相对路���问题
+// 修复图片相对路径问题
 const defaultImageRenderer = md.renderer.rules.image
 md.renderer.rules.image = function (tokens, idx, options, env, self) {
   const token = tokens[idx]
@@ -129,6 +133,28 @@ const setupCopyButtons = () => {
       }
     });
   });
+};
+
+const setupIntersectionObserver = () => {
+  // 清理旧的观察者
+  if (observer) {
+    observer.disconnect();
+  }
+
+  const headingElements = document.querySelectorAll('.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6');
+
+  observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        activeHeadingId.value = entry.target.id;
+      }
+    });
+  }, {
+    rootMargin: '0px 0px -80% 0px', // 当标题进入视口顶部20%时触发
+    threshold: 0
+  });
+
+  headingElements.forEach(el => observer.observe(el));
 };
 
 const fetchArticle = async () => {
@@ -182,9 +208,10 @@ const fetchArticle = async () => {
       const env = { articlePath: categoryPath }
       articleContent.value = md.render(markdownText, env)
 
-      // DOM更新后设置复制按钮
+      // DOM更新后设置复制按钮和滚动监听
       await nextTick()
       setupCopyButtons()
+      setupIntersectionObserver()
       // 渲染 Mermaid 图表
       mermaid.init(undefined, document.querySelectorAll('.mermaid'))
     } catch (e) {
@@ -199,10 +226,15 @@ const fetchArticle = async () => {
 
 onMounted(fetchArticle)
 watch(() => route.params.slug, fetchArticle)
+
+onUnmounted(() => {
+  if (observer) {
+    observer.disconnect();
+  }
+});
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap');
 
 .page-container {
   max-width: 1200px;
@@ -219,6 +251,13 @@ watch(() => route.params.slug, fetchArticle)
 .outline-sidebar {
   flex: 0 0 250px;
   width: 250px;
+}
+
+.outline-fixed-container {
+  position: fixed;
+  top: 100px;
+  width: 250px;
+  height: calc(100vh - 120px); /* 确保容器有明确的高度 */
 }
 
 .main-content {
@@ -350,7 +389,6 @@ watch(() => route.params.slug, fetchArticle)
   border-radius: 0;
   overflow-x: auto;
   border: none;
-  font-family: 'JetBrains Mono', 'Lucida Console', 'Lucida Sans Typewriter', monospace;
 }
 
 /* 行内代码 */
@@ -361,7 +399,6 @@ watch(() => route.params.slug, fetchArticle)
   margin: 0 2px;
   font-size: 90%;
   border-radius: 4px;
-  font-family: 'JetBrains Mono', 'Lucida Console', 'Lucida Sans Typewriter', monospace;
 }
 
 /* 引用 */

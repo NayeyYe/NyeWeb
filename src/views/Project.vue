@@ -7,7 +7,9 @@
     </div>
     <div v-else class="content-wrapper">
       <aside class="outline-sidebar">
-        <Outline v-if="headings.length" :outline="headings" />
+        <div class="outline-fixed-container">
+          <Outline v-if="headings.length" :outline="headings" :active-id="activeHeadingId" />
+        </div>
       </aside>
       <main class="main-content">
         <article class="markdown-body" v-html="projectContent"></article>
@@ -17,7 +19,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, nextTick } from 'vue'
+import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import projectsData from '@/data/projects.json'
 import Outline from '@/components/Outline.vue'
@@ -42,6 +44,8 @@ const route = useRoute()
 const projectContent = ref('')
 const projectNotFound = ref(false)
 const headings = ref([])
+const activeHeadingId = ref('')
+let observer = null
 
 const md = markdownit({
   html: true,
@@ -125,6 +129,28 @@ const setupCopyButtons = () => {
   });
 };
 
+const setupIntersectionObserver = () => {
+  // 清理旧的观察者
+  if (observer) {
+    observer.disconnect();
+  }
+
+  const headingElements = document.querySelectorAll('.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6');
+
+  observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        activeHeadingId.value = entry.target.id;
+      }
+    });
+  }, {
+    rootMargin: '0px 0px -80% 0px', // 当标题进入视口顶部20%时触发
+    threshold: 0
+  });
+
+  headingElements.forEach(el => observer.observe(el));
+};
+
 const fetchProject = async () => {
   projectNotFound.value = false
   projectContent.value = ''
@@ -169,9 +195,10 @@ const fetchProject = async () => {
       // 3. 渲染Markdown
       projectContent.value = md.render(markdownText)
 
-      // DOM更新后设置复制按钮
+      // DOM更新后设置复制按钮和滚动监听
       await nextTick()
       setupCopyButtons()
+      setupIntersectionObserver()
       // 渲染 Mermaid 图表
       mermaid.init(undefined, document.querySelectorAll('.mermaid'))
     } catch (e) {
@@ -186,10 +213,15 @@ const fetchProject = async () => {
 
 onMounted(fetchProject)
 watch(() => route.params.slug, fetchProject)
+
+onUnmounted(() => {
+  if (observer) {
+    observer.disconnect();
+  }
+});
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap');
 
 .page-container {
   max-width: 1200px;
@@ -206,6 +238,13 @@ watch(() => route.params.slug, fetchProject)
 .outline-sidebar {
   flex: 0 0 250px;
   width: 250px;
+}
+
+.outline-fixed-container {
+  position: fixed;
+  top: 100px;
+  width: 250px;
+  height: calc(100vh - 120px); /* 确保容器有明确的高度 */
 }
 
 .main-content {
@@ -337,7 +376,6 @@ watch(() => route.params.slug, fetchProject)
   border-radius: 0;
   overflow-x: auto;
   border: none;
-  font-family: 'JetBrains Mono', 'Lucida Console', 'Lucida Sans Typewriter', monospace;
 }
 
 /* 行内代码 */
@@ -348,7 +386,6 @@ watch(() => route.params.slug, fetchProject)
   margin: 0 2px;
   font-size: 90%;
   border-radius: 4px;
-  font-family: 'JetBrains Mono', 'Lucida Console', 'Lucida Sans Typewriter', monospace;
 }
 
 /* 引用 */

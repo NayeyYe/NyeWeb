@@ -8,7 +8,11 @@
     <nav>
       <ul>
         <li v-for="item in outline" :key="item.id" :class="`toc-level-${item.level}`">
-          <a :href="`#${item.id}`" @click.prevent="scrollTo(item.id)">{{ item.text }}</a>
+          <a
+            :href="`#${item.id}`"
+            :class="{ 'is-active': item.id === activeId }"
+            @click.prevent="scrollTo(item.id)"
+          >{{ item.text }}</a>
         </li>
       </ul>
     </nav>
@@ -20,6 +24,10 @@ defineProps({
   outline: {
     type: Array,
     required: true,
+  },
+  activeId: {
+    type: String,
+    default: '',
   },
 });
 
@@ -35,8 +43,13 @@ const scrollTo = (id) => {
 .outline-card {
   border-radius: 15px;
   border: 1px solid var(--el-border-color-lighter);
-  position: sticky;
-  top: 100px; /* Adjust based on your header height */
+  max-height: calc(100vh - 120px); /* 限制最大高度，120px是顶部和底部的留白 */
+  display: flex;
+  flex-direction: column;
+}
+
+.outline-card :deep(.el-card__body) {
+  overflow-y: auto;
 }
 
 .card-header {
@@ -58,10 +71,21 @@ a {
   color: var(--el-text-color-regular);
   font-size: 14px;
   transition: color 0.2s;
+  display: block;
+  padding: 2px 0;
 }
 
 a:hover {
   color: var(--el-color-primary);
+}
+
+a.is-active {
+  color: var(--el-color-primary);
+  font-weight: bold;
+  background-color: var(--el-color-primary-light-9);
+  border-radius: 4px;
+  padding-left: 5px;
+  margin-left: -5px;
 }
 
 /* Indent based on heading level */
