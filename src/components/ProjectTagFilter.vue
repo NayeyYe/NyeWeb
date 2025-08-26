@@ -1,22 +1,18 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 
-const props = defineProps({
-  tags: {
-    type: Array,
-    required: true,
-  },
-  counts: {
-    type: Object,
-    required: true,
-  },
-})
+interface Props {
+  tags: string[]
+  counts: Record<string, number>
+}
+
+const props = defineProps<Props>()
 
 const emit = defineEmits(['tag-selected'])
 
-const activeTag = ref(null)
+const activeTag = ref<string | null>(null)
 
-const selectTag = (tag) => {
+const selectTag = (tag: string | null) => {
   if (activeTag.value === tag) {
     activeTag.value = null
   } else {
