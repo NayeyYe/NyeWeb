@@ -65,6 +65,10 @@ const handleScrollToProject = (slug) => {
 
 <template>
   <div class="page-container">
+    <div class="header">
+      <h1>我的项目</h1>
+      <p>从代码到现实，这里是我实践和创造的结晶。</p>
+    </div>
     <div class="main-content">
       <aside class="left-sidebar">
         <ProjectTimeline :projects="filteredProjects" @scroll-to-project="handleScrollToProject" />
@@ -94,6 +98,21 @@ const handleScrollToProject = (slug) => {
   max-width: 1400px;
   margin: 100px auto 40px;
   padding: 0 20px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.header h1 {
+  font-size: 2.5em;
+  margin-bottom: 10px;
+}
+
+.header p {
+  font-size: 1.1em;
+  color: #606266;
 }
 
 .main-content {
