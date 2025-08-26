@@ -1,11 +1,18 @@
 <template>
-  <div class="project-container">
+  <div class="page-container">
     <div v-if="projectNotFound" class="not-found">
       <h1>404 - 项目未找到</h1>
       <p>抱歉，您要查找的项目不存在或链接已更改。</p>
       <router-link to="/projects">返回项目列表</router-link>
     </div>
-    <article v-else class="markdown-body" v-html="projectContent"></article>
+    <div v-else class="content-wrapper">
+      <aside class="outline-sidebar">
+        <Outline v-if="headings.length" :outline="headings" />
+      </aside>
+      <main class="main-content">
+        <article class="markdown-body" v-html="projectContent"></article>
+      </main>
+    </div>
   </div>
 </template>
 
@@ -13,9 +20,12 @@
 import { ref, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import projectsData from '@/data/projects.json'
+import Outline from '@/components/Outline.vue'
 
 // Markdown-it and plugins
 import markdownit from 'markdown-it'
+import mdAnchor from 'markdown-it-anchor'
+import slugify from 'slugify'
 import mdKatex from '@iktakahiro/markdown-it-katex'
 import hljs from 'highlight.js'
 
@@ -27,6 +37,7 @@ import 'katex/dist/katex.min.css'
 const route = useRoute()
 const projectContent = ref('')
 const projectNotFound = ref(false)
+const headings = ref([])
 
 const md = markdownit({
   html: true,
@@ -43,6 +54,14 @@ const md = markdownit({
     return '<pre class="hljs"><code>' + md.utils.escapeHtml(str) + '</code></pre>';
   }
 }).use(mdKatex)
+  .use(mdAnchor, {
+    permalink: true, // 强制为所有层级应用permalink，从而确保生成ID
+    level: [1, 2, 3, 4, 5, 6],
+    slugify: s => slugify(s, { lower: true, strict: true }),
+    permalinkSymbol: '¶', // 你可以自定义这个符号，或者设为空字符串''来隐藏它
+    permalinkBefore: true,
+    permalinkClass: 'header-anchor'
+  })
 
 // 修复图片相对路径问题
 const defaultImageRenderer = md.renderer.rules.image
@@ -59,6 +78,7 @@ md.renderer.rules.image = function (tokens, idx, options, env, self) {
 const fetchProject = async () => {
   projectNotFound.value = false
   projectContent.value = ''
+  headings.value = []
 
   const slug = route.params.slug
   if (!slug) {
@@ -78,6 +98,24 @@ const fetchProject = async () => {
       }
       const markdownText = await response.text()
 
+      // 提取标题
+      const tokens = md.parse(markdownText, {})
+      const extractedHeadings = []
+      tokens.forEach((token, i) => {
+        if (token.type === 'heading_open') {
+          const textToken = tokens[i + 1]
+          const id = token.attrGet('id')
+          if (textToken && textToken.type === 'inline' && id) {
+            extractedHeadings.push({
+              level: parseInt(token.tag.substring(1), 10),
+              text: textToken.content,
+              id: id
+            })
+          }
+        }
+      })
+      headings.value = extractedHeadings
+
       // 3. 渲染Markdown
       projectContent.value = md.render(markdownText)
     } catch (e) {
@@ -95,10 +133,26 @@ watch(() => route.params.slug, fetchProject)
 </script>
 
 <style scoped>
-.project-container {
-  max-width: 800px;
+.page-container {
+  max-width: 1200px;
   margin: 100px auto 40px;
   padding: 20px;
+}
+
+.content-wrapper {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.outline-sidebar {
+  flex: 0 0 250px;
+  width: 250px;
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0;
 }
 
 .markdown-body {
@@ -106,6 +160,25 @@ watch(() => route.params.slug, fetchProject)
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  position: relative; /* 为锚点定位提供上下文 */
+}
+
+/* 隐藏默认的锚点符号，因为我们只关心ID的生成 */
+:deep(.header-anchor) {
+  opacity: 0;
+  position: absolute;
+  left: -0.7em;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+:deep(h1:hover .header-anchor),
+:deep(h2:hover .header-anchor),
+:deep(h3:hover .header-anchor),
+:deep(h4:hover .header-anchor),
+:deep(h5:hover .header-anchor),
+:deep(h6:hover .header-anchor) {
+  opacity: 1;
 }
 
 .not-found {
