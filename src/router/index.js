@@ -15,7 +15,7 @@ const routes = [
     component: Knowledge
   },
   {
-    path: '/knowledge/:slug', // :slug 是一个动态参数，代表文章文件名（不含.md）
+    path: '/knowledge/:path+', // 使用 :path+ 匹配层级路径，如 /knowledge/category/slug
     name: 'Article',
     component: Article
   }

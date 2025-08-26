@@ -1,5 +1,5 @@
 <template>
-  <router-link :to="`/knowledge/${article.slug}`" class="card-link">
+  <router-link :to="`/knowledge/${article.category}/${article.slug}`" class="card-link">
     <el-card class="article-card" shadow="hover">
       <template #header>
         <div class="card-header">
@@ -90,4 +90,3 @@ defineProps({
   white-space: nowrap;
 }
 </style>
-

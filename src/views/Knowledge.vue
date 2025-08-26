@@ -22,6 +22,7 @@
         </div>
       </main>
       <aside class="tags-sidebar">
+        <CategoryTree :articles="sortedArticles" @category-selected="handleCategorySelected" />
         <TagFilter :tags="allTags" :counts="tagCounts" @tag-selected="handleTagSelected" />
       </aside>
     </div>
@@ -34,25 +35,39 @@ import articleData from '@/data/articles.json'
 import ArticleCard from '@/components/ArticleCard.vue'
 import ArticleTimeline from '@/components/ArticleTimeline.vue'
 import TagFilter from '@/components/TagFilter.vue'
+import CategoryTree from '@/components/CategoryTree.vue'
 
 // 所有文章，按日期降序排序
 const sortedArticles = computed(() => {
   return [...articleData].sort((a, b) => new Date(b.date) - new Date(a.date))
 })
 
-// 所有唯一的标签
+// 当前选择的分类和标签
+const selectedCategory = ref(null)
+const selectedTag = ref(null)
+
+// 1. 根据分类筛选
+const articlesByCategory = computed(() => {
+  if (!selectedCategory.value) {
+    return sortedArticles.value
+  }
+  return sortedArticles.value.filter(article =>
+    article.category && article.category.startsWith(selectedCategory.value)
+  )
+})
+
+// 2. 根据分类后的文章，计算可用标签和数量
 const allTags = computed(() => {
   const tags = new Set()
-  articleData.forEach(article => {
+  articlesByCategory.value.forEach(article => {
     article.tags.forEach(tag => tags.add(tag))
   })
   return Array.from(tags)
 })
 
-// 计算每个标签的文章数量
 const tagCounts = computed(() => {
   const counts = {}
-  articleData.forEach(article => {
+  articlesByCategory.value.forEach(article => {
     article.tags.forEach(tag => {
       counts[tag] = (counts[tag] || 0) + 1
     })
@@ -60,15 +75,13 @@ const tagCounts = computed(() => {
   return counts
 })
 
-// 当前选择的标签
-const selectedTag = ref(null)
 
-// 根据标签筛选后的文章
+// 3. 最终筛选结果（分类+标签）
 const filteredArticles = computed(() => {
   if (!selectedTag.value) {
-    return sortedArticles.value
+    return articlesByCategory.value
   }
-  return sortedArticles.value.filter(article => article.tags.includes(selectedTag.value))
+  return articlesByCategory.value.filter(article => article.tags.includes(selectedTag.value))
 })
 
 // 要显示的文章数量
@@ -87,6 +100,13 @@ const hasMoreArticles = computed(() => {
 // 加载更多文章
 const loadMore = () => {
   displayCount.value += 5
+}
+
+// 处理分类选择事件
+const handleCategorySelected = (category) => {
+  selectedCategory.value = category
+  selectedTag.value = null // 重置标签筛选
+  displayCount.value = 5 // 重置显示数量
 }
 
 // 处理标签选择事件

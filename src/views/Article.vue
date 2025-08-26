@@ -1,105 +1,119 @@
 <template>
   <div class="article-container">
-    <el-card class="article-card">
-      <div v-html="articleContent" class="markdown-body"></div>
-    </el-card>
+    <div v-if="articleNotFound" class="not-found">
+      <h1>404 - 文章未找到</h1>
+      <p>抱歉，您要查找的文章不存在或链接已更改。</p>
+      <router-link to="/knowledge">返回文章列表</router-link>
+    </div>
+    <article v-else class="markdown-body">
+      <h1>{{ articleTitle }}</h1>
+      <div v-html="articleContent"></div>
+    </article>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import MarkdownIt from 'markdown-it'
-import mdKatex from '@iktakahiro/markdown-it-katex'
-import hljs from 'markdown-it-highlightjs'
+import articlesData from '@/data/articles.json'
 
-// 导入所需样式
-import 'katex/dist/katex.min.css'
+// Markdown-it and plugins
+import markdownit from 'markdown-it'
+import mdKatex from '@iktakahiro/markdown-it-katex'
+import hljs from 'highlight.js'
+
+// CSS imports
 import 'highlight.js/styles/github.css'
 import 'github-markdown-css/github-markdown.css'
-
-// 初始化 markdown-it 并使用插件
-const md = new MarkdownIt({
-  html: true,
-  linkify: true,
-  typographer: true
-})
-  .use(mdKatex)
-  .use(hljs)
-
-// 保存原始的图片渲染规则
-const defaultImageRenderer = md.renderer.rules.image
-// 重写图片渲染规则以处理相对路径
-md.renderer.rules.image = function (tokens, idx, options, env, self) {
-  const token = tokens[idx]
-  const srcIndex = token.attrIndex('src')
-  const src = token.attrGet('src')
-
-  // 检查是否为相对路径
-  if (src && src.startsWith('./')) {
-    // 将相对路径转换为基于 /articles/knowledge/ 的绝对路径
-    // 例如：'./assets/img.png' -> '/articles/knowledge/assets/img.png'
-    const newSrc = `/articles/knowledge/${src.substring(2)}`
-    token.attrSet('src', newSrc)
-  }
-
-  // 调用原始的渲染器来渲染 <img> 标签
-  return defaultImageRenderer(tokens, idx, options, env, self)
-}
+import 'katex/dist/katex.min.css'
 
 const route = useRoute()
 const articleContent = ref('')
+const articleTitle = ref('')
+const articleNotFound = ref(false)
 
-const fetchArticle = async (slug) => {
-  if (!slug) return
-  try {
-    // 注意：路径是相对于 public 文件夹的
-    const response = await fetch(`/articles/knowledge/${slug}.md`)
-
-    if (!response.ok) {
-      throw new Error(`服务器响应错误: ${response.status}`)
+const md = markdownit({
+  html: true,
+  linkify: true,
+  typographer: true,
+  highlight: function (str, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      try {
+        return '<pre class="hljs"><code>' +
+               hljs.highlight(str, { language: lang, ignoreIllegals: true }).value +
+               '</code></pre>';
+      } catch (__) {}
     }
+    return '<pre class="hljs"><code>' + md.utils.escapeHtml(str) + '</code></pre>';
+  }
+}).use(mdKatex)
 
-    const markdownText = await response.text()
+// 修复图片相对路径问题
+const defaultImageRenderer = md.renderer.rules.image
+md.renderer.rules.image = function (tokens, idx, options, env, self) {
+  const token = tokens[idx]
+  const src = token.attrGet('src')
+  if (src && src.startsWith('./')) {
+    // 假设资源文件夹位于 `src/articles/knowledge/assets`
+    // 将 './assets/image.png' 转换为 Vite 在开发时能理解的绝对路径
+    token.attrSet('src', `/articles/knowledge/${src.substring(2)}`)
+  }
+  return defaultImageRenderer(tokens, idx, options, env, self)
+}
 
-    // 检查返回的是否是HTML（SPA回退机制可能导致此问题）
-    if (markdownText.trim().toLowerCase().startsWith('<!doctype html>') || markdownText.trim().startsWith('<script')) {
-      throw new Error('获取到的是HTML文件，而不是Markdown。请检查文章文件路径是否正确。')
+const fetchArticle = async () => {
+  articleNotFound.value = false
+  articleContent.value = ''
+  articleTitle.value = ''
+
+  const pathParts = route.params.path || []
+
+  if (pathParts.length > 0) {
+    const slug = pathParts[pathParts.length - 1]
+    const category = pathParts.slice(0, -1).join('/')
+
+    // 在JSON数据中查找匹配的文章
+    const articleData = articlesData.find(a => a.slug === slug && a.category === category)
+
+    if (articleData) {
+      articleTitle.value = articleData.title
+      try {
+        // 假设所有Markdown文件都平铺在 'src/articles/knowledge' 目录下
+        const module = await import(`../../articles/knowledge/${slug}.md?raw`)
+        articleContent.value = md.render(module.default)
+      } catch (e) {
+        console.error(`加载文章内容失败: ${slug}.md`, e)
+        articleNotFound.value = true
+      }
+    } else {
+      articleNotFound.value = true
     }
-
-    articleContent.value = md.render(markdownText)
-  } catch (error) {
-    console.error('获取文章失败:', error)
-    articleContent.value = `<h1>文章加载失败</h1><p><strong>原因:</strong> ${error.message}</p><p>请确认 <code>public/articles/knowledge/${slug}.md</code> 文件存在且路径正确。</p>`
+  } else {
+    articleNotFound.value = true
   }
 }
 
-onMounted(() => {
-  fetchArticle(route.params.slug)
-})
-
-// 监听路由变化，以便在同一页面切换文章时重新加载
-watch(
-  () => route.params.slug,
-  (newSlug) => {
-    fetchArticle(newSlug)
-  }
-)
+onMounted(fetchArticle)
+watch(() => route.params.path, fetchArticle)
 </script>
 
 <style scoped>
 .article-container {
-  padding: 100px 20px 20px;
-  max-width: 900px;
-  margin: 0 auto;
-}
-.article-card {
+  max-width: 800px;
+  margin: 100px auto 40px;
   padding: 20px;
-  border-radius: 15px;
 }
+
 .markdown-body {
-  /* 确保背景透明以适应卡片背景 */
-  background-color: transparent;
-  padding: 1rem; /* 为内容提供一些内边距 */
+  padding: 2em;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+
+.not-found {
+  text-align: center;
+  padding: 40px;
+  color: #606266;
 }
 </style>
