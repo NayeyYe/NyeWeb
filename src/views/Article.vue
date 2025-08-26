@@ -1,14 +1,21 @@
 <template>
-  <div class="article-container">
+  <div class="page-container">
     <div v-if="articleNotFound" class="not-found">
       <h1>404 - 文章未找到</h1>
       <p>抱歉，您要查找的文章不存在或链接已更改。</p>
       <router-link to="/knowledge">返回文章列表</router-link>
     </div>
-    <article v-else class="markdown-body">
-      <h1>{{ articleTitle }}</h1>
-      <div v-html="articleContent"></div>
-    </article>
+    <div v-else class="content-wrapper">
+      <aside class="outline-sidebar">
+        <Outline v-if="headings.length" :outline="headings" />
+      </aside>
+      <main class="main-content">
+        <article class="markdown-body">
+          <h1>{{ articleTitle }}</h1>
+          <div v-html="articleContent"></div>
+        </article>
+      </main>
+    </div>
   </div>
 </template>
 
@@ -16,9 +23,12 @@
 import { ref, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import articlesData from '@/data/articles.json'
+import Outline from '@/components/Outline.vue'
 
 // Markdown-it and plugins
 import markdownit from 'markdown-it'
+import mdAnchor from 'markdown-it-anchor'
+import slugify from 'slugify'
 import mdKatex from '@iktakahiro/markdown-it-katex'
 import hljs from 'highlight.js'
 
@@ -31,6 +41,7 @@ const route = useRoute()
 const articleContent = ref('')
 const articleTitle = ref('')
 const articleNotFound = ref(false)
+const headings = ref([])
 
 const md = markdownit({
   html: true,
@@ -47,6 +58,14 @@ const md = markdownit({
     return '<pre class="hljs"><code>' + md.utils.escapeHtml(str) + '</code></pre>';
   }
 }).use(mdKatex)
+  .use(mdAnchor, {
+    permalink: true, // 强制为所有层级应用permalink，从而确保生成ID
+    level: [1, 2, 3, 4, 5, 6],
+    slugify: s => slugify(s, { lower: true, strict: true }),
+    permalinkSymbol: '¶', // 你可以自定义这个符号，或者设为空字符串''来隐藏它
+    permalinkBefore: true,
+    permalinkClass: 'header-anchor'
+  })
 
 // 修复图片相对路径问题
 const defaultImageRenderer = md.renderer.rules.image
@@ -66,6 +85,7 @@ const fetchArticle = async () => {
   articleNotFound.value = false
   articleContent.value = ''
   articleTitle.value = ''
+  headings.value = []
 
   const slug = route.params.slug
   if (!slug) {
@@ -90,6 +110,24 @@ const fetchArticle = async () => {
       }
       const markdownText = await response.text()
 
+      // 提取标题
+      const tokens = md.parse(markdownText, {})
+      const extractedHeadings = []
+      tokens.forEach((token, i) => {
+        if (token.type === 'heading_open') {
+          const textToken = tokens[i + 1]
+          const id = token.attrGet('id')
+          if (textToken && textToken.type === 'inline' && id) {
+            extractedHeadings.push({
+              level: parseInt(token.tag.substring(1), 10),
+              text: textToken.content,
+              id: id
+            })
+          }
+        }
+      })
+      headings.value = extractedHeadings
+
       // 4. 渲染Markdown，并传入分类路径用于图片解析
       const env = { articlePath: categoryPath }
       articleContent.value = md.render(markdownText, env)
@@ -108,10 +146,26 @@ watch(() => route.params.slug, fetchArticle)
 </script>
 
 <style scoped>
-.article-container {
-  max-width: 800px;
+.page-container {
+  max-width: 1200px;
   margin: 100px auto 40px;
   padding: 20px;
+}
+
+.content-wrapper {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.outline-sidebar {
+  flex: 0 0 250px;
+  width: 250px;
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0;
 }
 
 .markdown-body {
@@ -119,6 +173,25 @@ watch(() => route.params.slug, fetchArticle)
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  position: relative; /* 为锚点定位提供上下文 */
+}
+
+/* 隐藏默认的锚点符号，因为我们只关心ID的生成 */
+:deep(.header-anchor) {
+  opacity: 0;
+  position: absolute;
+  left: -0.7em;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+:deep(h1:hover .header-anchor),
+:deep(h2:hover .header-anchor),
+:deep(h3:hover .header-anchor),
+:deep(h4:hover .header-anchor),
+:deep(h5:hover .header-anchor),
+:deep(h6:hover .header-anchor) {
+  opacity: 1;
 }
 
 .not-found {
