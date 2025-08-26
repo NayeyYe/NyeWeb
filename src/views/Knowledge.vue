@@ -9,7 +9,6 @@
         <ArticleTimeline :articles="filteredArticles" @scroll-to-article="handleScrollToArticle" />
       </aside>
       <main class="articles-main">
-        <TagFilter :tags="allTags" @tag-selected="handleTagSelected" />
         <div class="articles-grid">
           <ArticleCard
             v-for="article in displayedArticles"
@@ -22,6 +21,9 @@
           <el-button type="primary" plain @click="loadMore">查看更多</el-button>
         </div>
       </main>
+      <aside class="tags-sidebar">
+        <TagFilter :tags="allTags" :counts="tagCounts" @tag-selected="handleTagSelected" />
+      </aside>
     </div>
   </div>
 </template>
@@ -45,6 +47,17 @@ const allTags = computed(() => {
     article.tags.forEach(tag => tags.add(tag))
   })
   return Array.from(tags)
+})
+
+// 计算每个标签的文章数量
+const tagCounts = computed(() => {
+  const counts = {}
+  articleData.forEach(article => {
+    article.tags.forEach(tag => {
+      counts[tag] = (counts[tag] || 0) + 1
+    })
+  })
+  return counts
 })
 
 // 当前选择的标签
@@ -123,6 +136,8 @@ const handleScrollToArticle = (slug) => {
 .timeline-sidebar {
   width: 280px;
   flex-shrink: 0;
+  position: sticky;
+  top: 100px;
 }
 
 .articles-main {
@@ -138,5 +153,12 @@ const handleScrollToArticle = (slug) => {
 .load-more-container {
   margin-top: 20px;
   text-align: center;
+}
+
+.tags-sidebar {
+  width: 300px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 100px;
 }
 </style>
