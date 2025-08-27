@@ -22,7 +22,6 @@ import '@/assets/styles/header.css';
             <el-menu-item index="/knowledge">知识</el-menu-item>
             <el-menu-item index="/tools">小工具</el-menu-item>
             <el-menu-item index="/resources">资源</el-menu-item>
-            <el-menu-item index="/Dailylife">日常和随笔</el-menu-item>
           </el-menu>
         </div>
       </el-col>
