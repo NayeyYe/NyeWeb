@@ -7,6 +7,9 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Diagnostic reports (https://nodejs.org/api/report.html)
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
 node_modules
 .DS_Store
 dist
@@ -14,8 +17,16 @@ dist-ssr
 coverage
 *.local
 
+# Environment variables
+.env
+.env.*
+!.env.example
+
 /cypress/videos/
 /cypress/screenshots/
+
+# ESLint cache
+.eslintcache
 
 # Editor directories and files
 .vscode
@@ -29,5 +40,5 @@ coverage
 
 *.tsbuildinfo
 
-public/resources
-public/favorite
+frontend/public/resources
+frontend/public/favorite
