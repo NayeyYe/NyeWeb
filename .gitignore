@@ -40,5 +40,11 @@ coverage
 
 *.tsbuildinfo
 
+# Python
+__pycache__/
+*.pyc
+.venv
+venv/
+
 frontend/public/resources
 frontend/public/favorite
