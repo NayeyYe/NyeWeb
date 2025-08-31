@@ -2,7 +2,7 @@
   <div class="tools-page">
     <div class="header">
       <h1>小工具箱</h1>
-      <p>��些实用、有趣、能提升效率的在线小工具集合。</p>
+      <p>一些实用、有趣、能提升效率的在线小工具集合。</p>
     </div>
 
     <div class="filter-bar">
