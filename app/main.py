@@ -4,10 +4,24 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from urllib.parse import unquote
+from app import timeline
 
 # 创建 FastAPI 应用实例
 app = FastAPI()
+
+# 添加 CORS 中间件
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],  # Vue开发服务器地址
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# 包含时间线API路由
+app.include_router(timeline.router, prefix="/api", tags=["timeline"])
 
 # 定义 Vue 项目构建后的输出目录路径
 dist_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend", "dist"))
@@ -29,7 +43,7 @@ if os.path.exists(static_assets_dir):
 if os.path.exists(dist_dir):
     # 我们将 dist 目录挂载到一个不会与前端路由冲突的路径上，
     # 或者更简单地，我们依赖下面的“捕获所有”路由来处理。
-    # 为了提供 .md 文件等，我们需要一个能直接访问它们的挂载点。
+    # 为了提供 .md ���件等，我们需要一个能直接访问它们的挂载点。
     # 我们将 dist 目录挂载到根路径，但要确保它不会捕获所有内容。
     # 一个更健壮的方法是只挂载 dist 目录本身。
     app.mount("/static", StaticFiles(directory=dist_dir), name="dist")
