@@ -10,21 +10,69 @@
         <div class="book-tags">
           <el-tag v-for="tag in book.tags" :key="tag" type="info" size="small">{{ tag }}</el-tag>
         </div>
-        <a :href="`/resources/book/${book.filename}`" download>
-          <el-button type="primary" round>下载</el-button>
-        </a>
+        <el-button type="primary" round @click="downloadPdf">下载</el-button>
       </div>
     </div>
   </el-card>
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue';
+import { ElMessage } from 'element-plus';
+
+const props = defineProps({
   book: {
     type: Object,
     required: true,
   },
 });
+
+// 确保文件名总是有 .pdf 后缀
+const downloadFilename = computed(() => {
+  return props.book.filename.endsWith('.pdf') ? props.book.filename : `${props.book.filename}.pdf`;
+});
+
+// 构建完整的下载 URL
+const pdfUrl = computed(() => {
+  return `/resources/book/${encodeURIComponent(downloadFilename.value)}`;
+});
+
+const downloadPdf = async () => {
+  console.log('开始下载PDF:', downloadFilename.value);
+  console.log('请求URL:', pdfUrl.value);
+
+  try {
+    const response = await fetch(pdfUrl.value);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    // 检查响应的 Content-Type 是否为 PDF
+    const contentType = response.headers.get('content-type');
+    console.log('响应Content-Type:', contentType);
+
+    if (!contentType || !contentType.includes('application/pdf')) {
+      console.error('服务器返回的不是 PDF 文件，而是:', contentType);
+      throw new Error('服务器返回的不是 PDF 文件');
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = downloadFilename.value;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+    ElMessage.success('下载成功');
+  } catch (error) {
+    console.error('下载失败:', error);
+    ElMessage.error('下载失败，请稍后重试');
+  }
+};
 </script>
 
 <style scoped>
@@ -70,4 +118,3 @@ defineProps({
   gap: 8px;
 }
 </style>
-

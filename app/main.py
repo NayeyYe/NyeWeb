@@ -1,17 +1,17 @@
 import os
+import mimetypes
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from urllib.parse import unquote
 
 # 创建 FastAPI 应用实例
 app = FastAPI()
 
 # 定义 Vue 项目构建后的输出目录路径
-# 我们从当前文件位置 (app/main.py) 向上返回一级到项目根目录,
-# 然后进入 frontend/dist
-dist_dir = os.path.join(os.path.dirname(__file__), "..", "frontend", "dist")
-
+dist_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend", "dist"))
+print(f"Dist目录: {dist_dir}")
 
 # 定义静态资源目录 (JS, CSS, 图片等)
 # Vite 构建的项目通常将打包后的资源放在 'assets' 文件夹下
@@ -41,21 +41,74 @@ if os.path.exists(dist_dir):
 # 这样，Vue Router 就可以接管并在前端处理路由
 @app.get("/{path:path}")
 async def serve_vue_app(path: str):
-    index_path = os.path.join(dist_dir, "index.html")
-    # 检查请求的路径是否像一个文件（包含点号）
-    # 如果是，并且在 dist 目录中存在，则直接提供该文件
-    # 这处理了 public 文件夹中的文件，这些文件被复制到 dist 的根目录
-    potential_file_path = os.path.join(dist_dir, path)
-    if "." in path and os.path.exists(potential_file_path):
-        return FileResponse(potential_file_path)
+    # URL 解码
+    decoded_path = unquote(path)
+    print(f"原始请求路径: {path}")
+    print(f"解码后路径: {decoded_path}")
 
-    # 否则，返回主 index.html 文件
-    if os.path.exists(index_path):
-        return FileResponse(index_path)
+    # 如果是根路径，返回 index.html
+    if not decoded_path:
+        index_html_path = os.path.join(dist_dir, "index.html")
+        if os.path.exists(index_html_path):
+            return FileResponse(index_html_path)
+        else:
+            raise HTTPException(status_code=404, detail="Frontend not built")
+
+    # 标准化路径分隔符
+    normalized_path = decoded_path.replace('/', os.sep)
+    file_path = os.path.join(dist_dir, normalized_path)
+    print(f"标准化后的文件路径: {file_path}")
+
+    # 检查文件是否存在
+    if os.path.exists(file_path) and os.path.isfile(file_path):
+        print(f"找到文件: {file_path}")
+
+        # 获取 MIME 类型
+        mime_type, _ = mimetypes.guess_type(file_path)
+        if mime_type is None:
+            if file_path.lower().endswith('.pdf'):
+                mime_type = 'application/pdf'
+            elif file_path.lower().endswith('.md'):
+                mime_type = 'text/markdown'
+            else:
+                mime_type = 'application/octet-stream'
+
+        print(f"MIME类型: {mime_type}")
+
+        return FileResponse(
+            path=file_path,
+            media_type=mime_type,
+            filename=os.path.basename(file_path)
+        )
+
+    # 尝试添加 .pdf 扩展名
+    if not decoded_path.endswith('.pdf'):
+        pdf_path = os.path.join(dist_dir, normalized_path + '.pdf')
+        print(f"尝试添加.pdf扩展名: {pdf_path}")
+
+        if os.path.exists(pdf_path) and os.path.isfile(pdf_path):
+            print(f"找到PDF文件: {pdf_path}")
+            return FileResponse(
+                path=pdf_path,
+                media_type='application/pdf',
+                filename=os.path.basename(pdf_path)
+            )
+
+    # 列出父目录的内容进行调试
+    parent_dir = os.path.dirname(file_path)
+    if os.path.exists(parent_dir):
+        files = os.listdir(parent_dir)
+        print(f"父目录 {parent_dir} 存在，内容: {files}")
     else:
-        # 如果找不到 index.html (例如, 前端项目未构建), 返回错误
-        raise HTTPException(status_code=404, detail="Frontend not built. Run 'npm run build' in the 'frontend' directory.")
+        print(f"父目录 {parent_dir} 不存在")
 
+    # 如果文件不存在，返回 index.html 用于前端路由
+    print(f"文件不存在，返回 index.html 用于前端路由")
+    index_html_path = os.path.join(dist_dir, "index.html")
+    if os.path.exists(index_html_path):
+        return FileResponse(index_html_path)
+    else:
+        raise HTTPException(status_code=404, detail="File not found")
 
 if __name__ == "__main__":
     # 这使得你可以通过 `python app/main.py` 直接运行服务器。
