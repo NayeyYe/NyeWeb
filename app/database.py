@@ -72,7 +72,24 @@ class ProjectTag(Base):
     project_id = Column(Integer, ForeignKey('projects.id'), primary_key=True)
     tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
 
-# 获取数据库会话
+# 书籍模型
+class Book(Base):
+    __tablename__ = "books"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False)
+    description = Column(Text)
+    cover = Column(String(500))  # 封面图片路径
+    filename = Column(String(255))  # PDF文件名
+
+# 书籍标签关联模型
+class BookTag(Base):
+    __tablename__ = "book_tags"
+
+    book_id = Column(Integer, ForeignKey('books.id'), primary_key=True)
+    tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
+
+# ��取数据库会话
 def get_db():
     db = SessionLocal()
     try:

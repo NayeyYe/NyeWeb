@@ -35,12 +35,12 @@
       </div>
     </div>
 
-    <div class="content-grid">
+    <div v-loading="loading" class="content-grid">
       <!-- Books Grid -->
       <el-row :gutter="20" v-if="activeTab === 'books'">
         <el-col
           v-for="book in filteredItems"
-          :key="book.title"
+          :key="book.id"
           :xs="24" :sm="12" :md="8"
           class="grid-col"
         >
@@ -60,33 +60,93 @@
         </el-col>
       </el-row>
 
-      <el-empty v-if="filteredItems.length === 0" description="没有找到匹配的资源"></el-empty>
+      <el-empty v-if="!loading && filteredItems.length === 0" description="没有找到匹配的资源"></el-empty>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
+import axios from 'axios';
 import BookCard from '@/components/BookCard.vue';
 import FigureCard from '@/components/FigureCard.vue';
-import booksData from '@/data/books.json';
+// 保留图库的JSON导入，因为只改书籍部分
 import figuresData from '@/data/figures.json';
 
 const activeTab = ref('books');
 const searchQuery = ref('');
 const selectedTags = ref([]);
+const loading = ref(false);
+
+// 数据库数据
+const booksFromDB = ref([]);
+const bookTagsFromDB = ref([]);
+
+const API_BASE_URL = 'http://localhost:8080/api';
+
+// 获取书籍数据
+const fetchBooks = async () => {
+  loading.value = true;
+  try {
+    const response = await axios.get(`${API_BASE_URL}/books`, {
+      timeout: 10000,
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+
+    if (response.data && Array.isArray(response.data)) {
+      booksFromDB.value = response.data;
+      console.log(`Resources: 成功获取 ${booksFromDB.value.length} 本书籍`);
+    }
+  } catch (error) {
+    console.error('Resources: 获取书籍数据失败:', error);
+    booksFromDB.value = [];
+  } finally {
+    loading.value = false;
+  }
+};
+
+// 获取书籍标签数据
+const fetchBookTags = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/book-tags`, {
+      timeout: 10000,
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+
+    if (response.data) {
+      bookTagsFromDB.value = response.data.tags || [];
+      console.log(`Resources: 成功获取 ${bookTagsFromDB.value.length} 个书籍标签`);
+    }
+  } catch (error) {
+    console.error('Resources: 获取书籍标签数据失败:', error);
+    bookTagsFromDB.value = [];
+  }
+};
 
 const allTags = computed(() => {
   const tags = new Set();
-  const currentData = activeTab.value === 'books' ? booksData : figuresData;
-  currentData.forEach(item => {
-    item.tags.forEach(tag => tags.add(tag));
-  });
+  if (activeTab.value === 'books') {
+    // 使用数据库书籍数据
+    booksFromDB.value.forEach(book => {
+      if (book.tags) {
+        book.tags.forEach(tag => tags.add(tag));
+      }
+    });
+  } else {
+    // 使用JSON图库数据
+    figuresData.forEach(item => {
+      item.tags.forEach(tag => tags.add(tag));
+    });
+  }
   return Array.from(tags).sort();
 });
 
 const filteredItems = computed(() => {
-  const sourceData = activeTab.value === 'books' ? booksData : figuresData;
+  const sourceData = activeTab.value === 'books' ? booksFromDB.value : figuresData;
 
   return sourceData.filter(item => {
     const searchMatch =
@@ -96,10 +156,25 @@ const filteredItems = computed(() => {
 
     const tagMatch =
       selectedTags.value.length === 0 ||
-      selectedTags.value.every(tag => item.tags.includes(tag));
+      selectedTags.value.every(tag => item.tags && item.tags.includes(tag));
 
     return searchMatch && tagMatch;
   });
+});
+
+// 监听activeTab变化，切换到书籍时获取数据
+watch(activeTab, (newTab) => {
+  if (newTab === 'books' && booksFromDB.value.length === 0) {
+    fetchBooks();
+  }
+  // 清空搜索和筛选
+  searchQuery.value = '';
+  selectedTags.value = [];
+});
+
+onMounted(async () => {
+  // 默认显示书籍，所以首次加载获取书籍数据
+  await Promise.all([fetchBooks(), fetchBookTags()]);
 });
 </script>
 
@@ -158,4 +233,3 @@ const filteredItems = computed(() => {
   margin-bottom: 20px;
 }
 </style>
-

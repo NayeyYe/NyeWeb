@@ -12,6 +12,7 @@ import logging
 import timeline
 import articles
 import projects
+import books
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -33,6 +34,7 @@ app.add_middleware(
 app.include_router(timeline.router, prefix="/api", tags=["timeline"])
 app.include_router(articles.router, prefix="/api", tags=["articles"])
 app.include_router(projects.router, prefix="/api", tags=["projects"])
+app.include_router(books.router, prefix="/api", tags=["books"])
 
 # 添加根路径API测试端点
 @app.get("/api/health")
@@ -144,5 +146,5 @@ async def serve_vue_app(path: str):
 if __name__ == "__main__":
     # 这使得你可以通过 `python app/main.py` 直接运行服务器。
     # host="0.0.0.0" 让服务器可以被局域网内的其他设备访问。
-    # 你也可以使用 "127.0.0.1" 只在本地访问。
+    # 你��可以使用 "127.0.0.1" 只在本地访问。
     uvicorn.run(app, port=8080)
