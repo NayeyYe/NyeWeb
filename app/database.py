@@ -112,6 +112,22 @@ class FavoriteImage(Base):
     id = Column(Integer, primary_key=True, index=True)
     filename = Column(String(255), nullable=False)
 
+# 工具模型
+class Tool(Base):
+    __tablename__ = "tools"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False)
+    description = Column(Text)
+    url = Column(String(2083))  # URL字段
+
+# 工具标签关联模型
+class ToolTag(Base):
+    __tablename__ = "tool_tags"
+
+    tool_id = Column(Integer, ForeignKey('tools.id'), primary_key=True)
+    tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
+
 # ��取数据库会话
 def get_db():
     db = SessionLocal()

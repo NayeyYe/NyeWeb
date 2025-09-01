@@ -15,6 +15,7 @@ import projects
 import books
 import figures
 import favorite_images
+import tools
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -32,13 +33,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 包含路由
+# 包���路由
 app.include_router(timeline.router, prefix="/api", tags=["timeline"])
 app.include_router(articles.router, prefix="/api", tags=["articles"])
 app.include_router(projects.router, prefix="/api", tags=["projects"])
 app.include_router(books.router, prefix="/api", tags=["books"])
 app.include_router(figures.router, prefix="/api", tags=["figures"])
 app.include_router(favorite_images.router, prefix="/api", tags=["favorite-images"])
+app.include_router(tools.router, prefix="/api", tags=["tools"])
 
 # 添加根路径API测试端点
 @app.get("/api/health")
@@ -60,7 +62,7 @@ if os.path.exists(static_assets_dir):
     app.mount("/assets", StaticFiles(directory=static_assets_dir), name="assets")
 
 # 挂载整个 public 目录的内容 (现在位于 dist 目录的根)
-# 这将允许��接��问所有其他静态资源, 如:
+# 这���允许��接��问所有其他静态资源, 如:
 # /articles/knowledge/其他/cybersecurity-fundamentals.md
 # 注意: 这个挂载必须在 "捕获所有" 的 @app.get("/{path:path}") 路由之前
 if os.path.exists(dist_dir):

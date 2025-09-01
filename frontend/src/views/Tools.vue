@@ -37,51 +37,86 @@
       </div>
     </div>
 
-    <el-row :gutter="20">
-      <el-col
-        v-for="tool in filteredTools"
-        :key="tool.title"
-        :xs="24"
-        :sm="12"
-        :md="8"
-        class="tool-col"
-      >
-        <ToolCard :tool="tool" />
-      </el-col>
-    </el-row>
+    <div v-loading="loading">
+      <el-row :gutter="20">
+        <el-col
+          v-for="tool in filteredTools"
+          :key="tool.id"
+          :xs="24"
+          :sm="12"
+          :md="8"
+          class="tool-col"
+        >
+          <ToolCard :tool="tool" />
+        </el-col>
+      </el-row>
 
-    <el-empty v-if="filteredTools.length === 0" description="没有找到匹配的工具"></el-empty>
+      <el-empty v-if="!loading && filteredTools.length === 0" description="没有找到匹配的工具"></el-empty>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import axios from 'axios';
 import ToolCard from '@/components/ToolCard.vue';
-import toolsData from '@/data/tools.json';
 
 const searchQuery = ref('');
 const selectedTag = ref(null);
+const loading = ref(false);
+const toolsFromDB = ref([]);
+
+const API_BASE_URL = 'http://localhost:8080/api';
+
+// 获取工具数据
+const fetchTools = async () => {
+  loading.value = true;
+  try {
+    const response = await axios.get(`${API_BASE_URL}/tools`, {
+      timeout: 10000,
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+
+    if (response.data && Array.isArray(response.data)) {
+      toolsFromDB.value = response.data;
+      console.log(`Tools: 成功获取 ${toolsFromDB.value.length} 个工具`);
+    }
+  } catch (error) {
+    console.error('Tools: 获取工具数据失败:', error);
+    toolsFromDB.value = [];
+  } finally {
+    loading.value = false;
+  }
+};
 
 const allTags = computed(() => {
   const tags = new Set();
-  toolsData.forEach(tool => {
-    tool.tags.forEach(tag => tags.add(tag));
+  toolsFromDB.value.forEach(tool => {
+    if (tool.tags) {
+      tool.tags.forEach(tag => tags.add(tag));
+    }
   });
   return Array.from(tags).sort();
 });
 
 const filteredTools = computed(() => {
-  return toolsData.filter(tool => {
+  return toolsFromDB.value.filter(tool => {
     const searchMatch =
       searchQuery.value.trim() === '' ||
       tool.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       tool.description.toLowerCase().includes(searchQuery.value.toLowerCase());
 
     const tagMatch =
-      !selectedTag.value || tool.tags.includes(selectedTag.value);
+      !selectedTag.value || (tool.tags && tool.tags.includes(selectedTag.value));
 
     return searchMatch && tagMatch;
   });
+});
+
+onMounted(() => {
+  fetchTools();
 });
 </script>
 
