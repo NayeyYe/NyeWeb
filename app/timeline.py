@@ -19,6 +19,8 @@ def get_timeline(db: Session = Depends(database.get_db)):
     try:
         timeline_items = db.query(Timeline).order_by(Timeline.timestamp.desc()).all()
         logger.info(f"成功获取到 {len(timeline_items)} 条时间线数据")
+        for item in timeline_items:
+            logger.info(f"时间线数据: ID={item.id}, 时间={item.timestamp}, 内容={item.content[:30]}...")
         return timeline_items
     except Exception as e:
         logger.error(f"获取时间线数据时发生错误: {str(e)}")
@@ -60,7 +62,8 @@ def update_timeline_item(
         logger.warning(f"尝试更新不存在的时间线条目，ID: {item_id}")
         raise HTTPException(status_code=404, detail="Timeline item not found")
 
-    update_data = timeline_update.dict(exclude_unset=True)
+    # 修复：使用 model_dump 代替 dict
+    update_data = timeline_update.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(db_timeline, field, value)
 
@@ -73,7 +76,7 @@ def update_timeline_item(
 @router.delete("/timeline/{item_id}")
 def delete_timeline_item(item_id: int, db: Session = Depends(database.get_db)):
     """删除指定ID的时间线条目"""
-    logger.info(f"收到删除时间线��目的请求，ID: {item_id}")
+    logger.info(f"收到删除时间线条目的请求，ID: {item_id}")
     db_timeline = db.query(Timeline).filter(Timeline.id == item_id).first()
     if not db_timeline:
         logger.warning(f"尝试删除不存在的时间线条目，ID: {item_id}")

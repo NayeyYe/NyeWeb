@@ -6,22 +6,31 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from urllib.parse import unquote
-from timeline import router as timeline_router  # 修正导入路径
+
+# 修复导入问题 - 直接导入而不使用相对导入
+import timeline
 
 # 创建 FastAPI 应用实例
-app = FastAPI()
+app = FastAPI(title="NyeWeb API", version="1.0.0")
 
-# 添加 CORS 中间件
+# 添加 CORS 中间件 - 修复跨域问题
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],  # Vue开发服务器地址
+    allow_origins=["*"],  # 允许所有来源，简化开发环境配置
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
-# 包含时间线API路由
-app.include_router(timeline_router, prefix="/api", tags=["timeline"])
+# 包含时间线API路由 - 确保路由正确注册
+app.include_router(timeline.router, prefix="/api", tags=["timeline"])
+
+# 添加根路径API测试端点
+@app.get("/api/health")
+def health_check():
+    """健康检查端点"""
+    return {"status": "ok", "message": "API服务正常运行"}
+
 # 定义 Vue 项目构建后的输出目录路径
 dist_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend", "dist"))
 print(f"Dist目录: {dist_dir}")
@@ -31,7 +40,7 @@ print(f"Dist目录: {dist_dir}")
 static_assets_dir = os.path.join(dist_dir, "assets")
 
 # 挂载 'assets' 目录
-# 当浏览器请求 /assets/xxx.js 时, FastAPI 会从 frontend/dist/assets/ 目录中查找文件
+# 当浏览器请求 /assets/xxx.js ��, FastAPI 会从 frontend/dist/assets/ 目录中查找文件
 if os.path.exists(static_assets_dir):
     app.mount("/assets", StaticFiles(directory=static_assets_dir), name="assets")
 
