@@ -6,9 +6,14 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from urllib.parse import unquote
+import logging
 
 # 修复导入问题 - 直接导入而不使用相对导入
 import timeline
+
+# 配置日志
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("app")
 
 # 创建 FastAPI 应用实例
 app = FastAPI(title="NyeWeb API", version="1.0.0")
@@ -16,9 +21,9 @@ app = FastAPI(title="NyeWeb API", version="1.0.0")
 # 添加 CORS 中间件 - 修复跨域问题
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 允许所有来源，简化开发环境配置
+    allow_origins=["http://localhost:8080", "http://127.0.0.1:8080", "*"],  # 允许所有来源，简化开发环境配置
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 

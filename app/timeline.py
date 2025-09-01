@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Dict, Any
 import schemas, database
 from database import Timeline
 import logging
@@ -11,17 +11,89 @@ logger = logging.getLogger("timeline_api")
 
 router = APIRouter()
 
-# 获取所有时间线条目
-@router.get("/timeline", response_model=List[schemas.TimelineResponse])
+# 注意：更具体的路由需要放在前面！先移动数据库端点到顶部
+# 添加新的数据库直接获取端点，模拟 test_timeline.py 的成功方法
+@router.get("/timeline/database")
+def get_timeline_from_database(db: Session = Depends(database.get_db)) -> Dict[str, Any]:
+    """
+    直接从数据库获取时间线数据
+    模拟 test_timeline.py 中测试通过的数据获取方法
+    返回与测试相同的数据格式
+    """
+    logger.info("收到从数据库直接获取时间线数据的请求")
+    try:
+        # 使用与 test_timeline.py 相同的查询方法
+        timeline_items = db.query(Timeline).order_by(Timeline.timestamp.desc()).all()
+
+        logger.info(f"从数据库获取到 {len(timeline_items)} 条数据")
+
+        # 如果没有数据，返回空的成功响应
+        if not timeline_items:
+            logger.warning("数据库中没有时间线数据")
+            return {
+                "status": "success",
+                "data": [],
+                "total": 0,
+                "message": "数据库中暂无时间线数据"
+            }
+
+        # 转换为字典格式，与 test_timeline.py 中的转换方式完全相同
+        timeline_data = []
+        for item in timeline_items:
+            item_dict = {
+                "id": item.id,
+                "timestamp": item.timestamp.isoformat() if item.timestamp else None,
+                "content": item.content
+            }
+            timeline_data.append(item_dict)
+            logger.info(f"处理数据 - ID: {item.id}, 时间: {item.timestamp}, 内容: {item.content[:30]}...")
+
+        # 模拟 test_timeline.py 中的 API 响应格式
+        api_response = {
+            "status": "success",
+            "data": timeline_data,
+            "total": len(timeline_data),
+            "message": f"成功获取 {len(timeline_data)} 条时间线数据"
+        }
+
+        logger.info(f"成功处理 {len(timeline_data)} 条记录，返回API响应")
+        logger.info(f"返回的数据: {timeline_data}")
+        return api_response
+
+    except Exception as e:
+        logger.error(f"从数据库获取时间线数据时发生错误: {str(e)}")
+        import traceback
+        logger.error(f"详细错误堆栈: {traceback.format_exc()}")
+        # 返回错误响应，保持格式一致
+        return {
+            "status": "error",
+            "data": [],
+            "total": 0,
+            "message": f"获取时间线数据时发生错误: {str(e)}"
+        }
+
+# 修改基本时间线端点使用相同的数据格式
+@router.get("/timeline")
 def get_timeline(db: Session = Depends(database.get_db)):
     """获取所有时间线条目，按时间倒序排列"""
     logger.info("收到获取时间线数据的请求")
     try:
         timeline_items = db.query(Timeline).order_by(Timeline.timestamp.desc()).all()
         logger.info(f"成功获取到 {len(timeline_items)} 条时间线数据")
+
+        # 改用与上面相同的数据转换格式
+        timeline_data = []
         for item in timeline_items:
+            item_dict = {
+                "id": item.id,
+                "timestamp": item.timestamp.isoformat() if item.timestamp else None,
+                "content": item.content
+            }
+            timeline_data.append(item_dict)
             logger.info(f"时间线数据: ID={item.id}, 时间={item.timestamp}, 内容={item.content[:30]}...")
-        return timeline_items
+
+        # 直接返回JSON数组，不使用response_model自动序列化
+        return timeline_data
     except Exception as e:
         logger.error(f"获取时间线数据时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取时间线数据时发生错误: {str(e)}")
