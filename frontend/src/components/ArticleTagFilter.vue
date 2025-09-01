@@ -7,20 +7,20 @@
       </div>
     </template>
     <div v-loading="loading">
-      <div v-if="!loading && tagsFromDB.length > 0" class="tag-list">
+      <div v-if="!loading && displayTags.length > 0" class="tag-list">
         <el-tag
-          v-for="tag in tagsFromDB"
+          v-for="tag in displayTags"
           :key="tag"
           :class="{ 'is-active': activeTag === tag }"
           class="tag-item"
           effect="light"
           @click="selectTag(tag)"
-          :style="getTagStyle(tagCountsFromDB[tag] || 0)"
+          :style="getTagStyle(displayTagCounts[tag] || 0)"
         >
-          {{ tag }} ({{ tagCountsFromDB[tag] || 0 }})
+          {{ tag }} ({{ displayTagCounts[tag] || 0 }})
         </el-tag>
       </div>
-      <el-empty v-else-if="!loading && tagsFromDB.length === 0" description="暂无标签数据" :image-size="60">
+      <el-empty v-else-if="!loading && displayTags.length === 0" description="暂无标签数据" :image-size="60">
       </el-empty>
     </div>
   </el-card>
@@ -50,6 +50,15 @@ const activeTag = ref(null)
 
 const API_BASE_URL = 'http://localhost:8080/api'
 
+// 优先显示数据库数据，���果没有则使用props数据
+const displayTags = computed(() => {
+  return tagsFromDB.value.length > 0 ? tagsFromDB.value : props.tags
+})
+
+const displayTagCounts = computed(() => {
+  return Object.keys(tagCountsFromDB.value).length > 0 ? tagCountsFromDB.value : props.counts
+})
+
 // 获取数据库中的标签数据
 const fetchTags = async () => {
   loading.value = true
@@ -64,10 +73,10 @@ const fetchTags = async () => {
     if (response.data) {
       tagsFromDB.value = response.data.tags || []
       tagCountsFromDB.value = response.data.counts || {}
-      console.log(`成功获取 ${tagsFromDB.value.length} 个标签`)
+      console.log(`ArticleTagFilter: 成功获取 ${tagsFromDB.value.length} 个标签`)
     }
   } catch (error) {
-    console.error('获取标签数据失败:', error)
+    console.error('ArticleTagFilter: 获取标签数据失败:', error)
     tagsFromDB.value = []
     tagCountsFromDB.value = {}
   } finally {
@@ -76,7 +85,6 @@ const fetchTags = async () => {
 }
 
 const selectTag = (tag) => {
-  // 如果点击的是当前已激活的标签，则取消选择
   if (activeTag.value === tag) {
     clearFilter()
   } else {
@@ -92,8 +100,7 @@ const clearFilter = () => {
 
 // 计算数值范围，用于动态调整样式
 const fontMetrics = computed(() => {
-  // 优先使用数据库数据，如果没有则使用传入的props数据作为备用
-  const countsToUse = Object.keys(tagCountsFromDB.value).length > 0 ? tagCountsFromDB.value : props.counts
+  const countsToUse = displayTagCounts.value
   const countsArray = Object.values(countsToUse)
   if (countsArray.length === 0) {
     return { min: 1, max: 1 }
@@ -107,8 +114,8 @@ const fontMetrics = computed(() => {
 // 根据文章数量获取标签样式
 const getTagStyle = (count) => {
   const { min, max } = fontMetrics.value
-  const basePadding = 1 // em
-  const maxPadding = 2.5 // em
+  const basePadding = 1
+  const maxPadding = 2.5
 
   let horizontalPadding
   if (max === min || count === undefined) {
@@ -126,7 +133,6 @@ const getTagStyle = (count) => {
 // 监听props变化，当props数据更新时重新获取标签
 watch(() => [props.tags, props.counts], ([newTags, newCounts]) => {
   if (newTags && newTags.length > 0 && tagsFromDB.value.length === 0) {
-    // 如果还没有从数据库获取到数据，且有新的标签数据，则尝试重新获取
     fetchTags()
   }
 }, { immediate: true })

@@ -6,6 +6,7 @@
     </div>
     <div v-loading="loading" class="main-content">
       <aside class="timeline-sidebar">
+        <!-- 传递筛选后的文章给时间线组件 -->
         <ArticleTimeline :articles="filteredArticles" @scroll-to-article="handleScrollToArticle" />
       </aside>
       <main class="articles-main">
@@ -28,7 +29,7 @@
       </main>
       <aside class="tags-sidebar">
         <ArticleCategoryTree :articles="sortedArticles" @category-selected="handleCategorySelected" />
-        <ArticleTagFilter :tags="allTags" :counts="tagCounts" @tag-selected="handleTagSelected" />
+        <ArticleTagFilter :tags="availableTags" :counts="availableTagCounts" @tag-selected="handleTagSelected" />
       </aside>
     </div>
   </div>
@@ -49,7 +50,7 @@ const tagCounts = ref({})
 
 const API_BASE_URL = 'http://localhost:8080/api'
 
-// 获取文章数据
+// ���取文章数据
 const fetchArticles = async () => {
   loading.value = true
   try {
@@ -62,10 +63,10 @@ const fetchArticles = async () => {
 
     if (response.data && Array.isArray(response.data)) {
       articles.value = response.data
-      console.log(`成功获取 ${articles.value.length} 篇文章`)
+      console.log(`Knowledge: 成功获取 ${articles.value.length} 篇文章`)
     }
   } catch (error) {
-    console.error('获取文章数据失败:', error)
+    console.error('Knowledge: 获取文章数据失败:', error)
     articles.value = []
   } finally {
     loading.value = false
@@ -85,10 +86,10 @@ const fetchTags = async () => {
     if (response.data) {
       tags.value = response.data.tags || []
       tagCounts.value = response.data.counts || {}
-      console.log(`成功获取 ${tags.value.length} 个标签`)
+      console.log(`Knowledge: 成功获取 ${tags.value.length} 个标签`)
     }
   } catch (error) {
-    console.error('获取标签数据失败:', error)
+    console.error('Knowledge: 获取标签数据失败:', error)
     tags.value = []
     tagCounts.value = {}
   }
@@ -113,15 +114,30 @@ const articlesByCategory = computed(() => {
   )
 })
 
-// 2. 根据分类后的文章，计算可用标签和数量
-const allTags = computed(() => {
+// 2. 根据当前筛选后的文章计算可用标签
+const availableTags = computed(() => {
   const tagSet = new Set()
-  articlesByCategory.value.forEach(article => {
+  const articlesToCheck = selectedCategory.value ? articlesByCategory.value : sortedArticles.value
+  articlesToCheck.forEach(article => {
     if (article.tags) {
       article.tags.forEach(tag => tagSet.add(tag))
     }
   })
   return Array.from(tagSet)
+})
+
+// 计算可用标签的计数
+const availableTagCounts = computed(() => {
+  const counts = {}
+  const articlesToCheck = selectedCategory.value ? articlesByCategory.value : sortedArticles.value
+  articlesToCheck.forEach(article => {
+    if (article.tags) {
+      article.tags.forEach(tag => {
+        counts[tag] = (counts[tag] || 0) + 1
+      })
+    }
+  })
+  return counts
 })
 
 // 3. 最终筛选结果（分类+标签）

@@ -25,9 +25,16 @@ const routes = [
     component: Knowledge
   },
   {
-    path: '/knowledge/:slug', // 使用简洁的 slug 作为文章路由
+    path: '/article/:category+/:slug',
+    name: 'ArticleWithCategory',
+    component: () => import('@/views/Article.vue'),
+    meta: { title: '文章详情' }
+  },
+  {
+    path: '/article/:slug',
     name: 'Article',
-    component: Article
+    component: () => import('@/views/Article.vue'),
+    meta: { title: '文章详情' }
   },
   {
     path: '/projects',

@@ -39,8 +39,14 @@ const props = defineProps({
 })
 
 const articleLink = computed(() => {
-  // 链接直接使用文章的 slug
-  return `/knowledge/${props.article.slug}`
+  // 修复链接生成逻辑，确保正确处理分类路径
+  if (props.article.category) {
+    // 如果有分类，构建完整路径：/article/分类/slug
+    return `/article/${props.article.category}/${props.article.slug}`
+  } else {
+    // 如果没有分类，直接使用slug：/article/slug
+    return `/article/${props.article.slug}`
+  }
 })
 </script>
 

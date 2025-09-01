@@ -12,9 +12,10 @@
     </template>
     <div v-loading="loading">
       <el-collapse-transition>
-        <el-timeline v-show="!isCollapsed && !loading && articlesFromDB.length > 0">
+        <!-- 修改：使用传入的articles而不是数据库数据，这样可以响应筛选 -->
+        <el-timeline v-show="!isCollapsed && !loading && sortedArticles.length > 0">
           <el-timeline-item
-            v-for="article in sortedArticlesFromDB"
+            v-for="article in sortedArticles"
             :key="article.slug"
             :timestamp="article.date"
             placement="top"
@@ -25,7 +26,7 @@
           </el-timeline-item>
         </el-timeline>
       </el-collapse-transition>
-      <el-empty v-if="!loading && articlesFromDB.length === 0" description="暂无文章数据" :image-size="60">
+      <el-empty v-if="!loading && sortedArticles.length === 0" description="暂无文章数据" :image-size="60">
       </el-empty>
     </div>
   </el-card>
@@ -75,11 +76,9 @@ const fetchArticles = async () => {
   }
 }
 
-// 按日期排序文章（数据库数据优先，props作为备用）
-const sortedArticlesFromDB = computed(() => {
-  // 优先使用数据库数据，如果没有则使用传入的articles数据作为备用
-  const articlesToUse = articlesFromDB.value.length > 0 ? articlesFromDB.value : props.articles
-  return [...articlesToUse].sort((a, b) => new Date(b.date) - new Date(a.date))
+// 修改：直接使用传入的articles，这样可以响应筛选
+const sortedArticles = computed(() => {
+  return [...props.articles].sort((a, b) => new Date(b.date) - new Date(a.date))
 })
 
 const onArticleClick = (slug) => {

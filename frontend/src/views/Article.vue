@@ -24,6 +24,7 @@
 <script setup>
 import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
+import axios from 'axios'
 import Outline from '@/components/Outline.vue'
 import mermaid from 'mermaid'
 
@@ -49,6 +50,8 @@ const articleNotFound = ref(false)
 const headings = ref([])
 const activeHeadingId = ref('')
 let observer = null
+
+const API_BASE_URL = 'http://localhost:8080/api'
 
 const md = markdownit({
   html: true,
@@ -168,57 +171,88 @@ const fetchArticle = async () => {
     return
   }
 
-  // 1. 在JSON数据中通过slug查找文章
-  const articleData = articlesData.find(a => a.slug === slug)
+  try {
+    let articleData = null
 
-  if (articleData) {
-    articleTitle.value = articleData.title
-    const categoryPath = articleData.category
-    // 2. 根据分类和slug构建文件���公共URL路径
-    const fullPath = categoryPath ? `${categoryPath}/${articleData.slug}` : articleData.slug
+    // 检查是否有分类参数
+    if (route.params.category) {
+      // 如果URL包含分类，使用带分类的API
+      const category = Array.isArray(route.params.category)
+        ? route.params.category.join('/')
+        : route.params.category
 
-    try {
-      // 3. 使用 fetch 从 public 目录获取文章内容
-      const response = await fetch(`/articles/knowledge/${fullPath}.md`)
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-      const markdownText = await response.text()
-
-      // 提取标题
-      const tokens = md.parse(markdownText, {})
-      const extractedHeadings = []
-      tokens.forEach((token, i) => {
-        if (token.type === 'heading_open') {
-          const textToken = tokens[i + 1]
-          const id = token.attrGet('id')
-          if (textToken && textToken.type === 'inline' && id) {
-            extractedHeadings.push({
-              level: parseInt(token.tag.substring(1), 10),
-              text: textToken.content,
-              id: id
-            })
-          }
+      const response = await axios.get(`${API_BASE_URL}/articles/${category}/${slug}`, {
+        timeout: 10000,
+        headers: {
+          'Accept': 'application/json'
         }
       })
-      headings.value = extractedHeadings
+      articleData = response.data
+    } else {
+      // 如果URL不包含分类，使用普通的API
+      const response = await axios.get(`${API_BASE_URL}/articles/${slug}`, {
+        timeout: 10000,
+        headers: {
+          'Accept': 'application/json'
+        }
+      })
+      articleData = response.data
+    }
 
-      // 4. ��染Markdown，并传入分类路径用于图片解析
-      const env = { articlePath: categoryPath }
-      articleContent.value = md.render(markdownText, env)
+    if (articleData) {
+      articleTitle.value = articleData.title
+      const categoryPath = articleData.category
 
-      // DOM更新后设置复制按钮和滚动监听
-      await nextTick()
-      setupCopyButtons()
-      setupIntersectionObserver()
-      // 渲染 Mermaid 图表
-      mermaid.init(undefined, document.querySelectorAll('.mermaid'))
-    } catch (e) {
-      console.error(`加载文章内容失败: ${fullPath}.md`, e)
+      // 根据分类和slug构建文件路径
+      const fullPath = categoryPath ? `${categoryPath}/${articleData.slug}` : articleData.slug
+
+      try {
+        // 使用 fetch 从 dist 目录获取文章内容
+        const response = await fetch(`/articles/knowledge/${fullPath}.md`)
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+        const markdownText = await response.text()
+
+        // 提取标题
+        const tokens = md.parse(markdownText, {})
+        const extractedHeadings = []
+        tokens.forEach((token, i) => {
+          if (token.type === 'heading_open') {
+            const textToken = tokens[i + 1]
+            const id = token.attrGet('id')
+            if (textToken && textToken.type === 'inline' && id) {
+              extractedHeadings.push({
+                level: parseInt(token.tag.substring(1), 10),
+                text: textToken.content,
+                id: id
+              })
+            }
+          }
+        })
+        headings.value = extractedHeadings
+
+        // 渲染Markdown，并传入分类路径用于图片解析
+        const env = { articlePath: categoryPath }
+        articleContent.value = md.render(markdownText, env)
+
+        // DOM更新后设置复制按钮和滚动监听
+        await nextTick()
+        setupCopyButtons()
+        setupIntersectionObserver()
+        // 渲染 Mermaid 图表
+        mermaid.init(undefined, document.querySelectorAll('.mermaid'))
+
+        console.log(`成功加载文章: ${articleData.title}`)
+      } catch (e) {
+        console.error(`加载文章内容失败: ${fullPath}.md`, e)
+        articleNotFound.value = true
+      }
+    } else {
       articleNotFound.value = true
     }
-  } else {
-    console.error('在JSON数据中未找到文章:', { slug })
+  } catch (error) {
+    console.error('获取文章信息失败:', error)
     articleNotFound.value = true
   }
 }

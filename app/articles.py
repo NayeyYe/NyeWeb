@@ -36,12 +36,50 @@ def get_articles(db: Session = Depends(database.get_db)):
                 "tags": tags
             }
             articles_data.append(article_dict)
-            logger.info(f"文章数据: ID={article.id}, 标题={article.title}, 分类={article.category}")
+            logger.info(f"文章数据: ID={article.id}, 标题={article.title}, 分类={article.category}, slug={article.slug}")
 
         return articles_data
     except Exception as e:
         logger.error(f"获取文章数据时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取文章数据时发生错误: {str(e)}")
+
+# 添加新的路由来处理带分类的文章请求
+@router.get("/articles/{category:path}/{article_slug}")
+def get_article_by_category_and_slug(category: str, article_slug: str, db: Session = Depends(database.get_db)):
+    """根据分类和slug获取单篇文章详情"""
+    logger.info(f"收到获取文章详情的请求，分类: {category}, slug: {article_slug}")
+    try:
+        # 构建完整的分类路径进行查找
+        article = db.query(Article).filter(
+            Article.category == category,
+            Article.slug == article_slug
+        ).first()
+
+        if not article:
+            logger.warning(f"未找到文章，分类: {category}, slug: {article_slug}")
+            raise HTTPException(status_code=404, detail="文章未找到")
+
+        # 获取文章的标签
+        article_tags = db.query(Tag).join(ArticleTag).filter(ArticleTag.article_id == article.id).all()
+        tags = [tag.name for tag in article_tags]
+
+        article_dict = {
+            "id": article.id,
+            "title": article.title,
+            "slug": article.slug,
+            "summary": article.summary,
+            "category": article.category,
+            "date": article.date.strftime('%Y-%m-%d') if article.date else None,
+            "tags": tags
+        }
+
+        logger.info(f"成功获取文章详情: {article.title}")
+        return article_dict
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"获取文章详情时发生错误: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"获取文章详情时发生错误: {str(e)}")
 
 @router.get("/articles/{article_slug}")
 def get_article_by_slug(article_slug: str, db: Session = Depends(database.get_db)):
@@ -78,11 +116,9 @@ def get_article_by_slug(article_slug: str, db: Session = Depends(database.get_db
 @router.get("/tags")
 def get_all_tags(db: Session = Depends(database.get_db)):
     """获取所有标签及其文章数量"""
-    logger.info("收到获取所有标签的请求")
+    logger.info("收到获取���有标签的请求")
     try:
-        tags_with_counts = db.query(Tag.name, database.engine.execute("SELECT COUNT(*) FROM article_tags WHERE tag_id = tags.id").scalar()).all()
-
-        # 简化处理，直接获取所有标签和计数
+        # 移除有问题的查询，直接统计标签
         all_tags = []
         tag_counts = {}
 
