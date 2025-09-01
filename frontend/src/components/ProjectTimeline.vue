@@ -12,9 +12,10 @@
     </template>
     <div v-loading="loading">
       <el-collapse-transition>
-        <el-timeline v-show="!isCollapsed && !loading && projectsFromDB.length > 0">
+        <!-- 修改：使用传入的projects而不是数据库数据，这样可以响应筛选 -->
+        <el-timeline v-show="!isCollapsed && !loading && sortedProjects.length > 0">
           <el-timeline-item
-            v-for="project in sortedProjectsFromDB"
+            v-for="project in sortedProjects"
             :key="project.slug"
             :timestamp="project.date"
             placement="top"
@@ -25,7 +26,7 @@
           </el-timeline-item>
         </el-timeline>
       </el-collapse-transition>
-      <el-empty v-if="!loading && projectsFromDB.length === 0" description="暂无项目数据" :image-size="60">
+      <el-empty v-if="!loading && sortedProjects.length === 0" description="暂无项目数据" :image-size="60">
       </el-empty>
     </div>
   </el-card>
@@ -75,11 +76,9 @@ const fetchProjects = async () => {
   }
 }
 
-// 按日期排序项目（数据库数据优先，props作为备用）
-const sortedProjectsFromDB = computed(() => {
-  // 优先使用数据库数据，如果没有则使用传入的projects数据作为备用
-  const projectsToUse = projectsFromDB.value.length > 0 ? projectsFromDB.value : props.projects
-  return [...projectsToUse].sort((a, b) => new Date(b.date) - new Date(a.date))
+// 修改：直接使用传入的projects，这样可以响应筛选
+const sortedProjects = computed(() => {
+  return [...props.projects].sort((a, b) => new Date(b.date) - new Date(a.date))
 })
 
 const onProjectClick = (slug) => {
