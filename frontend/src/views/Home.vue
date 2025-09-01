@@ -51,8 +51,8 @@ import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import ProfileCard from '@/components/ProfileCard.vue'
 import TimelineEditor from '@/components/TimelineEditor.vue'
-import ArticleCard from '@/components/ArticleCard.vue'
-import ProjectCard from '@/components/ProjectCard.vue'
+import ArticleCard from '@/components/Article/ArticleCard.vue'
+import ProjectCard from '@/components/Project/ProjectCard.vue'
 
 const articlesLoading = ref(false)
 const projectsLoading = ref(false)

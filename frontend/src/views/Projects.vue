@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
-import ProjectCard from '@/components/ProjectCard.vue'
-import ProjectTimeline from '@/components/ProjectTimeline.vue'
-import ProjectTagFilter from '@/components/ProjectTagFilter.vue'
+import ProjectCard from '@/components/Project/ProjectCard.vue'
+import ProjectTimeline from '@/components/Project/ProjectTimeline.vue'
+import ProjectTagFilter from '@/components/Project/ProjectTagFilter.vue'
 
 const loading = ref(false)
 const projects = ref([])
