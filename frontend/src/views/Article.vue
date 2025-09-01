@@ -24,7 +24,6 @@
 <script setup>
 import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
-import articlesData from '@/data/articles.json'
 import Outline from '@/components/Outline.vue'
 import mermaid from 'mermaid'
 

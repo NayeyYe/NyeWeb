@@ -6,20 +6,26 @@
         <el-button link type="primary" @click="clearFilter" v-if="currentKey">清空</el-button>
       </div>
     </template>
-    <el-tree
-      :data="categoryTree"
-      :props="treeProps"
-      @node-click="handleNodeClick"
-      :highlight-current="true"
-      :expand-on-click-node="false"
-      node-key="path"
-      ref="treeRef"
-    />
+    <div v-loading="loading">
+      <el-tree
+        v-if="!loading && categoryTree.length > 0"
+        :data="categoryTree"
+        :props="treeProps"
+        @node-click="handleNodeClick"
+        :highlight-current="true"
+        :expand-on-click-node="false"
+        node-key="path"
+        ref="treeRef"
+      />
+      <el-empty v-else-if="!loading && categoryTree.length === 0" description="暂无分类数据" :image-size="60">
+      </el-empty>
+    </div>
   </el-card>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import axios from 'axios'
 
 const props = defineProps({
   articles: {
@@ -30,19 +36,52 @@ const props = defineProps({
 
 const emit = defineEmits(['category-selected'])
 
+const loading = ref(false)
+const categoriesFromDB = ref([])
 const treeRef = ref(null)
 const currentKey = ref(null)
+
+const API_BASE_URL = 'http://localhost:8080/api'
 
 const treeProps = {
   children: 'children',
   label: 'label',
 }
 
+// 获取数据库中的分类数据
+const fetchCategories = async () => {
+  loading.value = true
+  try {
+    const response = await axios.get(`${API_BASE_URL}/articles/categories`, {
+      timeout: 10000,
+      headers: {
+        'Accept': 'application/json'
+      }
+    })
+
+    if (response.data && response.data.categories) {
+      categoriesFromDB.value = response.data.categories
+      console.log(`成功获取 ${categoriesFromDB.value.length} 个分类`)
+    }
+  } catch (error) {
+    console.error('获取分类数据失败:', error)
+    categoriesFromDB.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+// 构建分类树
 const categoryTree = computed(() => {
+  // 优先使用数据库数据，如果没有则使用传入的articles数据作为备用
+  const articlesToProcess = categoriesFromDB.value.length > 0
+    ? categoriesFromDB.value.flatMap(cat => cat.articles.map(article => ({ ...article, category: cat.path })))
+    : props.articles
+
   const root = []
   const map = new Map()
 
-  props.articles.forEach(article => {
+  articlesToProcess.forEach(article => {
     if (!article.category) return
 
     const pathParts = article.category.split('/')
@@ -65,6 +104,8 @@ const categoryTree = computed(() => {
       currentLevel = node.children
     })
   })
+
+  console.log('构建的分类树:', root)
   return root
 })
 
@@ -85,6 +126,18 @@ const clearFilter = () => {
   }
   emit('category-selected', null)
 }
+
+// 监听articles变化，当articles数据更新时重新获取分类
+watch(() => props.articles, (newArticles) => {
+  if (newArticles && newArticles.length > 0 && categoriesFromDB.value.length === 0) {
+    // 如果还没有从数据库获取到数据，且有新的文章数据，则尝试重新获取
+    fetchCategories()
+  }
+}, { immediate: true })
+
+onMounted(() => {
+  fetchCategories()
+})
 </script>
 
 <style scoped>

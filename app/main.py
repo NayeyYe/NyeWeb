@@ -10,6 +10,7 @@ import logging
 
 # 修复导入问题 - 直接导入而不使用相对导入
 import timeline
+import articles
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -27,8 +28,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 包含时间线API路由 - 确保路由正确注册
+# 包含路由
 app.include_router(timeline.router, prefix="/api", tags=["timeline"])
+app.include_router(articles.router, prefix="/api", tags=["articles"])
 
 # 添加根路径API测试端点
 @app.get("/api/health")

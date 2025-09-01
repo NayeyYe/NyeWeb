@@ -1,7 +1,7 @@
 import os
-from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, Date, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, relationship
 from dotenv import load_dotenv
 
 # 加载环境变量
@@ -29,6 +29,31 @@ class Timeline(Base):
     id = Column(Integer, primary_key=True, index=True)
     timestamp = Column(DateTime, nullable=False)
     content = Column(Text, nullable=False)
+
+# 文章模型
+class Article(Base):
+    __tablename__ = "articles"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False)
+    slug = Column(String(255), nullable=False, unique=True)
+    category = Column(String(100))
+    date = Column(Date)
+    summary = Column(Text)
+
+# 标签模型
+class Tag(Base):
+    __tablename__ = "tags"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=False, unique=True)
+
+# 文章标签关联模型
+class ArticleTag(Base):
+    __tablename__ = "article_tags"
+
+    article_id = Column(Integer, ForeignKey('articles.id'), primary_key=True)
+    tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
 
 # 获取数据库会话
 def get_db():

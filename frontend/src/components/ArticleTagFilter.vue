@@ -3,26 +3,32 @@
     <template #header>
       <div class="card-header">
         <span>标签分类</span>
+        <el-button link type="primary" @click="clearFilter" v-if="activeTag">清空</el-button>
       </div>
     </template>
-    <div class="tag-list">
-      <el-tag
-        v-for="tag in tags"
-        :key="tag"
-        :class="{ 'is-active': activeTag === tag }"
-        class="tag-item"
-        effect="light"
-        @click="selectTag(tag)"
-        :style="getTagStyle(counts[tag] || 0)"
-      >
-        {{ tag }} ({{ counts[tag] || 0 }})
-      </el-tag>
+    <div v-loading="loading">
+      <div v-if="!loading && tagsFromDB.length > 0" class="tag-list">
+        <el-tag
+          v-for="tag in tagsFromDB"
+          :key="tag"
+          :class="{ 'is-active': activeTag === tag }"
+          class="tag-item"
+          effect="light"
+          @click="selectTag(tag)"
+          :style="getTagStyle(tagCountsFromDB[tag] || 0)"
+        >
+          {{ tag }} ({{ tagCountsFromDB[tag] || 0 }})
+        </el-tag>
+      </div>
+      <el-empty v-else-if="!loading && tagsFromDB.length === 0" description="暂无标签数据" :image-size="60">
+      </el-empty>
     </div>
   </el-card>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import axios from 'axios'
 
 const props = defineProps({
   tags: {
@@ -37,21 +43,58 @@ const props = defineProps({
 
 const emit = defineEmits(['tag-selected'])
 
+const loading = ref(false)
+const tagsFromDB = ref([])
+const tagCountsFromDB = ref({})
 const activeTag = ref(null)
+
+const API_BASE_URL = 'http://localhost:8080/api'
+
+// 获取数据库中的标签数据
+const fetchTags = async () => {
+  loading.value = true
+  try {
+    const response = await axios.get(`${API_BASE_URL}/tags`, {
+      timeout: 10000,
+      headers: {
+        'Accept': 'application/json'
+      }
+    })
+
+    if (response.data) {
+      tagsFromDB.value = response.data.tags || []
+      tagCountsFromDB.value = response.data.counts || {}
+      console.log(`成功获取 ${tagsFromDB.value.length} 个标签`)
+    }
+  } catch (error) {
+    console.error('获取标签数据失败:', error)
+    tagsFromDB.value = []
+    tagCountsFromDB.value = {}
+  } finally {
+    loading.value = false
+  }
+}
 
 const selectTag = (tag) => {
   // 如果点击的是当前已激活的标签，则取消选择
   if (activeTag.value === tag) {
-    activeTag.value = null
+    clearFilter()
   } else {
     activeTag.value = tag
+    emit('tag-selected', tag)
   }
-  emit('tag-selected', activeTag.value)
+}
+
+const clearFilter = () => {
+  activeTag.value = null
+  emit('tag-selected', null)
 }
 
 // 计算数值范围，用于动态调整样式
 const fontMetrics = computed(() => {
-  const countsArray = Object.values(props.counts)
+  // 优先使用数据库数据，如果没有则使用传入的props数据作为备用
+  const countsToUse = Object.keys(tagCountsFromDB.value).length > 0 ? tagCountsFromDB.value : props.counts
+  const countsArray = Object.values(countsToUse)
   if (countsArray.length === 0) {
     return { min: 1, max: 1 }
   }
@@ -79,6 +122,18 @@ const getTagStyle = (count) => {
     padding: `0 ${horizontalPadding.toFixed(2)}em`,
   }
 }
+
+// 监听props变化，当props数据更新时重新获取标签
+watch(() => [props.tags, props.counts], ([newTags, newCounts]) => {
+  if (newTags && newTags.length > 0 && tagsFromDB.value.length === 0) {
+    // 如果还没有从数据库获取到数据，且有新的标签数据，则尝试重新获取
+    fetchTags()
+  }
+}, { immediate: true })
+
+onMounted(() => {
+  fetchTags()
+})
 </script>
 
 <style scoped>
@@ -88,6 +143,9 @@ const getTagStyle = (count) => {
 }
 
 .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   font-weight: bold;
 }
 
