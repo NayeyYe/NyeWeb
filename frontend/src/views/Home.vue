@@ -9,7 +9,7 @@
         <template #header>
           <div class="card-header">
             <span>最近文章</span>
-            <router-link to="/knowledge" class="more-link">查看全部 &gt;</router-link>
+            <router-link to="/knowledge" class="more-link">查看��部 &gt;</router-link>
           </div>
         </template>
         <div v-loading="articlesLoading" class="card-list">
@@ -31,13 +31,15 @@
             <router-link to="/projects" class="more-link">查看全部 &gt;</router-link>
           </div>
         </template>
-        <div class="card-list">
+        <div v-loading="projectsLoading" class="card-list">
           <ProjectCard
             v-for="project in recentProjects"
             :key="project.slug"
             :project="project"
             class="list-item-card"
           />
+          <el-empty v-if="!projectsLoading && recentProjects.length === 0" description="暂无项目数据" :image-size="60">
+          </el-empty>
         </div>
       </el-card>
     </div>
@@ -51,11 +53,11 @@ import ProfileCard from '@/components/ProfileCard.vue'
 import TimelineEditor from '@/components/TimelineEditor.vue'
 import ArticleCard from '@/components/ArticleCard.vue'
 import ProjectCard from '@/components/ProjectCard.vue'
-// 保留项目数据的JSON导入，因为只改文章部分
-import projectsData from '@/data/projects.json'
 
 const articlesLoading = ref(false)
+const projectsLoading = ref(false)
 const articlesFromDB = ref([])
+const projectsFromDB = ref([])
 
 const API_BASE_URL = 'http://localhost:8080/api'
 
@@ -82,6 +84,29 @@ const fetchArticles = async () => {
   }
 }
 
+// 获取项目数据
+const fetchProjects = async () => {
+  projectsLoading.value = true
+  try {
+    const response = await axios.get(`${API_BASE_URL}/projects`, {
+      timeout: 10000,
+      headers: {
+        'Accept': 'application/json'
+      }
+    })
+
+    if (response.data && Array.isArray(response.data)) {
+      projectsFromDB.value = response.data
+      console.log(`首页: 成功获取 ${projectsFromDB.value.length} 个项目`)
+    }
+  } catch (error) {
+    console.error('首页: 获取项目数据失败:', error)
+    projectsFromDB.value = []
+  } finally {
+    projectsLoading.value = false
+  }
+}
+
 // 最近文章（从数据库获取，取前3篇）
 const recentArticles = computed(() => {
   return [...articlesFromDB.value]
@@ -89,15 +114,15 @@ const recentArticles = computed(() => {
     .slice(0, 3)
 })
 
-// 最近项目（暂时保持使用JSON数据）
+// 最近项目（从数据库获取，取前3个）
 const recentProjects = computed(() => {
-  return [...projectsData]
+  return [...projectsFromDB.value]
     .sort((a, b) => new Date(b.date) - new Date(a.date))
     .slice(0, 3)
 })
 
-onMounted(() => {
-  fetchArticles()
+onMounted(async () => {
+  await Promise.all([fetchArticles(), fetchProjects()])
 })
 </script>
 

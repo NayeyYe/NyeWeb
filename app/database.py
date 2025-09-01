@@ -55,6 +55,23 @@ class ArticleTag(Base):
     article_id = Column(Integer, ForeignKey('articles.id'), primary_key=True)
     tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
 
+# 项目模型
+class Project(Base):
+    __tablename__ = "projects"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False)
+    slug = Column(String(255), nullable=False, unique=True)
+    date = Column(Date)
+    summary = Column(Text)
+
+# 项目标签关联模型
+class ProjectTag(Base):
+    __tablename__ = "project_tags"
+
+    project_id = Column(Integer, ForeignKey('projects.id'), primary_key=True)
+    tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
+
 # 获取数据库会话
 def get_db():
     db = SessionLocal()

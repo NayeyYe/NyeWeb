@@ -12,7 +12,10 @@
         </div>
       </aside>
       <main class="main-content">
-        <article class="markdown-body" v-html="projectContent"></article>
+        <article class="markdown-body">
+          <h1>{{ projectTitle }}</h1>
+          <div v-html="projectContent"></div>
+        </article>
       </main>
     </div>
   </div>
@@ -21,7 +24,7 @@
 <script setup>
 import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
-import projectsData from '@/data/projects.json'
+import axios from 'axios'
 import Outline from '@/components/Outline.vue'
 import mermaid from 'mermaid'
 
@@ -42,10 +45,13 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' })
 
 const route = useRoute()
 const projectContent = ref('')
+const projectTitle = ref('')
 const projectNotFound = ref(false)
 const headings = ref([])
 const activeHeadingId = ref('')
 let observer = null
+
+const API_BASE_URL = 'http://localhost:8080/api'
 
 const md = markdownit({
   html: true,
@@ -144,7 +150,7 @@ const setupIntersectionObserver = () => {
       }
     });
   }, {
-    rootMargin: '0px 0px -80% 0px', // 当标题进入视口顶部20%时触发
+    rootMargin: '0px 0px -80% 0px',
     threshold: 0
   });
 
@@ -154,6 +160,7 @@ const setupIntersectionObserver = () => {
 const fetchProject = async () => {
   projectNotFound.value = false
   projectContent.value = ''
+  projectTitle.value = ''
   headings.value = []
 
   const slug = route.params.slug
@@ -162,51 +169,65 @@ const fetchProject = async () => {
     return
   }
 
-  // 1. 在JSON数据中通过slug查找项目
-  const projectData = projectsData.find(p => p.slug === slug)
-
-  if (projectData) {
-    try {
-      // 2. 使用 fetch 从 public/articles/projects 目录获取项目内容
-      const response = await fetch(`/articles/projects/${projectData.slug}.md`)
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+  try {
+    // 1. 从数据库API获取项目信息
+    const response = await axios.get(`${API_BASE_URL}/projects/${slug}`, {
+      timeout: 10000,
+      headers: {
+        'Accept': 'application/json'
       }
-      const markdownText = await response.text()
+    })
 
-      // 提取标题
-      const tokens = md.parse(markdownText, {})
-      const extractedHeadings = []
-      tokens.forEach((token, i) => {
-        if (token.type === 'heading_open') {
-          const textToken = tokens[i + 1]
-          const id = token.attrGet('id')
-          if (textToken && textToken.type === 'inline' && id) {
-            extractedHeadings.push({
-              level: parseInt(token.tag.substring(1), 10),
-              text: textToken.content,
-              id: id
-            })
-          }
+    if (response.data) {
+      const projectData = response.data
+      projectTitle.value = projectData.title
+
+      try {
+        // 2. 根据slug从dist目录获取项目内容
+        const markdownResponse = await fetch(`/articles/projects/${projectData.slug}.md`)
+        if (!markdownResponse.ok) {
+          throw new Error(`HTTP error! status: ${markdownResponse.status}`)
         }
-      })
-      headings.value = extractedHeadings
+        const markdownText = await markdownResponse.text()
 
-      // 3. 渲染Markdown
-      projectContent.value = md.render(markdownText)
+        // 提取标题
+        const tokens = md.parse(markdownText, {})
+        const extractedHeadings = []
+        tokens.forEach((token, i) => {
+          if (token.type === 'heading_open') {
+            const textToken = tokens[i + 1]
+            const id = token.attrGet('id')
+            if (textToken && textToken.type === 'inline' && id) {
+              extractedHeadings.push({
+                level: parseInt(token.tag.substring(1), 10),
+                text: textToken.content,
+                id: id
+              })
+            }
+          }
+        })
+        headings.value = extractedHeadings
 
-      // DOM更新后设置复制按钮和滚动监听
-      await nextTick()
-      setupCopyButtons()
-      setupIntersectionObserver()
-      // 渲染 Mermaid 图表
-      mermaid.init(undefined, document.querySelectorAll('.mermaid'))
-    } catch (e) {
-      console.error(`加载项目内容失败: ${projectData.slug}.md`, e)
+        // 3. 渲染Markdown
+        projectContent.value = md.render(markdownText)
+
+        // DOM更新后设置复制按钮和滚动监听
+        await nextTick()
+        setupCopyButtons()
+        setupIntersectionObserver()
+        // 渲染 Mermaid 图表
+        mermaid.init(undefined, document.querySelectorAll('.mermaid'))
+
+        console.log(`成功加载项目: ${projectData.title}`)
+      } catch (e) {
+        console.error(`加载项目内容失败: ${projectData.slug}.md`, e)
+        projectNotFound.value = true
+      }
+    } else {
       projectNotFound.value = true
     }
-  } else {
-    console.error('在JSON数据中未找到项目:', { slug })
+  } catch (error) {
+    console.error('获取项目信息失败:', error)
     projectNotFound.value = true
   }
 }
