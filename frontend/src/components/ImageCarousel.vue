@@ -5,29 +5,64 @@
         <span>我的收藏</span>
       </div>
     </template>
-    <el-carousel :interval="4000" height="200px" v-if="shuffledImages.length > 0" indicator-position="none">
-      <el-carousel-item v-for="image in shuffledImages" :key="image">
-        <img :src="image" class="carousel-image" alt="Favorite Image" />
-      </el-carousel-item>
-    </el-carousel>
-    <div v-else class="empty-state">
-      暂无收藏图片
+    <div v-loading="loading">
+      <el-carousel :interval="4000" height="200px" v-if="shuffledImages.length > 0" indicator-position="none">
+        <el-carousel-item v-for="image in shuffledImages" :key="image.id">
+          <img :src="getImageUrl(image.filename)" class="carousel-image" alt="Favorite Image" />
+        </el-carousel-item>
+      </el-carousel>
+      <div v-else-if="!loading" class="empty-state">
+        暂无收藏图片
+      </div>
     </div>
   </el-card>
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import imageFilenames from '@/data/favoriteImages.json';
+import { ref, computed, onMounted } from 'vue';
+import axios from 'axios';
 
-// 直接从导入的JSON文件生成图片路径列表
-const allImages = imageFilenames.map(filename => `/favorite/${filename}`);
+const loading = ref(false);
+const imagesFromDB = ref([]);
+
+const API_BASE_URL = 'http://localhost:8080/api';
+
+// 获取收藏图片数据
+const fetchFavoriteImages = async () => {
+  loading.value = true;
+  try {
+    const response = await axios.get(`${API_BASE_URL}/favorite-images`, {
+      timeout: 10000,
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+
+    if (response.data && Array.isArray(response.data)) {
+      imagesFromDB.value = response.data;
+      console.log(`ImageCarousel: 成功获取 ${imagesFromDB.value.length} 张收藏图片`);
+    }
+  } catch (error) {
+    console.error('ImageCarousel: 获取收藏图片数据失败:', error);
+    imagesFromDB.value = [];
+  } finally {
+    loading.value = false;
+  }
+};
 
 // 将图片数组随机打乱
 const shuffledImages = computed(() => {
-  return [...allImages].sort(() => Math.random() - 0.5);
+  return [...imagesFromDB.value].sort(() => Math.random() - 0.5);
 });
 
+// 生成图片URL
+const getImageUrl = (filename) => {
+  return `/favorite/${filename}`;
+};
+
+onMounted(() => {
+  fetchFavoriteImages();
+});
 </script>
 
 <style scoped>

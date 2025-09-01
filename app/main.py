@@ -13,6 +13,8 @@ import timeline
 import articles
 import projects
 import books
+import figures
+import favorite_images
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -35,6 +37,8 @@ app.include_router(timeline.router, prefix="/api", tags=["timeline"])
 app.include_router(articles.router, prefix="/api", tags=["articles"])
 app.include_router(projects.router, prefix="/api", tags=["projects"])
 app.include_router(books.router, prefix="/api", tags=["books"])
+app.include_router(figures.router, prefix="/api", tags=["figures"])
+app.include_router(favorite_images.router, prefix="/api", tags=["favorite-images"])
 
 # 添加根路径API测试端点
 @app.get("/api/health")
@@ -51,7 +55,7 @@ print(f"Dist目录: {dist_dir}")
 static_assets_dir = os.path.join(dist_dir, "assets")
 
 # 挂载 'assets' 目录
-# 当浏览器请求 /assets/xxx.js ��, FastAPI 会从 frontend/dist/assets/ 目录中查找文件
+# 当浏览器请求 /assets/xxx.js ��, FastAPI 会从 frontend/dist/assets/ 目录中查找文��
 if os.path.exists(static_assets_dir):
     app.mount("/assets", StaticFiles(directory=static_assets_dir), name="assets")
 
@@ -146,5 +150,5 @@ async def serve_vue_app(path: str):
 if __name__ == "__main__":
     # 这使得你可以通过 `python app/main.py` 直接运行服务器。
     # host="0.0.0.0" 让服务器可以被局域网内的其他设备访问。
-    # 你��可以使用 "127.0.0.1" 只在本地访问。
+    # 你��可以使用 "127.0.0.1" 只在本地访问���
     uvicorn.run(app, port=8080)

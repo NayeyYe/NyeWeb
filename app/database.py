@@ -89,6 +89,29 @@ class BookTag(Base):
     book_id = Column(Integer, ForeignKey('books.id'), primary_key=True)
     tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
 
+# ���表模型
+class Figure(Base):
+    __tablename__ = "figures"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False)
+    description = Column(Text)
+    filename = Column(String(255))  # 图片文件名
+
+# 图表标签关联模型
+class FigureTag(Base):
+    __tablename__ = "figure_tags"
+
+    figure_id = Column(Integer, ForeignKey('figures.id'), primary_key=True)
+    tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
+
+# 收藏图片模型
+class FavoriteImage(Base):
+    __tablename__ = "favorite_images"
+
+    id = Column(Integer, primary_key=True, index=True)
+    filename = Column(String(255), nullable=False)
+
 # ��取数据库会话
 def get_db():
     db = SessionLocal()
