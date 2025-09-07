@@ -10,7 +10,7 @@ const projects = ref([])
 const tags = ref([])
 const tagCounts = ref({})
 
-const API_BASE_URL = 'http://localhost:8080/api'
+const API_BASE_URL = '/api'
 
 // 获取项目数据
 const fetchProjects = async () => {

@@ -9,7 +9,7 @@ from urllib.parse import unquote
 import logging
 
 # 修复导入问题 - 直接导入而不使用相对导入
-from app.crud import articles, books, favorite_images, figures, projects, timeline, tools
+from crud import articles, books, favorite_images, figures, projects, timeline, tools
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)

@@ -41,7 +41,7 @@ const categoriesFromDB = ref([])
 const treeRef = ref(null)
 const currentKey = ref(null)
 
-const API_BASE_URL = 'http://localhost:8080/api'
+const API_BASE_URL = '/api'
 
 const treeProps = {
   children: 'children',

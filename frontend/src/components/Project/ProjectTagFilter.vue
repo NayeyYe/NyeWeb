@@ -16,7 +16,7 @@ const tagsFromDB = ref<string[]>([])
 const tagCountsFromDB = ref<Record<string, number>>({})
 const activeTag = ref<string | null>(null)
 
-const API_BASE_URL = 'http://localhost:8080/api'
+const API_BASE_URL = '/api'
 
 // 获取数据库中的项目标签数据
 const fetchProjectTags = async () => {

@@ -51,7 +51,7 @@ const headings = ref([])
 const activeHeadingId = ref('')
 let observer = null
 
-const API_BASE_URL = 'http://localhost:8080/api'
+const API_BASE_URL = '/api'
 
 const md = markdownit({
   html: true,

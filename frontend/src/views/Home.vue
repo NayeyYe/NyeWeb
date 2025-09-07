@@ -59,7 +59,7 @@ const projectsLoading = ref(false)
 const articlesFromDB = ref([])
 const projectsFromDB = ref([])
 
-const API_BASE_URL = 'http://localhost:8080/api'
+const API_BASE_URL = '/api'
 
 // 获取文章数据
 const fetchArticles = async () => {

@@ -43,7 +43,7 @@ import axios from 'axios'
 const loading = ref(false)
 const timelineItems = ref([])
 
-const API_BASE_URL = 'http://localhost:8080/api'
+const API_BASE_URL = '/api'
 
 const formatTimestamp = (timestamp) => {
   try {

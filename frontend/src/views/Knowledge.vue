@@ -48,7 +48,7 @@ const articles = ref([])
 const tags = ref([])
 const tagCounts = ref({})
 
-const API_BASE_URL = 'http://localhost:8080/api'
+const API_BASE_URL = '/api'
 
 // ���取文章数据
 const fetchArticles = async () => {
