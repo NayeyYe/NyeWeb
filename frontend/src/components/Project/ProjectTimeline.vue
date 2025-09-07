@@ -51,7 +51,7 @@ const projectsFromDB = ref([])
 const isCollapsed = ref(false)
 const selectedDate = ref(null)
 
-const API_BASE_URL = 'http://localhost:8080/api'
+const API_BASE_URL = '/api'
 
 // 获取数据库中的项目数据
 const fetchProjects = async () => {

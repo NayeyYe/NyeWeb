@@ -48,7 +48,7 @@ const tagsFromDB = ref([])
 const tagCountsFromDB = ref({})
 const activeTag = ref(null)
 
-const API_BASE_URL = 'http://localhost:8080/api'
+const API_BASE_URL = '/api'
 
 // 优先显示数据库数据，���果没有则使用props数据
 const displayTags = computed(() => {

@@ -66,7 +66,7 @@ const selectedTag = ref(null);
 const loading = ref(false);
 const toolsFromDB = ref([]);
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = '/api';
 
 // 获取工具数据
 const fetchTools = async () => {

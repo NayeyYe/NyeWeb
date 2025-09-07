@@ -82,7 +82,7 @@ const bookTagsFromDB = ref([]);
 const figuresFromDB = ref([]);
 const figureTagsFromDB = ref([]);
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = '/api';
 
 // 获取书���数据
 const fetchBooks = async () => {

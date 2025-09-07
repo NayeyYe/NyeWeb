@@ -25,7 +25,7 @@ import axios from 'axios';
 const loading = ref(false);
 const imagesFromDB = ref([]);
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = '/api';
 
 // 获取收藏图片数据
 const fetchFavoriteImages = async () => {
