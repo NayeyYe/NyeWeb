@@ -1,14 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Home from '../views/Home.vue'
-import Knowledge from '../views/Knowledge.vue'
-import Article from '../views/Article.vue' // 导入文章页面
-import Projects from '../views/Projects.vue'
-import Project from '../views/Project.vue'
-import Tools from '../views/Tools.vue'
-import Resources from '../views/Resources.vue'
-import AboutMe from '../views/AboutMe.vue'
-import AdminLogin from '../views/AdminLogin.vue'
-import HelloWorld from '../views/HelloWorld.vue'
+import Home from '../views/Main/Home.vue'
+import Knowledge from '../views/Main/Knowledge.vue'
+import Article from '../views/Main/Article.vue' // 导入文章页面
+import Projects from '../views/Main/Projects.vue'
+import Project from '../views/Main/Project.vue'
+import Tools from '../views/Main/Tools.vue'
+import Resources from '../views/Main/Resources.vue'
+import AboutMe from '../views/Main/AboutMe.vue'
+import AdminLogin from '../views/Dashboard/AdminLogin.vue'
+import HelloWorld from '../views/Dashboard/HelloWorld.vue'
 
 const routes = [
   {
@@ -29,13 +29,13 @@ const routes = [
   {
     path: '/article/:category+/:slug',
     name: 'ArticleWithCategory',
-    component: () => import('@/views/Article.vue'),
+    component: () => import('@/views/Main/Article.vue'),
     meta: { title: '文章详情' }
   },
   {
     path: '/article/:slug',
     name: 'Article',
-    component: () => import('@/views/Article.vue'),
+    component: () => import('@/views/Main/Article.vue'),
     meta: { title: '文章详情' }
   },
   {
