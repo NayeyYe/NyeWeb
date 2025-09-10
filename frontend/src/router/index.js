@@ -7,6 +7,8 @@ import Project from '../views/Project.vue'
 import Tools from '../views/Tools.vue'
 import Resources from '../views/Resources.vue'
 import AboutMe from '../views/AboutMe.vue'
+import AdminLogin from '../views/AdminLogin.vue'
+import HelloWorld from '../views/HelloWorld.vue'
 
 const routes = [
   {
@@ -55,6 +57,18 @@ const routes = [
     path: '/resources',
     name: 'Resources',
     component: Resources
+  },
+  {
+    path: '/admin/login',
+    name: 'AdminLogin',
+    component: AdminLogin,
+    meta: { title: '管理员登录' }
+  },
+  {
+    path: '/admin/dashboard',
+    name: 'AdminDashboard',
+    component: HelloWorld,
+    meta: { title: '管理后台' }
   }
 ]
 

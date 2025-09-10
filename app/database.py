@@ -3,6 +3,7 @@ from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, D
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from dotenv import load_dotenv
+from datetime import datetime
 
 # 加载环境变量
 load_dotenv()
@@ -128,7 +129,18 @@ class ToolTag(Base):
     tool_id = Column(Integer, ForeignKey('tools.id'), primary_key=True)
     tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
 
-# ��取数据库会话
+
+# Admin模型定义
+class Admin(Base):
+    __tablename__ = "admins"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(50), unique=True, index=True)
+    password_hash = Column(String(128))
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+# 数据库会话
 def get_db():
     db = SessionLocal()
     try:
