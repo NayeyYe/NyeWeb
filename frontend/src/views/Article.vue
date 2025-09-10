@@ -8,7 +8,7 @@
     <div v-else class="content-wrapper">
       <aside class="outline-sidebar">
         <div class="outline-fixed-container">
-          <Outline v-if="headings.length" :outline="headings" :active-id="activeHeadingId" />
+          <Outline v-if="headings.length" :outline="headings" :active-id="activeHeadingId"/>
         </div>
       </aside>
       <main class="main-content">
@@ -22,8 +22,8 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
-import { useRoute } from 'vue-router'
+import {nextTick, onMounted, onUnmounted, ref, watch} from 'vue'
+import {useRoute} from 'vue-router'
 import axios from 'axios'
 import Outline from '@/components/Outline.vue'
 import mermaid from 'mermaid'
@@ -41,7 +41,7 @@ import 'github-markdown-css/github-markdown.css'
 import 'katex/dist/katex.min.css'
 
 // 初始化 Mermaid
-mermaid.initialize({ startOnLoad: false, theme: 'default' })
+mermaid.initialize({startOnLoad: false, theme: 'default'})
 
 const route = useRoute()
 const articleContent = ref('')
@@ -61,21 +61,22 @@ const md = markdownit({
     if (lang && hljs.getLanguage(lang)) {
       try {
         return '<pre class="hljs"><code>' +
-               hljs.highlight(str, { language: lang, ignoreIllegals: true }).value +
-               '</code></pre>';
-      } catch (__) {}
+            hljs.highlight(str, {language: lang, ignoreIllegals: true}).value +
+            '</code></pre>';
+      } catch (__) {
+      }
     }
     return '<pre class="hljs"><code>' + md.utils.escapeHtml(str) + '</code></pre>';
   }
 }).use(mdKatex)
-  .use(mdAnchor, {
-    permalink: true,
-    level: [1, 2, 3, 4, 5, 6],
-    slugify: s => slugify(s, { lower: true, strict: true }),
-    permalinkSymbol: '¶',
-    permalinkBefore: true,
-    permalinkClass: 'header-anchor'
-  })
+    .use(mdAnchor, {
+      permalink: true,
+      level: [1, 2, 3, 4, 5, 6],
+      slugify: s => slugify(s, {lower: true, strict: true}),
+      permalinkSymbol: '¶',
+      permalinkBefore: true,
+      permalinkClass: 'header-anchor'
+    })
 
 // 自定义代码块渲染，支持 Mermaid
 const defaultFenceRenderer = md.renderer.rules.fence;
@@ -178,8 +179,8 @@ const fetchArticle = async () => {
     if (route.params.category) {
       // 如果URL包含分类，使用带分类的API
       const category = Array.isArray(route.params.category)
-        ? route.params.category.join('/')
-        : route.params.category
+          ? route.params.category.join('/')
+          : route.params.category
 
       const response = await axios.get(`${API_BASE_URL}/articles/${category}/${slug}`, {
         timeout: 10000,
@@ -233,7 +234,7 @@ const fetchArticle = async () => {
         headings.value = extractedHeadings
 
         // 渲染Markdown，并传入分类路径用于图片解析
-        const env = { articlePath: categoryPath }
+        const env = {articlePath: categoryPath}
         articleContent.value = md.render(markdownText, env)
 
         // DOM更新后设置复制按钮和滚动监听
@@ -348,9 +349,18 @@ onUnmounted(() => {
   margin-bottom: 1.4rem;
   font-weight: 600;
 }
-:deep(h1) { font-size: 2em; }
-:deep(h2) { font-size: 1.6em; }
-:deep(h3) { font-size: 1.3em; }
+
+:deep(h1) {
+  font-size: 2em;
+}
+
+:deep(h2) {
+  font-size: 1.6em;
+}
+
+:deep(h3) {
+  font-size: 1.3em;
+}
 
 /* 代码块容器 */
 :deep(.code-block-wrapper) {
@@ -384,9 +394,17 @@ onUnmounted(() => {
   border-radius: 50%;
 }
 
-:deep(.dot.red) { background-color: #ff5f56; }
-:deep(.dot.yellow) { background-color: #ffbd2e; }
-:deep(.dot.green) { background-color: #27c93f; }
+:deep(.dot.red) {
+  background-color: #ff5f56;
+}
+
+:deep(.dot.yellow) {
+  background-color: #ffbd2e;
+}
+
+:deep(.dot.green) {
+  background-color: #27c93f;
+}
 
 :deep(.language-name) {
   flex-grow: 1;

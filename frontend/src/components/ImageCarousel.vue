@@ -8,7 +8,7 @@
     <div v-loading="loading">
       <el-carousel :interval="4000" height="200px" v-if="shuffledImages.length > 0" indicator-position="none">
         <el-carousel-item v-for="image in shuffledImages" :key="image.id">
-          <img :src="getImageUrl(image.filename)" class="carousel-image" alt="Favorite Image" />
+          <img :src="getImageUrl(image.filename)" class="carousel-image" alt="Favorite Image"/>
         </el-carousel-item>
       </el-carousel>
       <div v-else-if="!loading" class="empty-state">
@@ -19,7 +19,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import {computed, onMounted, ref} from 'vue';
 import axios from 'axios';
 
 const loading = ref(false);

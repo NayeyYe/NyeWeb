@@ -1,7 +1,7 @@
 <template>
   <el-card :body-style="{ padding: '0px' }" class="book-card" shadow="hover">
     <div class="book-cover">
-      <el-image :src="book.cover" fit="cover" class="cover-image" />
+      <el-image :src="book.cover" fit="cover" class="cover-image"/>
     </div>
     <div class="book-info">
       <h3 class="book-title">{{ book.title }}</h3>
@@ -17,8 +17,8 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import { ElMessage } from 'element-plus';
+import {computed} from 'vue';
+import {ElMessage} from 'element-plus';
 
 const props = defineProps({
   book: {
@@ -83,35 +83,42 @@ const downloadPdf = async () => {
   flex-direction: column;
   height: 100%;
 }
+
 .book-cover {
   width: 100%;
   height: 180px;
 }
+
 .cover-image {
   width: 100%;
   height: 100%;
 }
+
 .book-info {
   padding: 20px;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
 }
+
 .book-title {
   font-size: 1.2em;
   margin: 0 0 10px 0;
 }
+
 .book-description {
   font-size: 0.9em;
   color: #606266;
   flex-grow: 1;
   margin-bottom: 15px;
 }
+
 .bottom-section {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
 }
+
 .book-tags {
   display: flex;
   flex-wrap: wrap;

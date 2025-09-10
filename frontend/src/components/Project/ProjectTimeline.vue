@@ -5,20 +5,20 @@
         <span>项目归档</span>
         <el-button link type="primary" @click="clearFilter" v-if="selectedDate">清空</el-button>
         <el-icon class="collapse-icon" @click="isCollapsed = !isCollapsed" :title="isCollapsed ? '展开' : '收起'">
-          <arrow-up-bold v-if="!isCollapsed" />
-          <arrow-down-bold v-else />
+          <arrow-up-bold v-if="!isCollapsed"/>
+          <arrow-down-bold v-else/>
         </el-icon>
       </div>
     </template>
     <div v-loading="loading">
       <el-collapse-transition>
-        <!-- 修改：使用传入的projects而不是数据库数据，这样可以响应筛选 -->
+
         <el-timeline v-show="!isCollapsed && !loading && sortedProjects.length > 0">
           <el-timeline-item
-            v-for="project in sortedProjects"
-            :key="project.slug"
-            :timestamp="project.date"
-            placement="top"
+              v-for="project in sortedProjects"
+              :key="project.slug"
+              :timestamp="project.date"
+              placement="top"
           >
             <a class="timeline-link" @click.prevent="onProjectClick(project.slug)">
               {{ project.title }}
@@ -33,8 +33,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { ArrowUpBold, ArrowDownBold } from '@element-plus/icons-vue'
+import {computed, onMounted, ref, watch} from 'vue'
+import {ArrowDownBold, ArrowUpBold} from '@element-plus/icons-vue'
 import axios from 'axios'
 
 const props = defineProps({
@@ -96,7 +96,7 @@ watch(() => props.projects, (newProjects) => {
     // 如果还没有从数据库获取到数据，且有新的项目数据，则尝试重新获取
     fetchProjects()
   }
-}, { immediate: true })
+}, {immediate: true})
 
 onMounted(() => {
   fetchProjects()

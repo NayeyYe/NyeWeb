@@ -12,12 +12,12 @@
       <div class="card-footer">
         <div class="article-tags">
           <el-tag
-            v-for="tag in article.tags"
-            :key="tag"
-            type="info"
-            size="small"
-            effect="plain"
-            round
+              v-for="tag in article.tags"
+              :key="tag"
+              type="info"
+              size="small"
+              effect="plain"
+              round
           >
             {{ tag }}
           </el-tag>
@@ -29,7 +29,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import {computed} from 'vue'
 
 const props = defineProps({
   article: {

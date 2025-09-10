@@ -6,11 +6,11 @@
         <p class="tool-description">{{ tool.description }}</p>
         <div class="tool-tags">
           <el-tag
-            v-for="tag in tool.tags"
-            :key="tag"
-            type="info"
-            size="small"
-            class="tool-tag"
+              v-for="tag in tool.tags"
+              :key="tag"
+              type="info"
+              size="small"
+              class="tool-tag"
           >
             {{ tag }}
           </el-tag>
@@ -27,10 +27,10 @@ defineProps({
     required: true,
     validator: (value) => {
       return (
-        typeof value.title === 'string' &&
-        typeof value.description === 'string' &&
-        Array.isArray(value.tags) &&
-        typeof value.url === 'string'
+          typeof value.title === 'string' &&
+          typeof value.description === 'string' &&
+          Array.isArray(value.tags) &&
+          typeof value.url === 'string'
       );
     },
   },

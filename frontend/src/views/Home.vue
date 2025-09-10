@@ -1,8 +1,8 @@
 <template>
   <div class="home-container">
     <div class="left-column">
-      <ProfileCard class="profile-card-container" />
-      <TimelineEditor class="timeline-editor-container" />
+      <ProfileCard class="profile-card-container"/>
+      <TimelineEditor class="timeline-editor-container"/>
     </div>
     <div class="right-column-content">
       <el-card class="content-card">
@@ -14,10 +14,10 @@
         </template>
         <div v-loading="articlesLoading" class="card-list">
           <ArticleCard
-            v-for="article in recentArticles"
-            :key="article.slug"
-            :article="article"
-            class="list-item-card"
+              v-for="article in recentArticles"
+              :key="article.slug"
+              :article="article"
+              class="list-item-card"
           />
           <el-empty v-if="!articlesLoading && recentArticles.length === 0" description="暂无文章数据" :image-size="60">
           </el-empty>
@@ -33,10 +33,10 @@
         </template>
         <div v-loading="projectsLoading" class="card-list">
           <ProjectCard
-            v-for="project in recentProjects"
-            :key="project.slug"
-            :project="project"
-            class="list-item-card"
+              v-for="project in recentProjects"
+              :key="project.slug"
+              :project="project"
+              class="list-item-card"
           />
           <el-empty v-if="!projectsLoading && recentProjects.length === 0" description="暂无项目数据" :image-size="60">
           </el-empty>
@@ -47,7 +47,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import axios from 'axios'
 import ProfileCard from '@/components/ProfileCard.vue'
 import TimelineEditor from '@/components/TimelineEditor.vue'
@@ -110,15 +110,15 @@ const fetchProjects = async () => {
 // 最近文章（从数据库获取，取前3篇）
 const recentArticles = computed(() => {
   return [...articlesFromDB.value]
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
-    .slice(0, 3)
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .slice(0, 3)
 })
 
 // 最近项目（从数据库获取，取前3个）
 const recentProjects = computed(() => {
   return [...projectsFromDB.value]
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
-    .slice(0, 3)
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .slice(0, 3)
 })
 
 onMounted(async () => {

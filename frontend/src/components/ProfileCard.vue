@@ -1,7 +1,7 @@
 <template>
   <el-card class="profile-card">
     <div class="card-content">
-      <el-avatar :size="100" src="/avatar.jpg" />
+      <el-avatar :size="100" src="/avatar.jpg"/>
       <h2 class="name">Nye Ye</h2>
       <p class="title">废物一位</p>
       <div class="social-links">
@@ -9,10 +9,14 @@
         <a href="mailto:NayeyYe@163.com" class="social-link" title="Email">E</a>
         <a href="#" class="social-link" title="Twitter">T</a>
       </div>
-      <el-divider />
+      <el-divider/>
       <div class="contact-info">
-        <p><span class="icon">在读院校:</span> <el-link href="https://www.whu.edu.cn/" target="_blank">武汉大学</el-link></p>
-        <p><span class="icon">Email:</span> <el-link href="mailto:NayeyYe@163.com">NayeyYe@163.com</el-link></p>
+        <p><span class="icon">在读院校:</span>
+          <el-link href="https://www.whu.edu.cn/" target="_blank">武汉大学</el-link>
+        </p>
+        <p><span class="icon">Email:</span>
+          <el-link href="mailto:NayeyYe@163.com">NayeyYe@163.com</el-link>
+        </p>
         <p><span class="icon">Tel:</span> <span>+86-13597646338</span></p>
       </div>
     </div>
@@ -29,7 +33,7 @@
   width: 350px;
   box-sizing: border-box; /* 确保宽度包含内边距和边框 */
   border-radius: 15px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
   padding: 20px;
   background-color: #fff;

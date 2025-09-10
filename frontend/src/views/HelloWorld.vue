@@ -1,4 +1,3 @@
-<!-- filepath: /d:/Nayey/Code/Vue/nyeweb/frontend/src/views/HelloWorld.vue -->
 <template>
   <div class="hello-world">
     <div class="container">

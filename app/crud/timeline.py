@@ -1,35 +1,29 @@
+import sys
+from typing import Dict, Any
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List, Dict, Any
-import sys
+
 sys.path.append("..")
 import schemas, database
 from database import Timeline
 import logging
 
-# 配置日志记录
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("timeline_api")
 
 router = APIRouter()
 
-# 注意：更具体的路由需要放在前面！先移动数据库端点到顶部
-# 添加新的数据库直接获取端点，模拟 test_timeline.py 的成功方法
+
 @router.get("/timeline/database")
 def get_timeline_from_database(db: Session = Depends(database.get_db)) -> Dict[str, Any]:
-    """
-    直接从数据库获取时间线数据
-    模拟 test_timeline.py 中测试通过的数据获取方法
-    返回与测试相同的数据格式
-    """
     logger.info("收到从数据库直接获取时间线数据的请求")
     try:
-        # 使用与 test_timeline.py 相同的查询方法
+
         timeline_items = db.query(Timeline).order_by(Timeline.timestamp.desc()).all()
 
         logger.info(f"从数据库获取到 {len(timeline_items)} 条数据")
 
-        # 如果没有数据，返回空的成功响应
         if not timeline_items:
             logger.warning("数据库中没有时间线数据")
             return {
@@ -39,7 +33,6 @@ def get_timeline_from_database(db: Session = Depends(database.get_db)) -> Dict[s
                 "message": "数据库中暂无时间线数据"
             }
 
-        # 转换为字典格式，与 test_timeline.py 中的转换方式完全相同
         timeline_data = []
         for item in timeline_items:
             item_dict = {
@@ -50,7 +43,6 @@ def get_timeline_from_database(db: Session = Depends(database.get_db)) -> Dict[s
             timeline_data.append(item_dict)
             logger.info(f"处理数据 - ID: {item.id}, 时间: {item.timestamp}, 内容: {item.content[:30]}...")
 
-        # 模拟 test_timeline.py 中的 API 响应格式
         api_response = {
             "status": "success",
             "data": timeline_data,
@@ -66,7 +58,7 @@ def get_timeline_from_database(db: Session = Depends(database.get_db)) -> Dict[s
         logger.error(f"从数据库获取时间线数据时发生错误: {str(e)}")
         import traceback
         logger.error(f"详细错误堆栈: {traceback.format_exc()}")
-        # 返回错误响应，保持格式一致
+
         return {
             "status": "error",
             "data": [],
@@ -74,16 +66,14 @@ def get_timeline_from_database(db: Session = Depends(database.get_db)) -> Dict[s
             "message": f"获取时间线数据时发生错误: {str(e)}"
         }
 
-# 修改基本时间线端点使用相同的数据格式
+
 @router.get("/timeline")
 def get_timeline(db: Session = Depends(database.get_db)):
-    """获取所有时间线条目，按时间倒序排列"""
     logger.info("收到获取时间线数据的请求")
     try:
         timeline_items = db.query(Timeline).order_by(Timeline.timestamp.desc()).all()
         logger.info(f"成功获取到 {len(timeline_items)} 条时间线数据")
 
-        # 改用与上面相同的数据转换格式
         timeline_data = []
         for item in timeline_items:
             item_dict = {
@@ -94,19 +84,17 @@ def get_timeline(db: Session = Depends(database.get_db)):
             timeline_data.append(item_dict)
             logger.info(f"时间线数据: ID={item.id}, 时间={item.timestamp}, 内容={item.content[:30]}...")
 
-        # 直接返回JSON数组，不使用response_model自动序列化
         return timeline_data
     except Exception as e:
         logger.error(f"获取时间线数据时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取时间线数据时发生错误: {str(e)}")
 
-# 创建新的时间线条目
+
 @router.post("/timeline", response_model=schemas.TimelineResponse)
 def create_timeline_item(
-    timeline_item: schemas.TimelineCreate,
-    db: Session = Depends(database.get_db)
+        timeline_item: schemas.TimelineCreate,
+        db: Session = Depends(database.get_db)
 ):
-    """创建新的时间线条目"""
     logger.info("收到创建时间线条目的请求")
     try:
         db_timeline = Timeline(
@@ -122,21 +110,19 @@ def create_timeline_item(
         logger.error(f"创建时间线条目时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"创建时间线条目时发生错误: {str(e)}")
 
-# 更新时间线条目
+
 @router.put("/timeline/{item_id}", response_model=schemas.TimelineResponse)
 def update_timeline_item(
-    item_id: int,
-    timeline_update: schemas.TimelineUpdate,
-    db: Session = Depends(database.get_db)
+        item_id: int,
+        timeline_update: schemas.TimelineUpdate,
+        db: Session = Depends(database.get_db)
 ):
-    """更新指定ID的时间线条目"""
     logger.info(f"收到更新时间线条目的请求，ID: {item_id}")
     db_timeline = db.query(Timeline).filter(Timeline.id == item_id).first()
     if not db_timeline:
         logger.warning(f"尝试更新不存在的时间线条目，ID: {item_id}")
         raise HTTPException(status_code=404, detail="Timeline item not found")
 
-    # 修复：使用 model_dump 代替 dict
     update_data = timeline_update.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(db_timeline, field, value)
@@ -146,10 +132,9 @@ def update_timeline_item(
     logger.info(f"成功更新时间线条目，ID: {db_timeline.id}")
     return db_timeline
 
-# 删除时间线条目
+
 @router.delete("/timeline/{item_id}")
 def delete_timeline_item(item_id: int, db: Session = Depends(database.get_db)):
-    """删除指定ID的时间线条目"""
     logger.info(f"收到删除时间线条目的请求，ID: {item_id}")
     db_timeline = db.query(Timeline).filter(Timeline.id == item_id).first()
     if not db_timeline:

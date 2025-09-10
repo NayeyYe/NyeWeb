@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import {computed, onMounted, ref, watch} from 'vue'
 import axios from 'axios'
 
 interface Props {
@@ -63,7 +63,7 @@ const fontMetrics = computed(() => {
   const countsToUse = Object.keys(tagCountsFromDB.value).length > 0 ? tagCountsFromDB.value : props.counts
   const countsArray = Object.values(countsToUse)
   if (countsArray.length === 0) {
-    return { min: 1, max: 1 }
+    return {min: 1, max: 1}
   }
   return {
     min: Math.min(...countsArray),
@@ -73,7 +73,7 @@ const fontMetrics = computed(() => {
 
 // 根据项目数量获取标签样式
 const getTagStyle = (count) => {
-  const { min, max } = fontMetrics.value
+  const {min, max} = fontMetrics.value
   const basePadding = 1
   const maxPadding = 2.5
 
@@ -96,7 +96,7 @@ watch(() => [props.tags, props.counts], ([newTags, newCounts]) => {
     // 如果还没有从数据库获取到数据，且有新的标签数据，则尝试重新获取
     fetchProjectTags()
   }
-}, { immediate: true })
+}, {immediate: true})
 
 onMounted(() => {
   fetchProjectTags()
@@ -114,18 +114,19 @@ onMounted(() => {
     <div v-loading="loading">
       <div v-if="!loading && (tagsFromDB.length > 0 || props.tags.length > 0)" class="tag-list">
         <el-tag
-          v-for="tag in (tagsFromDB.length > 0 ? tagsFromDB : props.tags)"
-          :key="tag"
-          :class="{ 'is-active': activeTag === tag }"
-          class="tag-item"
-          effect="light"
-          @click="selectTag(tag)"
-          :style="getTagStyle((Object.keys(tagCountsFromDB).length > 0 ? tagCountsFromDB : props.counts)[tag] || 0)"
+            v-for="tag in (tagsFromDB.length > 0 ? tagsFromDB : props.tags)"
+            :key="tag"
+            :class="{ 'is-active': activeTag === tag }"
+            class="tag-item"
+            effect="light"
+            @click="selectTag(tag)"
+            :style="getTagStyle((Object.keys(tagCountsFromDB).length > 0 ? tagCountsFromDB : props.counts)[tag] || 0)"
         >
           {{ tag }} ({{ (Object.keys(tagCountsFromDB).length > 0 ? tagCountsFromDB : props.counts)[tag] || 0 }})
         </el-tag>
       </div>
-      <el-empty v-else-if="!loading && tagsFromDB.length === 0 && props.tags.length === 0" description="暂无标签数据" :image-size="60">
+      <el-empty v-else-if="!loading && tagsFromDB.length === 0 && props.tags.length === 0" description="暂无标签数据"
+                :image-size="60">
       </el-empty>
     </div>
   </el-card>

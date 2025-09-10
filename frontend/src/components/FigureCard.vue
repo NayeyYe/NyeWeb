@@ -1,9 +1,9 @@
 <template>
   <div class="figure-card">
     <el-image
-      :src="`/resources/figure/${figure.filename}`"
-      fit="cover"
-      class="figure-image"
+        :src="`/resources/figure/${figure.filename}`"
+        fit="cover"
+        class="figure-image"
     >
       <template #placeholder>
         <div class="image-slot">加载中<span class="dot">...</span></div>
@@ -14,28 +14,32 @@
         <p class="figure-title">{{ figure.title }}</p>
         <div class="actions">
           <el-button type="primary" circle @click="handlePreview">
-            <el-icon><View /></el-icon>
+            <el-icon>
+              <View/>
+            </el-icon>
           </el-button>
           <a :href="`/resources/figure/${figure.filename}`" download>
             <el-button type="success" circle>
-              <el-icon><Download /></el-icon>
+              <el-icon>
+                <Download/>
+              </el-icon>
             </el-button>
           </a>
         </div>
       </div>
     </div>
     <el-image-viewer
-      v-if="showViewer"
-      :url-list="[`/resources/figure/${figure.filename}`]"
-      @close="showViewer = false"
-      :initial-index="0"
+        v-if="showViewer"
+        :url-list="[`/resources/figure/${figure.filename}`]"
+        @close="showViewer = false"
+        :initial-index="0"
     />
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { View, Download } from '@element-plus/icons-vue';
+import {ref} from 'vue';
+import {Download, View} from '@element-plus/icons-vue';
 
 const props = defineProps({
   figure: {
@@ -59,14 +63,17 @@ const handlePreview = () => {
   aspect-ratio: 16 / 10;
   background-color: #f5f7fa;
 }
+
 .figure-image {
   width: 100%;
   height: 100%;
   transition: transform 0.3s ease;
 }
+
 .figure-card:hover .figure-image {
   transform: scale(1.1);
 }
+
 .figure-overlay {
   position: absolute;
   top: 0;
@@ -82,23 +89,28 @@ const handlePreview = () => {
   padding: 15px;
   box-sizing: border-box;
 }
+
 .figure-card:hover .figure-overlay {
   opacity: 1;
 }
+
 .overlay-content {
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+
 .figure-title {
   margin: 0;
   font-weight: bold;
 }
+
 .actions {
   display: flex;
   gap: 10px;
 }
+
 .image-slot {
   display: flex;
   justify-content: center;

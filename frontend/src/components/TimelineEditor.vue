@@ -7,20 +7,20 @@
     </template>
 
     <div v-loading="loading" class="timeline-container">
-      <!-- 主要的时间线显示 -->
+
       <el-timeline v-if="!loading && timelineItems.length > 0">
         <el-timeline-item
-          v-for="item in timelineItems"
-          :key="'item-' + item.id"
-          :timestamp="formatTimestamp(item.timestamp)"
-          placement="top"
+            v-for="item in timelineItems"
+            :key="'item-' + item.id"
+            :timestamp="formatTimestamp(item.timestamp)"
+            placement="top"
         >
           <div class="timeline-item-content">
             <el-tooltip
-              :disabled="item.content.length <= 50"
-              effect="dark"
-              :content="item.content"
-              placement="top"
+                :disabled="item.content.length <= 50"
+                effect="dark"
+                :content="item.content"
+                placement="top"
             >
               <p class="timeline-content">
                 {{ item.content.length > 50 ? item.content.slice(0, 50) + '...' : item.content }}
@@ -37,7 +37,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import {onMounted, ref} from 'vue'
 import axios from 'axios'
 
 const loading = ref(false)

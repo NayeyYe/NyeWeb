@@ -1,4 +1,3 @@
-<!-- filepath: /d:/Nayey/Code/Vue/nyeweb/frontend/src/views/AdminLogin.vue -->
 <template>
   <div class="admin-login">
     <div class="login-container">
@@ -7,21 +6,21 @@
         <div class="form-group">
           <label for="username">用户名:</label>
           <input
-            type="text"
-            id="username"
-            v-model="loginForm.username"
-            required
-            placeholder="请输入用户名"
+              type="text"
+              id="username"
+              v-model="loginForm.username"
+              required
+              placeholder="请输入用户名"
           />
         </div>
         <div class="form-group">
           <label for="password">密码:</label>
           <input
-            type="password"
-            id="password"
-            v-model="loginForm.password"
-            required
-            placeholder="请输入密码"
+              type="password"
+              id="password"
+              v-model="loginForm.password"
+              required
+              placeholder="请输入密码"
           />
         </div>
         <button type="submit" :disabled="loading">
@@ -52,7 +51,7 @@ export default {
     async handleLogin() {
       this.loading = true;
       this.errorMessage = '';
-      
+
       try {
         const response = await fetch('/api/admin/login', {
           method: 'POST',
@@ -61,9 +60,9 @@ export default {
           },
           body: JSON.stringify(this.loginForm)
         });
-        
+
         const data = await response.json();
-        
+
         if (response.ok) {
           // 保存token到localStorage
           localStorage.setItem('adminToken', data.token);

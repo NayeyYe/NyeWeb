@@ -13,50 +13,50 @@
 
       <div class="filter-bar">
         <el-input
-          v-model="searchQuery"
-          placeholder="搜索资源..."
-          clearable
-          class="search-input"
+            v-model="searchQuery"
+            placeholder="搜索资源..."
+            clearable
+            class="search-input"
         />
         <el-select
-          v-model="selectedTags"
-          multiple
-          filterable
-          placeholder="按标签筛选"
-          class="tag-select"
+            v-model="selectedTags"
+            multiple
+            filterable
+            placeholder="按标签筛选"
+            class="tag-select"
         >
           <el-option
-            v-for="tag in allTags"
-            :key="tag"
-            :label="tag"
-            :value="tag"
+              v-for="tag in allTags"
+              :key="tag"
+              :label="tag"
+              :value="tag"
           />
         </el-select>
       </div>
     </div>
 
     <div v-loading="loading" class="content-grid">
-      <!-- Books Grid -->
+
       <el-row :gutter="20" v-if="activeTab === 'books'">
         <el-col
-          v-for="book in filteredItems"
-          :key="book.id"
-          :xs="24" :sm="12" :md="8"
-          class="grid-col"
+            v-for="book in filteredItems"
+            :key="book.id"
+            :xs="24" :sm="12" :md="8"
+            class="grid-col"
         >
-          <BookCard :book="book" />
+          <BookCard :book="book"/>
         </el-col>
       </el-row>
 
-      <!-- Gallery Grid -->
+
       <el-row :gutter="20" v-if="activeTab === 'gallery'">
         <el-col
-          v-for="figure in filteredItems"
-          :key="figure.id"
-          :xs="24" :sm="12" :md="8"
-          class="grid-col"
+            v-for="figure in filteredItems"
+            :key="figure.id"
+            :xs="24" :sm="12" :md="8"
+            class="grid-col"
         >
-          <FigureCard :figure="figure" />
+          <FigureCard :figure="figure"/>
         </el-col>
       </el-row>
 
@@ -66,7 +66,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import {computed, onMounted, ref, watch} from 'vue';
 import axios from 'axios';
 import BookCard from '@/components/BookCard.vue';
 import FigureCard from '@/components/FigureCard.vue';
@@ -195,13 +195,13 @@ const filteredItems = computed(() => {
 
   return sourceData.filter(item => {
     const searchMatch =
-      searchQuery.value.trim() === '' ||
-      item.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchQuery.value.toLowerCase());
+        searchQuery.value.trim() === '' ||
+        item.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+        item.description.toLowerCase().includes(searchQuery.value.toLowerCase());
 
     const tagMatch =
-      selectedTags.value.length === 0 ||
-      selectedTags.value.every(tag => item.tags && item.tags.includes(tag));
+        selectedTags.value.length === 0 ||
+        selectedTags.value.every(tag => item.tags && item.tags.includes(tag));
 
     return searchMatch && tagMatch;
   });

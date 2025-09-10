@@ -8,14 +8,14 @@
     </template>
     <div v-loading="loading">
       <el-tree
-        v-if="!loading && categoryTree.length > 0"
-        :data="categoryTree"
-        :props="treeProps"
-        @node-click="handleNodeClick"
-        :highlight-current="true"
-        :expand-on-click-node="false"
-        node-key="path"
-        ref="treeRef"
+          v-if="!loading && categoryTree.length > 0"
+          :data="categoryTree"
+          :props="treeProps"
+          @node-click="handleNodeClick"
+          :highlight-current="true"
+          :expand-on-click-node="false"
+          node-key="path"
+          ref="treeRef"
       />
       <el-empty v-else-if="!loading && categoryTree.length === 0" description="暂无分类数据" :image-size="60">
       </el-empty>
@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import {computed, onMounted, ref, watch} from 'vue'
 import axios from 'axios'
 
 const props = defineProps({
@@ -75,8 +75,8 @@ const fetchCategories = async () => {
 const categoryTree = computed(() => {
   // 优先使用数据库数据，如果没有则使用传入的articles数据作为备用
   const articlesToProcess = categoriesFromDB.value.length > 0
-    ? categoriesFromDB.value.flatMap(cat => cat.articles.map(article => ({ ...article, category: cat.path })))
-    : props.articles
+      ? categoriesFromDB.value.flatMap(cat => cat.articles.map(article => ({...article, category: cat.path})))
+      : props.articles
 
   const root = []
   const map = new Map()
@@ -133,7 +133,7 @@ watch(() => props.articles, (newArticles) => {
     // 如果还没有从数据库获取到数据，且有新的文章数据，则尝试重新获取
     fetchCategories()
   }
-}, { immediate: true })
+}, {immediate: true})
 
 onMounted(() => {
   fetchCategories()

@@ -9,13 +9,13 @@
     <div v-loading="loading">
       <div v-if="!loading && displayTags.length > 0" class="tag-list">
         <el-tag
-          v-for="tag in displayTags"
-          :key="tag"
-          :class="{ 'is-active': activeTag === tag }"
-          class="tag-item"
-          effect="light"
-          @click="selectTag(tag)"
-          :style="getTagStyle(displayTagCounts[tag] || 0)"
+            v-for="tag in displayTags"
+            :key="tag"
+            :class="{ 'is-active': activeTag === tag }"
+            class="tag-item"
+            effect="light"
+            @click="selectTag(tag)"
+            :style="getTagStyle(displayTagCounts[tag] || 0)"
         >
           {{ tag }} ({{ displayTagCounts[tag] || 0 }})
         </el-tag>
@@ -27,7 +27,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import {computed, onMounted, ref, watch} from 'vue'
 import axios from 'axios'
 
 const props = defineProps({
@@ -103,7 +103,7 @@ const fontMetrics = computed(() => {
   const countsToUse = displayTagCounts.value
   const countsArray = Object.values(countsToUse)
   if (countsArray.length === 0) {
-    return { min: 1, max: 1 }
+    return {min: 1, max: 1}
   }
   return {
     min: Math.min(...countsArray),
@@ -113,7 +113,7 @@ const fontMetrics = computed(() => {
 
 // 根据文章数量获取标签样式
 const getTagStyle = (count) => {
-  const { min, max } = fontMetrics.value
+  const {min, max} = fontMetrics.value
   const basePadding = 1
   const maxPadding = 2.5
 
@@ -135,7 +135,7 @@ watch(() => [props.tags, props.counts], ([newTags, newCounts]) => {
   if (newTags && newTags.length > 0 && tagsFromDB.value.length === 0) {
     fetchTags()
   }
-}, { immediate: true })
+}, {immediate: true})
 
 onMounted(() => {
   fetchTags()
