@@ -7,8 +7,8 @@ import Project from '../views/Main/Project.vue'
 import Tools from '../views/Main/Tools.vue'
 import Resources from '../views/Main/Resources.vue'
 import AboutMe from '../views/Main/AboutMe.vue'
-import AdminLogin from '../views/Dashboard/AdminLogin.vue'
-import HelloWorld from '../views/Dashboard/HelloWorld.vue'
+import AdminLogin from '@/views/admin/AdminLogin.vue'
+import DashBoard from '@/views/admin/DashBoard.vue'
 
 const routes = [
   {
@@ -67,7 +67,7 @@ const routes = [
   {
     path: '/admin/dashboard',
     name: 'AdminDashboard',
-    component: HelloWorld,
+    component: DashBoard,
     meta: { title: '管理后台' }
   }
 ]

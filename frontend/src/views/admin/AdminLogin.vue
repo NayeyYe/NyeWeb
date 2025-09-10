@@ -90,13 +90,14 @@ export default {
   align-items: center;
   min-height: 100vh;
   background-color: #f5f5f5;
+  padding-top: 55px; /* 为固定Header留出空间 */
 }
 
 .login-container {
   background: white;
   padding: 40px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 20px; /* 更圆润的边角，与Header保持一致 */
+  box-shadow: 0 2px 8px #f0f1f2; /* 与Header统一的阴影效果 */
   width: 100%;
   max-width: 400px;
 }
@@ -121,23 +122,23 @@ input {
   width: 100%;
   padding: 12px;
   border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 8px; /* 输入框也使用圆润边角 */
   box-sizing: border-box;
 }
 
 button {
   width: 100%;
   padding: 12px;
-  background-color: #007bff;
+  background-color: #409eff; /* 使用与网站主题色一致的蓝色 */
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px; /* 按钮圆润边角 */
   cursor: pointer;
   font-size: 16px;
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: #337ecc; /* hover颜色与Logo保持一致 */
 }
 
 button:disabled {

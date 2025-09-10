@@ -1,14 +1,54 @@
 <script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
+// 判断是否为管理员页面
+const isAdminPage = computed(() => {
+  return route.path.startsWith('/admin')
+})
+
+// 获取管理员页面标题
+const adminPageTitle = computed(() => {
+  if (route.path === '/admin/login') {
+    return '管理员登录'
+  } else if (route.path.includes('/admin/dashboard') || route.path.includes('/admin')) {
+    return '管理员控制面板'
+  }
+  return '管理后台'
+})
 </script>
 
 <template>
   <!--  这是我的网站的顶栏  -->
   <el-header class="fixed-header">
-    <el-row justify="space-between" align="middle" style="height: 100%; width: 100%;">
+    <!-- 管理员页面的简化Header -->
+    <div v-if="isAdminPage" class="admin-header">
+      <!-- 左侧Logo -->
+      <div class="admin-logo-section">
+        <router-link to="/" class="admin-logo-link" title="转跳到首页">
+          <span class="admin-logo-text">Nye Web</span>
+        </router-link>
+      </div>
+
+      <!-- 中间标题 -->
+      <div class="admin-title">
+        <span class="admin-title-text">{{ adminPageTitle }}</span>
+      </div>
+
+      <!-- 右侧占位，保持布局平衡 -->
+      <div class="admin-placeholder"></div>
+    </div>
+
+    <!-- 普通页面的完整Header -->
+    <el-row v-else justify="space-between" align="middle" style="height: 100%; width: 100%;">
       <!-- 左侧 Logo/Icon -->
       <el-col :span="4">
         <div class="logo-section">
-          <span class="logo-text">Nye Web</span>
+          <router-link to="/" class="logo-link">
+            <span class="logo-text">Nye Web</span>
+          </router-link>
         </div>
       </el-col>
 
@@ -29,12 +69,12 @@
       <el-col :span="4">
         <div class="user-section">
           <router-link to="/about" class="user-info-link">
-            <div class="user-info">
-              <span class="about-me">关于我</span>
-              <el-avatar size="small" class="user-avatar">
-                <img src="/avatar.jpg" alt="用户头像" />
-              </el-avatar>
-            </div>
+            <span class="about-me">关于我</span>
+          </router-link>
+          <router-link to="/admin/login" class="avatar-link">
+            <el-avatar size="small" class="user-avatar">
+              <img src="/avatar.jpg" alt="用户头像" />
+            </el-avatar>
           </router-link>
         </div>
       </el-col>
@@ -56,6 +96,57 @@
   border-radius: 20px;
   background: #fff;
 }
+
+/* 管理员页面Header样式 */
+.admin-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  padding: 0 60px;
+}
+
+.admin-logo-section {
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.admin-logo-link {
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+}
+
+.admin-logo-text {
+  font-size: 20px;
+  font-weight: bold;
+  color: #409eff;
+  cursor: pointer;
+}
+
+.admin-logo-link:hover .admin-logo-text {
+  color: #337ecc;
+}
+
+.admin-title {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.admin-title-text {
+  font-size: 20px;
+  font-weight: bold;
+  color: #409eff;
+}
+
+.admin-placeholder {
+  flex: 1;
+}
+
 .logo-section {
   display: flex;
   align-items: center;
@@ -91,10 +182,20 @@
   border-bottom: 2px solid #409eff;
 }
 
+.logo-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.logo-link:hover .logo-text {
+  color: #337ecc;
+}
+
 .user-section {
   display: flex;
   justify-content: flex-end;
   align-items: center;
+  gap: 15px;
   padding-right: 100px;
 }
 
@@ -122,5 +223,15 @@
   text-decoration: none;
   color: inherit;
   display: inline-block;
+}
+
+.avatar-link {
+  text-decoration: none;
+  display: inline-block;
+}
+
+.avatar-link:hover .user-avatar {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
 }
 </style>
