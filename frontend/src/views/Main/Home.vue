@@ -49,10 +49,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
-import ProfileCard from '@/components/ProfileCard.vue'
-import TimelineEditor from '@/components/TimelineEditor.vue'
-import ArticleCard from '@/components/Article/ArticleCard.vue'
-import ProjectCard from '@/components/Project/ProjectCard.vue'
+import ProfileCard from '@/components/Main/Home/ProfileCard.vue'
+import TimelineEditor from '@/components/Main/Home/TimelineEditor.vue'
+import ArticleCard from '@/components/Main/Article/ArticleCard.vue'
+import ProjectCard from '@/components/Main/Project/ProjectCard.vue'
 
 const articlesLoading = ref(false)
 const projectsLoading = ref(false)

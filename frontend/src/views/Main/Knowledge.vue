@@ -38,10 +38,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
-import ArticleCard from '@/components/Article/ArticleCard.vue'
-import ArticleTimeline from '@/components/Article/ArticleTimeline.vue'
-import ArticleTagFilter from '@/components/Article/ArticleTagFilter.vue'
-import ArticleCategoryTree from '@/components/Article/ArticleCategoryTree.vue'
+import ArticleCard from '@/components/Main/Article/ArticleCard.vue'
+import ArticleTimeline from '@/components/Main/Article/ArticleTimeline.vue'
+import ArticleTagFilter from '@/components/Main/Article/ArticleTagFilter.vue'
+import ArticleCategoryTree from '@/components/Main/Article/ArticleCategoryTree.vue'
 
 const loading = ref(false)
 const articles = ref([])

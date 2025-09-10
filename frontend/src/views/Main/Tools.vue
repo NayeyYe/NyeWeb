@@ -59,7 +59,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
-import ToolCard from '@/components/ToolCard.vue';
+import ToolCard from '@/components/Main/Tools/ToolCard.vue';
 
 const searchQuery = ref('');
 const selectedTag = ref(null);

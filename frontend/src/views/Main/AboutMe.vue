@@ -48,8 +48,8 @@
 </template>
 
 <script setup>
-import ProfileCard from '@/components/ProfileCard.vue'
-import ImageCarousel from '@/components/ImageCarousel.vue'
+import ProfileCard from '@/components/Main/Home/ProfileCard.vue'
+import ImageCarousel from '@/components/Main/MyInfo/ImageCarousel.vue'
 </script>
 
 <style scoped>

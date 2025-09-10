@@ -25,7 +25,7 @@
 import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
-import Outline from '@/components/Outline.vue'
+import Outline from '@/components/Main/Outline.vue'
 import mermaid from 'mermaid'
 
 // Markdown-it and plugins
