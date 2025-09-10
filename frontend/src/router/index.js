@@ -9,6 +9,11 @@ import Resources from '../views/Main/Resources.vue'
 import AboutMe from '../views/Main/AboutMe.vue'
 import AdminLogin from '@/views/admin/AdminLogin.vue'
 import DashBoard from '@/views/admin/DashBoard.vue'
+import ProjectManagement from '@/views/admin/ProjectManagement.vue'
+import ArticleManagement from '@/views/admin/ArticleManagement.vue'
+import ToolManagement from '@/views/admin/ToolManagement.vue'
+import ResourceManagement from '@/views/admin/ResourceManagement.vue'
+import ProfileManagement from '@/views/admin/ProfileManagement.vue'
 
 const routes = [
   {
@@ -65,10 +70,47 @@ const routes = [
     meta: { title: '管理员登录' }
   },
   {
-    path: '/admin/dashboard',
-    name: 'AdminDashboard',
+    path: '/admin',
     component: DashBoard,
-    meta: { title: '管理后台' }
+    meta: { title: '管理后台' },
+    children: [
+      {
+        path: 'dashboard',
+        name: 'AdminDashboard',
+        component: () => import('@/views/admin/DashBoard.vue'),
+        meta: { title: '管理后台控制台' }
+      },
+      {
+        path: 'projects',
+        name: 'ProjectManagement',
+        component: ProjectManagement,
+        meta: { title: '项目管理' }
+      },
+      {
+        path: 'articles',
+        name: 'ArticleManagement',
+        component: ArticleManagement,
+        meta: { title: '文章管理' }
+      },
+      {
+        path: 'tools',
+        name: 'ToolManagement',
+        component: ToolManagement,
+        meta: { title: '工具管理' }
+      },
+      {
+        path: 'resources',
+        name: 'ResourceManagement',
+        component: ResourceManagement,
+        meta: { title: '资源管理' }
+      },
+      {
+        path: 'profile',
+        name: 'ProfileManagement',
+        component: ProfileManagement,
+        meta: { title: '自我信息管理' }
+      }
+    ]
   }
 ]
 

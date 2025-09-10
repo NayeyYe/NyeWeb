@@ -9,22 +9,17 @@ const isAdminPage = computed(() => {
   return route.path.startsWith('/admin')
 })
 
-// 获取管理员页面标题
-const adminPageTitle = computed(() => {
-  if (route.path === '/admin/login') {
-    return '管理员登录'
-  } else if (route.path.includes('/admin/dashboard') || route.path.includes('/admin')) {
-    return '管理员控制面板'
-  }
-  return '管理后台'
+// 判断是否为管理员登录页面（只在登录页显示Header）
+const isAdminLogin = computed(() => {
+  return route.path === '/admin/login'
 })
 </script>
 
 <template>
   <!--  这是我的网站的顶栏  -->
-  <el-header class="fixed-header">
-    <!-- 管理员页面的简化Header -->
-    <div v-if="isAdminPage" class="admin-header">
+  <el-header class="fixed-header" v-if="!isAdminPage || isAdminLogin">
+    <!-- 管理员登录页面的简化Header -->
+    <div v-if="isAdminLogin" class="admin-header">
       <!-- 左侧Logo -->
       <div class="admin-logo-section">
         <router-link to="/" class="admin-logo-link" title="转跳到首页">
@@ -34,7 +29,7 @@ const adminPageTitle = computed(() => {
 
       <!-- 中间标题 -->
       <div class="admin-title">
-        <span class="admin-title-text">{{ adminPageTitle }}</span>
+        <span class="admin-title-text">管理员登录</span>
       </div>
 
       <!-- 右侧占位，保持布局平衡 -->
@@ -92,9 +87,10 @@ const adminPageTitle = computed(() => {
   height: 55px;
   display: flex;
   align-items: center;
-  box-shadow: 0 2px 8px #f0f1f2;
-  border-radius: 20px;
-  background: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-radius: 0;
+  background: #ffffff;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 /* 管理员页面Header样式 */
@@ -105,6 +101,7 @@ const adminPageTitle = computed(() => {
   align-items: center;
   height: 100%;
   padding: 0 60px;
+  background: #ffffff;
 }
 
 .admin-logo-section {
