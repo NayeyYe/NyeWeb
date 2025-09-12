@@ -18,7 +18,7 @@
             <template #header>
               <div class="filter-header">
                 <span>文章分类</span>
-                <el-button link type="primary" @click="clearCategoryFilter" v-if="filterForm.category">清空</el-button>
+                <el-button link @click="clearCategoryFilter" v-if="filterForm.category" class="clear-category-btn">清空</el-button>
               </div>
             </template>
             <div v-loading="categoryLoading">
@@ -32,6 +32,7 @@
                 node-key="path"
                 ref="categoryTreeRef"
                 class="category-tree"
+                :current-node-key="filterForm.category"
               />
               <el-empty v-else-if="!categoryLoading && categoryTree.length === 0" description="暂无分类" :image-size="40" />
             </div>
@@ -44,7 +45,7 @@
             <template #header>
               <div class="filter-header">
                 <span>筛选条件</span>
-                <el-button link type="primary" @click="resetAllFilters">重置</el-button>
+                <el-button link @click="resetAllFilters" class="reset-link-btn">重置</el-button>
               </div>
             </template>
             <div class="filter-controls">
@@ -210,7 +211,7 @@ const treeProps = {
   label: 'label'
 }
 
-// 获取分类数据 - 参考ArticleCategoryTree.vue的写法
+// 获取分类数据
 const fetchCategories = async () => {
   categoryLoading.value = true
   try {
@@ -223,26 +224,56 @@ const fetchCategories = async () => {
 
     if (response.data && response.data.categories) {
       categoriesFromDB.value = response.data.categories
+      // 构建分类树
+      buildCategoryTreeFromData()
       console.log(`成功获取 ${categoriesFromDB.value.length} 个分类`)
     }
   } catch (error) {
     console.error('获取分类数据失败:', error)
-    categoriesFromDB.value = []
+    // 如果数据库获取失败，尝试从文章数据构建
+    buildCategoryTreeFromArticles()
   } finally {
     categoryLoading.value = false
   }
 }
 
-// 构建分类树 - 参考ArticleCategoryTree.vue的写法
-const buildCategoryTree = computed(() => {
-  const articlesToProcess = categoriesFromDB.value.length > 0
-    ? categoriesFromDB.value.flatMap(cat => cat.articles.map(article => ({ ...article, category: cat.path })))
-    : articles.value
-
+// 从数据库数据构建分类树
+const buildCategoryTreeFromData = () => {
   const root = []
   const map = new Map()
 
-  articlesToProcess.forEach(article => {
+  categoriesFromDB.value.forEach(cat => {
+    const pathParts = cat.path.split('/')
+    let currentLevel = root
+    let currentPath = ''
+
+    pathParts.forEach((part, index) => {
+      currentPath += (index > 0 ? '/' : '') + part
+      let node = map.get(currentPath)
+
+      if (!node) {
+        node = {
+          label: part,
+          path: currentPath,
+          children: [],
+        }
+        map.set(currentPath, node)
+        currentLevel.push(node)
+      }
+      currentLevel = node.children
+    })
+  })
+
+  categoryTree.value = root
+  console.log('从数据库构建的分类树:', root)
+}
+
+// 从文章数据构建分类树（备用方案）
+const buildCategoryTreeFromArticles = () => {
+  const root = []
+  const map = new Map()
+
+  articles.value.forEach(article => {
     if (!article.category) return
 
     const pathParts = article.category.split('/')
@@ -266,11 +297,9 @@ const buildCategoryTree = computed(() => {
     })
   })
 
-  return root
-})
-
-// 使用computed属性
-categoryTree.value = buildCategoryTree
+  categoryTree.value = root
+  console.log('从文章构建的分类树:', root)
+}
 
 // 获取文章列表
 const fetchArticles = async () => {
@@ -286,6 +315,7 @@ const fetchTags = async () => {
 
 // 分类点击处理
 const handleCategoryClick = (data) => {
+  console.log('点击分类:', data)
   if (filterForm.category === data.path) {
     clearCategoryFilter()
   } else {
@@ -318,16 +348,90 @@ const filteredArticles = computed(() => {
   return arr
 })
 
+// 获取汉字拼音首字母的函数
+const getChineseFirstLetter = (str) => {
+  if (!str) return ''
+  const firstChar = str.charAt(0)
+
+  // 如果是英文字母或数字，直接返回
+  if (/^[a-zA-Z0-9]/.test(firstChar)) {
+    return firstChar.toUpperCase()
+  }
+
+  // 汉字转拼音首字母的映射表（简化版）
+  const pinyinMap = {
+    '啊': 'A', '阿': 'A', '爱': 'A', '安': 'A', '按': 'A',
+    '八': 'B', '白': 'B', '百': 'B', '办': 'B', '帮': 'B', '包': 'B', '保': 'B', '报': 'B', '被': 'B', '本': 'B', '比': 'B', '编': 'B', '变': 'B', '表': 'B', '别': 'B', '并': 'B', '不': 'B',
+    '才': 'C', '采': 'C', '参': 'C', '产': 'C', '长': 'C', '常': 'C', '车': 'C', '成': 'C', '程': 'C', '出': 'C', '创': 'C', '从': 'C', '存': 'C',
+    '大': 'D', '带': 'D', '单': 'D', '当': 'D', '到': 'D', '得': 'D', '的': 'D', '地': 'D', '第': 'D', '点': 'D', '电': 'D', '定': 'D', '东': 'D', '动': 'D', '都': 'D', '对': 'D', '多': 'D',
+    '而': 'E', '二': 'E',
+    '发': 'F', '法': 'F', '反': 'F', '方': 'F', '放': 'F', '非': 'F', '分': 'F', '风': 'F', '服': 'F', '复': 'F',
+    '改': 'G', '感': 'G', '干': 'G', '刚': 'G', '高': 'G', '个': 'G', '给': 'G', '根': 'G', '跟': 'G', '工': 'G', '公': 'G', '功': 'G', '关': 'G', '管': 'G', '过': 'G', '国': 'G',
+    '还': 'H', '好': 'H', '和': 'H', '很': 'H', '后': 'H', '回': 'H', '会': 'H', '或': 'H',
+    '基': 'J', '及': 'J', '家': 'J', '加': 'J', '间': 'J', '见': 'J', '建': 'J', '将': 'J', '教': 'J', '接': 'J', '结': 'J', '解': 'J', '进': 'J', '经': 'J', '就': 'J', '据': 'J',
+    '开': 'K', '看': 'K', '可': 'K',
+    '来': 'L', '老': 'L', '了': 'L', '理': 'L', '里': 'L', '力': 'L', '立': 'L', '连': 'L', '两': 'L', '列': 'L', '另': 'L', '路': 'L',
+    '没': 'M', '每': 'M', '美': 'M', '们': 'M', '面': 'M', '名': 'M', '明': 'M', '目': 'M',
+    '那': 'N', '能': 'N', '你': 'N', '年': 'N', '内': 'N',
+    '批': 'P', '品': 'P', '平': 'P', '评': 'P',
+    '其': 'Q', '起': 'Q', '前': 'Q', '全': 'Q', '去': 'Q', '确': 'Q',
+    '人': 'R', '如': 'R', '入': 'R',
+    '三': 'S', '上': 'S', '设': 'S', '社': 'S', '生': 'S', '时': 'S', '十': 'S', '实': 'S', '使': 'S', '是': 'S', '手': 'S', '首': 'S', '数': 'S', '说': 'S', '思': 'S', '所': 'S',
+    '他': 'T', '她': 'T', '它': 'T', '太': 'T', '台': 'T', '谈': 'T', '特': 'T', '提': 'T', '体': 'T', '天': 'T', '条': 'T', '通': 'T', '同': 'T', '头': 'T', '图': 'T', '推': 'T',
+    '我': 'W', '为': 'W', '位': 'W', '文': 'W', '问': 'W', '无': 'W', '五': 'W', '物': 'W',
+    '下': 'X', '现': 'X', '向': 'X', '项': 'X', '小': 'X', '新': 'X', '行': 'X', '形': 'X', '学': 'X', '选': 'X',
+    '一': 'Y', '以': 'Y', '已': 'Y', '因': 'Y', '应': 'Y', '用': 'Y', '有': 'Y', '又': 'Y', '于': 'Y', '与': 'Y', '元': 'Y', '原': 'Y', '月': 'Y', '运': 'Y',
+    '在': 'Z', '再': 'Z', '怎': 'Z', '增': 'Z', '展': 'Z', '这': 'Z', '真': 'Z', '正': 'Z', '之': 'Z', '只': 'Z', '知': 'Z', '直': 'Z', '中': 'Z', '种': 'Z', '重': 'Z', '主': 'Z', '住': 'Z', '注': 'Z', '专': 'Z', '转': 'Z', '状': 'Z', '准': 'Z', '资': 'Z', '自': 'Z', '总': 'Z', '组': 'Z', '作': 'Z', '做': 'Z'
+  }
+
+  // 查找汉字的拼音首字母
+  for (const [char, pinyin] of Object.entries(pinyinMap)) {
+    if (firstChar === char) {
+      return pinyin
+    }
+  }
+
+  // 如果没有找到，尝试使用Unicode编码范围判断
+  const code = firstChar.charCodeAt(0)
+  if (code >= 0x4e00 && code <= 0x9fff) {
+    // 基本汉字范围，简单映射到字母
+    return String.fromCharCode(65 + (code % 26))
+  }
+
+  return firstChar.toUpperCase()
+}
+
+// 统一的排序函数
+const getSortValue = (item, key) => {
+  const value = item[key]
+  if (!value) return ''
+
+  if (key === 'title' || key === 'slug') {
+    // 对于标题和文件名，使用首字母排序
+    return getChineseFirstLetter(value.toString())
+  }
+
+  return value
+}
+
 // 排序
 const sortedArticles = computed(() => {
   const arr = [...filteredArticles.value]
   arr.sort((a, b) => {
-    let v1 = a[sortKey.value]
-    let v2 = b[sortKey.value]
+    let v1 = getSortValue(a, sortKey.value)
+    let v2 = getSortValue(b, sortKey.value)
+
     if (sortKey.value === 'date') {
-      v1 = new Date(v1)
-      v2 = new Date(v2)
+      v1 = new Date(a[sortKey.value])
+      v2 = new Date(b[sortKey.value])
+    } else if (sortKey.value === 'title' || sortKey.value === 'slug') {
+      // 对于标题和文件名，先按首字母排序，如果首字母相同则按原字符串排序
+      if (v1 === v2) {
+        v1 = a[sortKey.value] || ''
+        v2 = b[sortKey.value] || ''
+      }
     }
+
     if (v1 < v2) return sortOrder.value === 'asc' ? -1 : 1
     if (v1 > v2) return sortOrder.value === 'asc' ? 1 : -1
     return 0
@@ -386,10 +490,10 @@ const onEditorSave = () => {
   refreshArticles()
 }
 
-const refreshArticles = () => {
-  fetchArticles()
-  fetchTags()
-  fetchCategories()
+const refreshArticles = async () => {
+  await fetchArticles()
+  await fetchTags()
+  await fetchCategories()
 }
 
 onMounted(() => {
@@ -528,6 +632,26 @@ onMounted(() => {
 .el-button--danger {
   background: #f56c6c;
   border-color: #f56c6c;
+}
+
+.reset-link-btn {
+  color: #666 !important;
+  font-weight: normal !important;
+}
+
+.reset-link-btn:hover {
+  color: #409eff !important;
+  background: transparent !important;
+}
+
+.clear-category-btn {
+  color: #666 !important;
+  font-weight: normal !important;
+}
+
+.clear-category-btn:hover {
+  color: #409eff !important;
+  background: transparent !important;
 }
 
 :deep(.el-card__header) {
