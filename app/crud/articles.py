@@ -6,12 +6,24 @@ sys.path.append("..")
 import database
 from database import Article, Tag, ArticleTag
 import logging
+from pydantic import BaseModel
+from typing import Optional, List
+import os
+import shutil
+from datetime import datetime
 
 # 配置日志记录
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("articles_api")
 
 router = APIRouter()
+
+# 添加请求模型
+class CreateArticleRequest(BaseModel):
+    title: str
+    summary: Optional[str] = None
+    category: Optional[str] = None
+    tags: Optional[List[str]] = []
 
 @router.get("/articles")
 def get_articles(db: Session = Depends(database.get_db)):
@@ -115,10 +127,124 @@ def get_article_by_slug(article_slug: str, db: Session = Depends(database.get_db
         logger.error(f"获取文章详情时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取文章详情时发生错误: {str(e)}")
 
+@router.post("/articles")
+def create_article(article_data: CreateArticleRequest, db: Session = Depends(database.get_db)):
+    """创建新文章"""
+    logger.info(f"收到创建文章请求: {article_data.title}")
+    try:
+        # 生成slug
+        slug = article_data.title.lower().replace(' ', '-').replace('/', '-')
+        
+        # 检查slug是否已存在
+        existing_article = db.query(Article).filter(Article.slug == slug).first()
+        if existing_article:
+            raise HTTPException(status_code=400, detail="文章标题已存在，请修改标题")
+        
+        # 创建文章记录
+        new_article = Article(
+            title=article_data.title,
+            slug=slug,
+            summary=article_data.summary,
+            category=article_data.category,
+            date=datetime.now().date()
+        )
+        
+        db.add(new_article)
+        db.commit()
+        db.refresh(new_article)
+        
+        # 处理标签
+        for tag_name in article_data.tags or []:
+            tag = db.query(Tag).filter(Tag.name == tag_name).first()
+            if not tag:
+                tag = Tag(name=tag_name)
+                db.add(tag)
+                db.commit()
+                db.refresh(tag)
+            
+            # 创建文章-标签关联
+            article_tag = ArticleTag(article_id=new_article.id, tag_id=tag.id)
+            db.add(article_tag)
+        
+        db.commit()
+        
+        # 创建markdown文件
+        try:
+            file_path = f"frontend/dist/articles/knowledge"
+            if article_data.category:
+                file_path += f"/{article_data.category}"
+            
+            os.makedirs(file_path, exist_ok=True)
+            
+            markdown_content = f"# {article_data.title}\n\n"
+            if article_data.summary:
+                markdown_content += f"{article_data.summary}\n\n"
+            markdown_content += "<!-- 请在此处添加文章内容 -->\n"
+            
+            with open(f"{file_path}/{slug}.md", 'w', encoding='utf-8') as f:
+                f.write(markdown_content)
+                
+            logger.info(f"成功创建markdown文件: {file_path}/{slug}.md")
+        except Exception as e:
+            logger.warning(f"创建markdown文件失败: {str(e)}")
+        
+        logger.info(f"成功创建文章: {new_article.title}")
+        return {"message": "文章创建成功", "id": new_article.id}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"创建文章时发生错误: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"创建文章时发生错误: {str(e)}")
+
+@router.delete("/articles/{article_id}")
+def delete_article(article_id: int, db: Session = Depends(database.get_db)):
+    """删除文章"""
+    logger.info(f"收到删除文章请求: ID={article_id}")
+    try:
+        # 查找文章
+        article = db.query(Article).filter(Article.id == article_id).first()
+        if not article:
+            raise HTTPException(status_code=404, detail="文章未找到")
+        
+        # 删除文章-标签关联
+        db.query(ArticleTag).filter(ArticleTag.article_id == article_id).delete()
+        
+        # 删除markdown文件
+        try:
+            file_path = f"frontend/dist/articles/knowledge"
+            if article.category:
+                file_path += f"/{article.category}"
+            file_path += f"/{article.slug}.md"
+            
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                logger.info(f"成功删除markdown文件: {file_path}")
+            else:
+                logger.warning(f"markdown文件不存在: {file_path}")
+                
+        except Exception as e:
+            logger.warning(f"删除markdown文件失败: {str(e)}")
+        
+        # 删除文章记录
+        db.delete(article)
+        db.commit()
+        
+        logger.info(f"成功删除文章: {article.title}")
+        return {"message": "文章删除成功"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"删除文章时发生错误: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"删除文章时发生错误: {str(e)}")
+
 @router.get("/tags")
 def get_all_tags(db: Session = Depends(database.get_db)):
     """获取所有标签及其文章数量"""
-    logger.info("收到获取���有标签的请求")
+    logger.info("收到获取所有标签的请求")
     try:
         # 移除有问题的查询，直接统计标签
         all_tags = []
