@@ -101,4 +101,72 @@ def get_all_project_tags(db: Session = Depends(database.get_db)):
     except Exception as e:
         logger.error(f"获取项目标签时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取项目标签时发生错误: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"获取项目标签时发生错误: {str(e)}")
+
+# 新增管理员获取全部项目的接口
+@router.get("/admin/projects")
+def get_all_projects_admin(db: Session = Depends(database.get_db)):
+    """管理员获取所有项目（包含所有状态），按日期倒序排列"""
+    logger.info("收到管理员获取全部项目数据的请求")
+    try:
+        projects = db.query(Project).order_by(Project.date.desc()).all()
+        logger.info(f"成功获取到 {len(projects)} 个项目（所有状态）")
+
+        # 转换为前端需要的格式
+        projects_data = []
+        for project in projects:
+            # 获取项目的标签
+            project_tags = db.query(Tag).join(ProjectTag).filter(ProjectTag.project_id == project.id).all()
+            tags = [tag.name for tag in project_tags]
+
+            # 状态映射
+            status_map = {0: 'draft', 1: 'published', 2: 'recycled'}
+            
+            project_dict = {
+                "id": project.id,
+                "title": project.title,
+                "slug": project.slug,
+                "summary": project.summary,
+                "date": project.date.strftime('%Y-%m-%d') if project.date else None,
+                "tags": tags,
+                "status": status_map.get(project.status, 'draft')
+            }
+            projects_data.append(project_dict)
+            logger.info(f"项目数据: ID={project.id}, 标题={project.title}, 状态={project.status}")
+
+        return projects_data
+    except Exception as e:
+        logger.error(f"获取项目数据时发生错误: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"获取项目数据时发生错误: {str(e)}")
+
+# 新增修改项目状态的接口
+@router.patch("/projects/{project_id}/status")
+def update_project_status(project_id: int, status_data: dict, db: Session = Depends(database.get_db)):
+    """修改项目状态"""
+    logger.info(f"收到修改项目状态请求: ID={project_id}, 状态={status_data.get('status')}")
+    try:
+        # 查找项目
+        project = db.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            raise HTTPException(status_code=404, detail="项目未找到")
+        
+        # 状态映射
+        status_map = {'draft': 0, 'published': 1, 'recycled': 2}
+        new_status = status_data.get('status')
+        
+        if new_status not in status_map:
+            raise HTTPException(status_code=400, detail="无效的状态值")
+        
+        # 更新状态
+        old_status = project.status
+        project.status = status_map[new_status]
+        db.commit()
+        
+        logger.info(f"成功修改项目状态: {project.title}, {old_status} -> {project.status}")
+        return {"message": "项目状态修改成功", "status": new_status}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"修改项目状态时发生错误: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"修改项目状态时发生错误: {str(e)}")
