@@ -19,8 +19,8 @@ def get_tools(db: Session = Depends(database.get_db)):
     """获取所有工具"""
     logger.info("收到获取工具数据的请求")
     try:
-        tools = db.query(Tool).all()
-        logger.info(f"成功获取到 {len(tools)} 个工具")
+        tools = db.query(Tool).filter(Tool.status == 1).all()
+        logger.info(f"成功获取到 {len(tools)} 个已发布工具")
 
         # 转换为前端需要的格式
         tools_data = []
@@ -49,7 +49,7 @@ def get_tool_by_id(tool_id: int, db: Session = Depends(database.get_db)):
     """根据ID获取单个工具详情"""
     logger.info(f"收到获取工具详情的请求，ID: {tool_id}")
     try:
-        tool = db.query(Tool).filter(Tool.id == tool_id).first()
+        tool = db.query(Tool).filter(Tool.id == tool_id, Tool.status == 1).first()
         if not tool:
             logger.warning(f"未找到工具，ID: {tool_id}")
             raise HTTPException(status_code=404, detail="工具未找到")
@@ -82,8 +82,8 @@ def get_all_tool_tags(db: Session = Depends(database.get_db)):
         all_tags = []
         tag_counts = {}
 
-        # 获取所有工具的标签统计
-        tools = db.query(Tool).all()
+        # 获取所有已发布工具的标签统计
+        tools = db.query(Tool).filter(Tool.status == 1).all()
         for tool in tools:
             tool_tags = db.query(Tag).join(ToolTag).filter(ToolTag.tool_id == tool.id).all()
             for tag in tool_tags:

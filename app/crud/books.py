@@ -19,8 +19,8 @@ def get_books(db: Session = Depends(database.get_db)):
     """获取所有书籍"""
     logger.info("收到获取书籍数据的请求")
     try:
-        books = db.query(Book).all()
-        logger.info(f"成功获取到 {len(books)} 本书籍")
+        books = db.query(Book).filter(Book.status == 1).all()
+        logger.info(f"成功获取到 {len(books)} 本已发布书籍")
 
         # 转换为前端需要的格式
         books_data = []
@@ -50,7 +50,7 @@ def get_book_by_id(book_id: int, db: Session = Depends(database.get_db)):
     """根据ID获取单本书籍详情"""
     logger.info(f"收到获取书籍详情的请求，ID: {book_id}")
     try:
-        book = db.query(Book).filter(Book.id == book_id).first()
+        book = db.query(Book).filter(Book.id == book_id, Book.status == 1).first()
         if not book:
             logger.warning(f"未找到书籍，ID: {book_id}")
             raise HTTPException(status_code=404, detail="书籍未找到")
@@ -84,8 +84,8 @@ def get_all_book_tags(db: Session = Depends(database.get_db)):
         all_tags = []
         tag_counts = {}
 
-        # 获取所有书籍的标签统计
-        books = db.query(Book).all()
+        # 获取所有已发布书籍的标签统计
+        books = db.query(Book).filter(Book.status == 1).all()
         for book in books:
             book_tags = db.query(Tag).join(BookTag).filter(BookTag.book_id == book.id).all()
             for tag in book_tags:

@@ -3,6 +3,7 @@ from datetime import datetime
 
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, Date, ForeignKey
+from sqlalchemy.dialects.mysql import TINYINT
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
@@ -42,6 +43,7 @@ class Article(Base):
     category = Column(String(100))
     date = Column(Date)
     summary = Column(Text)
+    status = Column(TINYINT, nullable=False, default=1)  # 0=未发布, 1=已发布, 2=已回收
 
 # 标签模型
 class Tag(Base):
@@ -66,6 +68,7 @@ class Project(Base):
     slug = Column(String(255), nullable=False, unique=True)
     date = Column(Date)
     summary = Column(Text)
+    status = Column(TINYINT, nullable=False, default=1)  # 0=未发布, 1=已发布, 2=已回收
 
 # 项目标签关联模型
 class ProjectTag(Base):
@@ -83,6 +86,7 @@ class Book(Base):
     description = Column(Text)
     cover = Column(String(500))  # 封面图片路径
     filename = Column(String(255))  # PDF文件名
+    status = Column(TINYINT, nullable=False, default=1)  # 0=未发布, 1=已发布, 2=已回收
 
 # 书籍标签关联模型
 class BookTag(Base):
@@ -91,7 +95,7 @@ class BookTag(Base):
     book_id = Column(Integer, ForeignKey('books.id'), primary_key=True)
     tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
 
-# ���表模型
+# 图表模型
 class Figure(Base):
     __tablename__ = "figures"
 
@@ -99,6 +103,7 @@ class Figure(Base):
     title = Column(String(255), nullable=False)
     description = Column(Text)
     filename = Column(String(255))  # 图片文件名
+    status = Column(TINYINT, nullable=False, default=1)  # 0=未发布, 1=已发布, 2=已回收
 
 # 图表标签关联模型
 class FigureTag(Base):
@@ -122,6 +127,7 @@ class Tool(Base):
     title = Column(String(255), nullable=False)
     description = Column(Text)
     url = Column(String(2083))  # URL字段
+    status = Column(TINYINT, nullable=False, default=1)  # 0=未发布, 1=已发布, 2=已回收
 
 # 工具标签关联模型
 class ToolTag(Base):

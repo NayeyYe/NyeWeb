@@ -30,8 +30,8 @@ def get_articles(db: Session = Depends(database.get_db)):
     """获取所有文章，按日期倒序排列"""
     logger.info("收到获取文章数据的请求")
     try:
-        articles = db.query(Article).order_by(Article.date.desc()).all()
-        logger.info(f"成功获取到 {len(articles)} 篇文章")
+        articles = db.query(Article).filter(Article.status == 1).order_by(Article.date.desc()).all()
+        logger.info(f"成功获取到 {len(articles)} 篇已发布文章")
 
         # 转换为前端需要的格式
         articles_data = []
@@ -57,7 +57,76 @@ def get_articles(db: Session = Depends(database.get_db)):
         logger.error(f"获取文章数据时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取文章数据时发生错误: {str(e)}")
 
-# 添加新的路由来处理带分类的文章请求
+# 新增管理员获取全部文章的接口
+@router.get("/admin/articles")
+def get_all_articles_admin(db: Session = Depends(database.get_db)):
+    """管理员获取所有文章（包含所有状态），按日期倒序排列"""
+    logger.info("收到管理员获取全部文章数据的请求")
+    try:
+        articles = db.query(Article).order_by(Article.date.desc()).all()
+        logger.info(f"成功获取到 {len(articles)} 篇文章（所有状态）")
+
+        # 转换为前端需要的格式
+        articles_data = []
+        for article in articles:
+            # 获取文章的标签
+            article_tags = db.query(Tag).join(ArticleTag).filter(ArticleTag.article_id == article.id).all()
+            tags = [tag.name for tag in article_tags]
+
+            # 状态映射
+            status_map = {0: 'draft', 1: 'published', 2: 'recycled'}
+            
+            article_dict = {
+                "id": article.id,
+                "title": article.title,
+                "slug": article.slug,
+                "summary": article.summary,
+                "category": article.category,
+                "date": article.date.strftime('%Y-%m-%d') if article.date else None,
+                "tags": tags,
+                "status": status_map.get(article.status, 'draft')
+            }
+            articles_data.append(article_dict)
+            logger.info(f"文章数据: ID={article.id}, 标题={article.title}, 状态={article.status}")
+
+        return articles_data
+    except Exception as e:
+        logger.error(f"获取文章数据时发生错误: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"获取文章数据时发生错误: {str(e)}")
+
+# 新增修改文章状态的接口
+@router.patch("/articles/{article_id}/status")
+def update_article_status(article_id: int, status_data: dict, db: Session = Depends(database.get_db)):
+    """修改文章状态"""
+    logger.info(f"收到修改文章状态请求: ID={article_id}, 状态={status_data.get('status')}")
+    try:
+        # 查找文章
+        article = db.query(Article).filter(Article.id == article_id).first()
+        if not article:
+            raise HTTPException(status_code=404, detail="文章未找到")
+        
+        # 状态映射
+        status_map = {'draft': 0, 'published': 1, 'recycled': 2}
+        new_status = status_data.get('status')
+        
+        if new_status not in status_map:
+            raise HTTPException(status_code=400, detail="无效的状态值")
+        
+        # 更新状态
+        old_status = article.status
+        article.status = status_map[new_status]
+        db.commit()
+        
+        logger.info(f"成功修改文章状态: {article.title}, {old_status} -> {article.status}")
+        return {"message": "文章状态修改成功", "status": new_status}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"修改文章状态时发生错误: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"修改文章状态时发生错误: {str(e)}")
+
 @router.get("/articles/{category:path}/{article_slug}")
 def get_article_by_category_and_slug(category: str, article_slug: str, db: Session = Depends(database.get_db)):
     """根据分类和slug获取单篇文章详情"""
@@ -66,7 +135,8 @@ def get_article_by_category_and_slug(category: str, article_slug: str, db: Sessi
         # 构建完整的分类路径进行查找
         article = db.query(Article).filter(
             Article.category == category,
-            Article.slug == article_slug
+            Article.slug == article_slug,
+            Article.status == 1
         ).first()
 
         if not article:
@@ -100,7 +170,7 @@ def get_article_by_slug(article_slug: str, db: Session = Depends(database.get_db
     """根据slug获取单篇文章详情"""
     logger.info(f"收到获取文章详情的请求，slug: {article_slug}")
     try:
-        article = db.query(Article).filter(Article.slug == article_slug).first()
+        article = db.query(Article).filter(Article.slug == article_slug, Article.status == 1).first()
         if not article:
             logger.warning(f"未找到文章，slug: {article_slug}")
             raise HTTPException(status_code=404, detail="文章未找到")
@@ -246,12 +316,11 @@ def get_all_tags(db: Session = Depends(database.get_db)):
     """获取所有标签及其文章数量"""
     logger.info("收到获取所有标签的请求")
     try:
-        # 移除有问题的查询，直接统计标签
         all_tags = []
         tag_counts = {}
 
-        # 获取所有文章的标签统计
-        articles = db.query(Article).all()
+        # 获取所有已发布文章的标签统计
+        articles = db.query(Article).filter(Article.status == 1).all()
         for article in articles:
             article_tags = db.query(Tag).join(ArticleTag).filter(ArticleTag.article_id == article.id).all()
             for tag in article_tags:
@@ -273,8 +342,8 @@ def get_article_categories(db: Session = Depends(database.get_db)):
     """获取所有文章分类树结构"""
     logger.info("收到获取文章分类树的请求")
     try:
-        articles = db.query(Article).all()
-        logger.info(f"从数据库获取到 {len(articles)} 篇文章用于构建分类树")
+        articles = db.query(Article).filter(Article.status == 1).all()
+        logger.info(f"从数据库获取到 {len(articles)} 篇已发布文章用于构建分类树")
 
         # 构建分类树数据
         categories = {}

@@ -19,8 +19,8 @@ def get_figures(db: Session = Depends(database.get_db)):
     """获取所有图表"""
     logger.info("收到获取图表数据的请求")
     try:
-        figures = db.query(Figure).all()
-        logger.info(f"成功获取到 {len(figures)} 个图表")
+        figures = db.query(Figure).filter(Figure.status == 1).all()
+        logger.info(f"成功获取到 {len(figures)} 个已发布图表")
 
         # 转换为前端需要的格式
         figures_data = []
@@ -49,7 +49,7 @@ def get_figure_by_id(figure_id: int, db: Session = Depends(database.get_db)):
     """根据ID获取单个图表详情"""
     logger.info(f"收到获取图表详情的请求，ID: {figure_id}")
     try:
-        figure = db.query(Figure).filter(Figure.id == figure_id).first()
+        figure = db.query(Figure).filter(Figure.id == figure_id, Figure.status == 1).first()
         if not figure:
             logger.warning(f"未找到图表，ID: {figure_id}")
             raise HTTPException(status_code=404, detail="图表未找到")
@@ -82,8 +82,8 @@ def get_all_figure_tags(db: Session = Depends(database.get_db)):
         all_tags = []
         tag_counts = {}
 
-        # 获取所有图表的标签统计
-        figures = db.query(Figure).all()
+        # 获取所有已发布图表的标签统计
+        figures = db.query(Figure).filter(Figure.status == 1).all()
         for figure in figures:
             figure_tags = db.query(Tag).join(FigureTag).filter(FigureTag.figure_id == figure.id).all()
             for tag in figure_tags:

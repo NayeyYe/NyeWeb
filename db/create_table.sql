@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS `articles`
     `slug`     VARCHAR(255) NOT NULL UNIQUE,
     `category` VARCHAR(100),
     `date`     DATE,
-    `summary`  TEXT
+    `summary`  TEXT,
+    `status`   TINYINT NOT NULL DEFAULT 1 COMMENT '0=未发布, 1=已发布, 2=已回收'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
@@ -22,7 +23,8 @@ CREATE TABLE IF NOT EXISTS `projects`
     `title`   VARCHAR(255) NOT NULL,
     `slug`    VARCHAR(255) NOT NULL UNIQUE,
     `date`    DATE,
-    `summary` TEXT
+    `summary` TEXT,
+    `status`  TINYINT NOT NULL DEFAULT 1 COMMENT '0=未发布, 1=已发布, 2=已回收'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
@@ -33,7 +35,8 @@ CREATE TABLE IF NOT EXISTS `books`
     `title`       VARCHAR(255) NOT NULL,
     `description` TEXT,
     `filename`    VARCHAR(255),
-    `cover`       VARCHAR(255)
+    `cover`       VARCHAR(255),
+    `status`  TINYINT NOT NULL DEFAULT 1 COMMENT '0=未发布, 1=已发布, 2=已回收'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
@@ -43,7 +46,8 @@ CREATE TABLE IF NOT EXISTS `figures`
     `id`          INT AUTO_INCREMENT PRIMARY KEY,
     `title`       VARCHAR(255) NOT NULL,
     `description` TEXT,
-    `filename`    VARCHAR(255)
+    `filename`    VARCHAR(255),
+    `status`      TINYINT NOT NULL DEFAULT 1 COMMENT '0=未发布, 1=已发布, 2=已回收'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
@@ -53,7 +57,8 @@ CREATE TABLE IF NOT EXISTS `tools`
     `id`          INT AUTO_INCREMENT PRIMARY KEY,
     `title`       VARCHAR(255) NOT NULL,
     `description` TEXT,
-    `url`         VARCHAR(2083)
+    `url`         VARCHAR(2083),
+    `status`      TINYINT NOT NULL DEFAULT 1 COMMENT '0=未发布, 1=已发布, 2=已回收'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
