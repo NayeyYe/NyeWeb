@@ -18,7 +18,7 @@
             <template #header>
               <div class="filter-header">
                 <span>文章分类</span>
-                <el-button link @click="clearCategoryFilter" v-if="filterForm.category" class="clear-category-btn">清空</el-button>
+                <el-button link @click="clearCategoryFilter" v-if="filterForm.category" class="reset-link-btn">清空</el-button>
               </div>
             </template>
             <div v-loading="categoryLoading" class="category-content">
@@ -94,8 +94,10 @@
                     <el-option label="已回收" value="recycled" />
                   </el-select>
                 </div>
+              </div>
+              <div class="filter-row">
                 <div class="filter-item">
-                  <label>排序：</label>
+                  <label>时间排序：</label>
                   <el-button-group>
                     <el-button :type="sortOrder === 'asc' ? 'primary' : ''" @click="setSortOrder('asc')">升序</el-button>
                     <el-button :type="sortOrder === 'desc' ? 'primary' : ''" @click="setSortOrder('desc')">降序</el-button>
@@ -703,6 +705,12 @@ onMounted(() => {
 .clear-category-btn:hover {
   color: #409eff !important;
   background: transparent !important;
+}
+
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 /* 自定义滚动条样式 */

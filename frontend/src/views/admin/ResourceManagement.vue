@@ -737,6 +737,12 @@ onMounted(() => {
   background: transparent !important;
 }
 
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 :deep(.el-card__header) {
   padding: 16px 20px;
   background: #fafafa;

@@ -98,11 +98,6 @@
               </el-link>
             </template>
           </el-table-column>
-          <el-table-column prop="description" label="工具描述" min-width="200" show-overflow-tooltip>
-            <template #default="scope">
-              <div class="tool-description">{{ scope.row.description || '暂无描述' }}</div>
-            </template>
-          </el-table-column>
           <el-table-column prop="tags" label="标签" min-width="150" show-overflow-tooltip>
             <template #default="scope">
               <div v-if="scope.row.tags && scope.row.tags.length > 0" class="tool-tags">
@@ -189,15 +184,6 @@
             clearable
           />
         </el-form-item>
-        <el-form-item label="工具描述" prop="description">
-          <el-input
-            v-model="createForm.description"
-            type="textarea"
-            :rows="3"
-            placeholder="请输入工具描述"
-            clearable
-          />
-        </el-form-item>
         <el-form-item label="工具标签">
           <el-select
             v-model="createForm.tags"
@@ -249,7 +235,6 @@ const filterForm = reactive({
 const createForm = reactive({
   title: '',
   url: '',
-  description: '',
   tags: []
 })
 
@@ -407,7 +392,6 @@ const resetCreateForm = () => {
   Object.assign(createForm, {
     title: '',
     url: '',
-    description: '',
     tags: []
   })
 }
@@ -517,11 +501,6 @@ onMounted(() => {
   font-size: 13px;
 }
 
-.tool-description {
-  color: #666;
-  font-size: 14px;
-}
-
 .tool-tags {
   display: flex;
   align-items: center;
@@ -580,6 +559,12 @@ onMounted(() => {
   background: transparent !important;
 }
 
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 :deep(.el-card__header) {
   padding: 16px 20px;
   background: #fafafa;
@@ -612,4 +597,3 @@ onMounted(() => {
   gap: 12px;
 }
 </style>
-
