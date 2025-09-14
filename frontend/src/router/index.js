@@ -12,7 +12,6 @@ import ProjectManagement from '@/views/admin/ProjectManagement.vue'
 import ArticleManagement from '@/views/admin/ArticleManagement.vue'
 import ToolManagement from '@/views/admin/ToolManagement.vue'
 import ResourceManagement from '@/views/admin/ResourceManagement.vue'
-import ProfileManagement from '@/views/admin/ProfileManagement.vue'
 
 const routes = [
   {
@@ -102,12 +101,6 @@ const routes = [
         name: 'ResourceManagement',
         component: ResourceManagement,
         meta: { title: '资源管理' }
-      },
-      {
-        path: 'profile',
-        name: 'ProfileManagement',
-        component: ProfileManagement,
-        meta: { title: '自我信息管理' }
       }
     ]
   }

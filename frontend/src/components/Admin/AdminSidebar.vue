@@ -36,10 +36,6 @@
         <span>资源管理</span>
       </el-menu-item>
 
-      <el-menu-item index="/admin/profile" class="menu-item">
-        <el-icon><User /></el-icon>
-        <span>自我信息管理</span>
-      </el-menu-item>
     </el-menu>
 
     <div class="sidebar-footer">
