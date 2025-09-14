@@ -102,3 +102,100 @@ def get_all_book_tags(db: Session = Depends(database.get_db)):
         logger.error(f"获取书籍标签时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取书籍标签时发生错误: {str(e)}")
 
+# 新增管理员获取全部书籍的接口
+@router.get("/admin/books")
+def get_all_books_admin(db: Session = Depends(database.get_db)):
+    """管理员获取所有书籍（包含所有状态）"""
+    logger.info("收到管理员获取全部书籍数据的请求")
+    try:
+        books = db.query(Book).all()
+        logger.info(f"成功获取到 {len(books)} 本书籍（所有状态）")
+
+        # 转换为前端需要的格式
+        books_data = []
+        for book in books:
+            # 获取书籍的标签
+            book_tags = db.query(Tag).join(BookTag).filter(BookTag.book_id == book.id).all()
+            tags = [tag.name for tag in book_tags]
+
+            # 状态映射
+            status_map = {0: 'draft', 1: 'published', 2: 'recycled'}
+            
+            book_dict = {
+                "id": book.id,
+                "title": book.title,
+                "description": book.description,
+                "cover": book.cover,
+                "filename": book.filename,
+                "tags": tags,
+                "status": status_map.get(book.status, 'draft')
+            }
+            books_data.append(book_dict)
+            logger.info(f"书籍数据: ID={book.id}, 标题={book.title}, 状态={book.status}")
+
+        return books_data
+    except Exception as e:
+        logger.error(f"获取书籍数据时发生错误: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"获取书籍数据时发生错误: {str(e)}")
+
+# 新增修改书籍状态的接口
+@router.patch("/books/{book_id}/status")
+def update_book_status(book_id: int, status_data: dict, db: Session = Depends(database.get_db)):
+    """修改书籍状态"""
+    logger.info(f"收到修改书籍状态请求: ID={book_id}, 状态={status_data.get('status')}")
+    try:
+        # 查找书籍
+        book = db.query(Book).filter(Book.id == book_id).first()
+        if not book:
+            raise HTTPException(status_code=404, detail="书籍未找到")
+        
+        # 状态映射
+        status_map = {'draft': 0, 'published': 1, 'recycled': 2}
+        new_status = status_data.get('status')
+        
+        if new_status not in status_map:
+            raise HTTPException(status_code=400, detail="无效的状态值")
+        
+        # 更新状态
+        old_status = book.status
+        book.status = status_map[new_status]
+        db.commit()
+        
+        logger.info(f"成功修改书籍状态: {book.title}, {old_status} -> {book.status}")
+        return {"message": "书籍状态修改成功", "status": new_status}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"修改书籍状态时发生错误: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"修改书籍状态时发生错误: {str(e)}")
+
+# 新增删除书籍的接口
+@router.delete("/books/{book_id}")
+def delete_book(book_id: int, db: Session = Depends(database.get_db)):
+    """删除书籍"""
+    logger.info(f"收到删除书籍请求: ID={book_id}")
+    try:
+        # 查找书籍
+        book = db.query(Book).filter(Book.id == book_id).first()
+        if not book:
+            raise HTTPException(status_code=404, detail="书籍未找到")
+        
+        # 删除书籍-标签关联
+        db.query(BookTag).filter(BookTag.book_id == book_id).delete()
+        
+        # 删除书籍记录
+        db.delete(book)
+        db.commit()
+        
+        logger.info(f"成功删除书籍: {book.title}")
+        return {"message": "书籍删除成功"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"删除书籍时发生错误: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"删除书籍时发生错误: {str(e)}")
+
