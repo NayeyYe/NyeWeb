@@ -154,8 +154,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch, computed, onMounted, nextTick } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import {computed, onMounted, reactive, ref, watch} from 'vue'
+import {ElMessage, ElMessageBox} from 'element-plus'
 import axios from 'axios'
 import markdownit from 'markdown-it'
 import mdAnchor from 'markdown-it-anchor'

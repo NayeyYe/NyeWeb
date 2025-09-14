@@ -17,8 +17,8 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import { ElMessage } from 'element-plus';
+import {computed} from 'vue';
+import {ElMessage} from 'element-plus';
 
 const props = defineProps({
   book: {

@@ -135,12 +135,9 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick } from 'vue'
-import { ElMessage } from 'element-plus'
-import {
-  Folder, Calendar, Link, Document, Edit,
-  CopyDocument, View, Refresh
-} from '@element-plus/icons-vue'
+import {nextTick, ref, watch} from 'vue'
+import {ElMessage} from 'element-plus'
+import {Calendar, CopyDocument, Document, Edit, Folder, Link, Refresh, View} from '@element-plus/icons-vue'
 import markdownit from 'markdown-it'
 import mdAnchor from 'markdown-it-anchor'
 import slugify from 'slugify'

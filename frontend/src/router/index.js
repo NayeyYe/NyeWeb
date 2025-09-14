@@ -1,7 +1,6 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import {createRouter, createWebHistory} from 'vue-router'
 import Home from '../views/Main/Home.vue'
 import Knowledge from '../views/Main/Knowledge.vue'
-import Article from '../views/Main/Article.vue' // 导入文章页面
 import Projects from '../views/Main/Projects.vue'
 import Project from '../views/Main/Project.vue'
 import Tools from '../views/Main/Tools.vue'

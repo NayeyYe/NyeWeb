@@ -33,8 +33,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { ArrowUpBold, ArrowDownBold } from '@element-plus/icons-vue'
+import {computed, onMounted, ref, watch} from 'vue'
+import {ArrowDownBold, ArrowUpBold} from '@element-plus/icons-vue'
 import axios from 'axios'
 
 const props = defineProps({

@@ -1,7 +1,8 @@
+import sys
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List, Dict, Any
-import sys
+
 sys.path.append("..")
 import database
 from database import Figure, Tag, FigureTag

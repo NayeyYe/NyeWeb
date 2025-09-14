@@ -47,7 +47,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import axios from 'axios'
 import ProfileCard from '@/components/Main/Home/ProfileCard.vue'
 import TimelineEditor from '@/components/Main/Home/TimelineEditor.vue'

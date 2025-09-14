@@ -1,7 +1,9 @@
+import sys
+from typing import Dict, Any
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List, Dict, Any
-import sys
+
 sys.path.append("..")
 import schemas, database
 from database import Timeline

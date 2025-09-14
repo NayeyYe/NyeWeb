@@ -34,8 +34,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { View, Download } from '@element-plus/icons-vue';
+import {ref} from 'vue';
+import {Download, View} from '@element-plus/icons-vue';
 
 const props = defineProps({
   figure: {

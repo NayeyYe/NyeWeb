@@ -22,8 +22,8 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
-import { useRoute } from 'vue-router'
+import {nextTick, onMounted, onUnmounted, ref, watch} from 'vue'
+import {useRoute} from 'vue-router'
 import axios from 'axios'
 import Outline from '@/components/Main/Outline.vue'
 import mermaid from 'mermaid'

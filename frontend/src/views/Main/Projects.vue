@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import axios from 'axios'
 import ProjectCard from '@/components/Main/Project/ProjectCard.vue'
 import ProjectTimeline from '@/components/Main/Project/ProjectTimeline.vue'

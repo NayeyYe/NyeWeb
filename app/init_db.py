@@ -3,12 +3,14 @@
 用于创建表和插入初始数据
 """
 import os
+
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from dotenv import load_dotenv
-from database import Base
+
 from crud.admin import create_admin
 from database import Admin
+from database import Base
 
 # 加载环境变量
 load_dotenv()

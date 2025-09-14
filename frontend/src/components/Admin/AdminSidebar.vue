@@ -59,9 +59,9 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { House, Folder, Document, Tools, Box, User, SwitchButton, HomeFilled } from '@element-plus/icons-vue'
+import {computed} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
+import {Box, Document, Folder, HomeFilled, House, SwitchButton, Tools, User} from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()

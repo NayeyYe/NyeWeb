@@ -1,10 +1,12 @@
+import hashlib
 import os
-from sqlalchemy.orm import Session
+import sys
+
+from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
-from dotenv import load_dotenv
-import hashlib
-import sys
+from sqlalchemy.orm import Session
+
 sys.path.append("..")
 from database import Admin, get_db
 

@@ -66,7 +66,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import {computed, onMounted, ref, watch} from 'vue';
 import axios from 'axios';
 import BookCard from '@/components/Main/Resources/BookCard.vue';
 import FigureCard from '@/components/Main/Resources/FigureCard.vue';
