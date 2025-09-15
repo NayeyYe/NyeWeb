@@ -399,20 +399,12 @@ const fetchCategories = async () => {
   categoryLoading.value = true
   try {
     console.log('开始获取分类数据...')
-
-    // 检查API基础URL配置
-    const baseURL = axios.defaults.baseURL || ''
-    const fullURL = `${baseURL}/api/articles/categories`
-    console.log('请求URL:', fullURL)
-
     const response = await axios.get('/api/articles/categories', {
       timeout: 10000,
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        'Accept': 'application/json'
       }
     })
-
     console.log('分类数据响应:', response.data)
     
     if (response.data?.categories && Array.isArray(response.data.categories)) {
@@ -429,29 +421,17 @@ const fetchCategories = async () => {
       status: error.response?.status,
       statusText: error.response?.statusText,
       data: error.response?.data,
-      url: error.config?.url,
-      baseURL: error.config?.baseURL
+      url: error.config?.url
     })
     
-    // 更详细的错误处理
-    if (error.code === 'NETWORK_ERROR' || error.message === 'Network Error') {
-      console.error('网络连接错误，请检查：')
-      console.error('1. 后端服务是否启动')
-      console.error('2. API路由是否正确配置')
-      console.error('3. 前端代理配置是否正确')
-      ElMessage.error('无法连接到服务器，请检查网络连接和服务器状态')
-    } else if (error.response?.status === 404) {
-      console.warn('分类API接口不存在，可能需要检查路由配置')
-      ElMessage.warning('分类接口暂不可用，请联系管理员')
-    } else if (error.response?.status >= 500) {
-      console.error('服务器内部错误:', error.response.data)
-      ElMessage.error('服务器错误，请稍后重试')
+    // 提供更友好的错误提示
+    if (error.response?.status === 404) {
+      console.warn('分类API接口不存在，使用默认分类')
+      categoryTree.value = []
     } else {
-      console.error('其他错误:', error)
-      ElMessage.error('获取分类列表失败，请稍后重试')
+      categoryTree.value = []
+      ElMessage.error('获取分类列表失败，请检查网络连接')
     }
-
-    categoryTree.value = []
   } finally {
     categoryLoading.value = false
   }
@@ -571,21 +551,14 @@ const createCategory = async () => {
       description: newCategory.description
     })
     
-    // 发送创建请求 - 确保使用正确的API路径
-    const response = await axios.post('/api/articles/categories', {
+    // 发送创建请求
+    await axios.post('/api/articles/categories', {
       name: newCategory.name,
       path: fullPath,
       parent: parentPath || null,
       description: newCategory.description
-    }, {
-      timeout: 10000,
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
     })
     
-    console.log('创建分类响应:', response.data)
     ElMessage.success('分类文件夹创建成功')
     
     // 设置为当前选中的分类
@@ -604,13 +577,8 @@ const createCategory = async () => {
     }
   } catch (error) {
     console.error('创建分类文件夹失败:', error)
-
-    if (error.code === 'NETWORK_ERROR' || error.message === 'Network Error') {
-      ElMessage.error('网络连接失败，请检查服务器状态')
-    } else if (error.response?.status === 409) {
+    if (error.response?.status === 409) {
       ElMessage.error('分类文件夹已存在')
-    } else if (error.response?.status === 404) {
-      ElMessage.error('创建分类接口不可用，请联系管理员')
     } else {
       ElMessage.error('创建分类文件夹失败: ' + (error.response?.data?.detail || error.message))
     }
@@ -726,33 +694,19 @@ const handleUpload = async () => {
       content: formData.content
     }
     
-    console.log('上传文章数据:', uploadData)
-
-    const response = await axios.post('/api/articles', uploadData, {
-      timeout: 30000,
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
-    })
-
-    console.log('上传响应:', response.data)
+    await axios.post('/api/articles', uploadData)
+    
     ElMessage.success('文章上传成功')
     emit('upload-success')
     handleClose()
   } catch (error) {
     console.error('上传失败:', error)
-
-    if (error.code === 'NETWORK_ERROR' || error.message === 'Network Error') {
-      ElMessage.error('网络连接失败，请检查服务器状态')
-    } else if (error.response?.status === 409) {
+    if (error.response?.status === 409) {
       ElMessage.error('文章标题已存在')
     } else if (error.response?.status === 400) {
       ElMessage.error(error.response.data?.detail || '请求参数错误')
-    } else if (error.response?.status === 404) {
-      ElMessage.error('上传接口不可用，请联系管理员')
     } else {
-      ElMessage.error('上传失败: ' + (error.response?.data?.detail || error.message))
+      ElMessage.error('上传失败，请稍后重试')
     }
   } finally {
     uploading.value = false
