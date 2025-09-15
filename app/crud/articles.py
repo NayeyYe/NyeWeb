@@ -11,6 +11,8 @@ from pydantic import BaseModel
 from typing import Optional, List
 import os
 from datetime import datetime
+import json
+import re
 
 # 配置日志记录
 logging.basicConfig(level=logging.INFO)
@@ -21,9 +23,23 @@ router = APIRouter()
 # 添加请求模型
 class CreateArticleRequest(BaseModel):
     title: str
+    slug: Optional[str] = None
     summary: Optional[str] = None
     category: Optional[str] = None
     tags: Optional[List[str]] = []
+    status: Optional[str] = 'draft'
+    content: str
+    date: Optional[str] = None
+
+class GenerateSummaryRequest(BaseModel):
+    content: str
+    title: Optional[str] = None
+
+class CreateCategoryRequest(BaseModel):
+    name: str
+    path: Optional[str] = None
+    parent: Optional[str] = None
+    description: Optional[str] = None
 
 @router.get("/articles")
 def get_articles(db: Session = Depends(database.get_db)):
@@ -64,7 +80,7 @@ def get_all_articles_admin(db: Session = Depends(database.get_db)):
     logger.info("收到管理员获取全部文章数据的请求")
     try:
         articles = db.query(Article).order_by(Article.date.desc()).all()
-        logger.info(f"成功获取到 {len(articles)} 篇文章（所有状态）")
+        logger.info(f"成功获取到 {len(articles)} 篇文章（�����有状态）")
 
         # 转换为前端需要的格式
         articles_data = []
@@ -197,18 +213,328 @@ def get_article_by_slug(article_slug: str, db: Session = Depends(database.get_db
         logger.error(f"获取文章详情时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取文章详情时发生错误: {str(e)}")
 
+# 新增AI摘要生成接口
+@router.post("/articles/generate-summary")
+async def generate_summary(request: GenerateSummaryRequest):
+    """使用AI生成文章摘要"""
+    logger.info(f"收到生成摘要请求，标题: {request.title}")
+    try:
+        # 这里可以集成各种大模型API
+        # 示例使用OpenAI API，您可以替换为其他模型
+        summary = await call_ai_api_for_summary(request.content, request.title)
+        
+        if summary:
+            logger.info("摘要生成成功")
+            return {"summary": summary}
+        else:
+            # 降级方案：简单文本提取
+            fallback_summary = extract_simple_summary(request.content)
+            return {"summary": fallback_summary}
+            
+    except Exception as e:
+        logger.error(f"生成摘要时发生错误: {str(e)}")
+        # 返回降级方案而不是抛出异常
+        fallback_summary = extract_simple_summary(request.content)
+        return {"summary": fallback_summary}
+
+async def call_ai_api_for_summary(content: str, title: str = None) -> str:
+    """调用AI API生成摘要"""
+    try:
+        # 这里可以调用不同的AI服务
+        # 例如：OpenAI GPT, 百度千帆, 阿里云通义千问等
+        
+        # 示例：调用OpenAI API
+        # import openai
+        # response = await openai.ChatCompletion.acreate(
+        #     model="gpt-3.5-turbo",
+        #     messages=[
+        #         {"role": "system", "content": "你是一个专业的文章摘要生成助手。请为以下文章生成一个简洁、准确的摘要，长度控制在100-200字之间。"},
+        #         {"role": "user", "content": f"标题：{title}\n\n内容：{content[:2000]}"}
+        #     ],
+        #     max_tokens=300
+        # )
+        # return response.choices[0].message.content.strip()
+        
+        # 示例：模拟AI响应
+        import asyncio
+        await asyncio.sleep(1)  # 模拟API调用延迟
+        
+        # 简单的文本处理作为示例
+        summary = extract_simple_summary(content)
+        return summary
+        
+    except Exception as e:
+        logger.error(f"调用AI API失败: {str(e)}")
+        return None
+
+def extract_simple_summary(content: str) -> str:
+    """简单的摘要提取降级方案"""
+    if not content:
+        return ""
+    
+    # 移除markdown标记
+    import re
+    text = re.sub(r'^#{1,6}\s+', '', content, flags=re.MULTILINE)  # 移除标题
+    text = re.sub(r'\*\*(.*?)\*\*', r'\1', text)  # 移除粗体
+    text = re.sub(r'\*(.*?)\*', r'\1', text)  # 移除斜体
+    text = re.sub(r'`(.*?)`', r'\1', text)  # 移除行内代码
+    text = re.sub(r'\[(.*?)\]\(.*?\)', r'\1', text)  # 移除链接
+    text = re.sub(r'!\[.*?\]\(.*?\)', '', text)  # 移除图片
+    text = re.sub(r'```[\s\S]*?```', '', text)  # 移除代码块
+    text = re.sub(r'\n{2,}', '\n', text)  # 移除多余换行
+    text = text.strip()
+    
+    # 取前150字符作为摘要
+    if len(text) > 150:
+        text = text[:150] + "..."
+    
+    return text
+
+# 新增分类管理接口
+@router.post("/articles/categories")
+def create_category(request: CreateCategoryRequest, db: Session = Depends(database.get_db)):
+    """创建新的文章分类文件夹"""
+    logger.info(f"收到创建分类文件夹请求: {request.name}")
+    try:
+        # 生成分类路径
+        if not request.path:
+            # 清理文件夹名称，确保安全
+            safe_name = request.name.strip()
+            # 移除特殊字符，保留中文、英文、数字、下划线和连字符
+            safe_name = re.sub(r'[^\w\u4e00-\u9fa5\-]', '-', safe_name)
+            safe_name = re.sub(r'-+', '-', safe_name).strip('-')
+
+            if request.parent:
+                path = f"{request.parent}/{safe_name}"
+            else:
+                path = safe_name
+        else:
+            path = request.path
+        
+        # 检查路径是否为空
+        if not path:
+            raise HTTPException(status_code=400, detail="分类路径不能为空")
+        
+        # 检查分类路径是否已存在（检查是否有文章使用该分类）
+        existing_articles = db.query(Article).filter(Article.category == path).first()
+        if existing_articles:
+            raise HTTPException(status_code=409, detail="分类文件夹已存在（已有文章使用该分类）")
+
+        # 创建物理文件夹
+        try:
+            create_physical_category_folder(path)
+        except Exception as e:
+            logger.warning(f"创建物理文件夹失败: {str(e)}")
+            # 继续执行，不阻断流程
+        
+        logger.info(f"成功创建分类文件夹: {request.name} -> {path}")
+        return {
+            "message": "分类文件夹创建成功",
+            "name": request.name,
+            "path": path
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"创建分类文件夹时发生错误: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"创建分类文件夹时发生错误: {str(e)}")
+
+def create_physical_category_folder(category_path: str):
+    """创建物理分类文件夹"""
+    try:
+        # 构建完整的文件系统路径 - 修正路径
+        base_path = "../frontend/dist/articles/knowledge"
+        full_path = os.path.join(base_path, category_path.replace('/', os.sep))
+        
+        # 创建目录
+        os.makedirs(full_path, exist_ok=True)
+        
+        # 创建README.md文件说明该分类
+        readme_path = os.path.join(full_path, 'README.md')
+        if not os.path.exists(readme_path):
+            with open(readme_path, 'w', encoding='utf-8') as f:
+                f.write(f"# {category_path.split('/')[-1]}\n\n")
+                f.write(f"分类路径: {category_path}\n\n")
+                f.write("此文件夹用于存储相关文章。\n")
+        
+        logger.info(f"成功创建物理文件夹: {full_path}")
+        
+    except Exception as e:
+        logger.error(f"创建物理文件夹失败: {str(e)}")
+        raise
+
+@router.get("/articles/categories")
+def get_article_categories(db: Session = Depends(database.get_db)):
+    """获取所有文章分类树结构"""
+    logger.info("收到获取文章分类树的请求")
+    try:
+        # 获取所有文章（包括所有状态）来构建分类树
+        articles = db.query(Article).all()
+        logger.info(f"从数据库获取到 {len(articles)} 篇文章用于构建分类树")
+
+        # 构建分类集合
+        categories_set = set()
+
+        # 从数据库文章中获取分类
+        for article in articles:
+            if article.category:
+                categories_set.add(article.category)
+
+        # 扫描物理文件夹补充分类
+        try:
+            physical_categories = scan_physical_categories()
+            logger.info(f"扫描到物理分类: {[cat['path'] for cat in physical_categories]}")
+            for cat in physical_categories:
+                if cat["path"]:  # 确保路径不为空
+                    categories_set.add(cat["path"])
+        except Exception as e:
+            logger.warning(f"扫描物理文件夹失败: {str(e)}")
+
+        # 转换为树形结构数据
+        tree_data = []
+        for category_path in sorted(categories_set):
+            if category_path:  # 排除空分类
+                tree_data.append({
+                    "path": category_path,
+                    "count": len([a for a in articles if a.category == category_path]),
+                    "articles": []
+                })
+
+        # 如果没有分类，创建一个默认分类
+        if len(tree_data) == 0:
+            tree_data = [{
+                "path": "default",
+                "count": 0,
+                "articles": []
+            }]
+
+        logger.info(f"成功构建分类树，包含 {len(tree_data)} 个分类: {[cat['path'] for cat in tree_data]}")
+        return {
+            "categories": tree_data,
+            "total": len(tree_data)
+        }
+    except Exception as e:
+        logger.error(f"获取文章分类树时发生错误: {str(e)}")
+        # 即使出错，也返回一个默认分类，避免前端报错
+        return {
+            "categories": [{
+                "path": "default",
+                "count": 0,
+                "articles": []
+            }],
+            "total": 1
+        }
+
+def scan_physical_categories():
+    """扫描物理文件夹获取分类"""
+    categories = []
+    base_path = "../frontend/dist/articles/knowledge"
+
+    try:
+        # 获取绝对路径
+        abs_base_path = os.path.abspath(base_path)
+        logger.info(f"扫描物理文件夹路径: {abs_base_path}")
+
+        # 确保基础路径存在
+        os.makedirs(abs_base_path, exist_ok=True)
+
+        if os.path.exists(abs_base_path):
+            # 递归遍历所有子目录
+            for root, dirs, files in os.walk(abs_base_path):
+                # 过滤掉隐藏文件夹和系统文件夹
+                dirs[:] = [d for d in dirs if not d.startswith('.') and d != '__pycache__']
+                
+                # 计算相对路径
+                rel_path = os.path.relpath(root, abs_base_path)
+
+                # 跳过根目录本身
+                if rel_path == '.':
+                    continue
+
+                # 转换路径分隔符为统一的斜杠
+                category_path = rel_path.replace(os.sep, '/')
+                
+                # 过滤掉以.开头的隐藏文件夹路径
+                if any(part.startswith('.') for part in category_path.split('/')):
+                    continue
+
+                # 统计markdown文件数量（排除README.md和其他特殊文件）
+                md_files = [f for f in files 
+                          if f.endswith('.md') 
+                          and f not in ['README.md', '.gitkeep', 'index.md']
+                          and not f.startswith('.')]
+                md_count = len(md_files)
+                
+                logger.info(f"发现分类文件夹: {category_path}, markdown文件: {md_files}")
+
+                categories.append({
+                    "path": category_path,
+                    "count": md_count,
+                    "articles": md_files
+                })
+                
+        logger.info(f"扫描物理文件夹完成，找到 {len(categories)} 个分类")
+
+        # 打印所有发现的分类路径用于调试
+        for cat in categories:
+            logger.info(f"  - {cat['path']} ({cat['count']} 文件)")
+            
+        # 确保至少有一个根目录条目
+        if not any(cat['path'] == '.' or cat['path'] == '' for cat in categories):
+            # 添加根目录信息
+            root_files = []
+            try:
+                root_md_files = [f for f in os.listdir(abs_base_path) 
+                               if f.endswith('.md') 
+                               and f not in ['README.md', '.gitkeep', 'index.md']
+                               and not f.startswith('.')]
+                if root_md_files:
+                    categories.insert(0, {
+                        "path": "root",
+                        "count": len(root_md_files),
+                        "articles": root_md_files
+                    })
+            except Exception as e:
+                logger.warning(f"无法读取根目录文件: {e}")
+
+    except Exception as e:
+        logger.error(f"扫描物理分类文件夹失败: {str(e)}")
+        import traceback
+        logger.error(f"详细错误信息: {traceback.format_exc()}")
+
+    return categories
+
+# 修改创建文章接口
 @router.post("/articles")
 def create_article(article_data: CreateArticleRequest, db: Session = Depends(database.get_db)):
     """创建新文章"""
     logger.info(f"收到创建文章请求: {article_data.title}")
     try:
-        # 生成slug
-        slug = article_data.title.lower().replace(' ', '-').replace('/', '-')
+        # 生成或验证slug，自动从标题生成
+        if not article_data.slug:
+            slug = generate_safe_slug(article_data.title)
+        else:
+            slug = generate_safe_slug(article_data.slug)
         
-        # 检查slug是否已存在
-        existing_article = db.query(Article).filter(Article.slug == slug).first()
-        if existing_article:
-            raise HTTPException(status_code=400, detail="文章标题已存在，请修改标题")
+        # 确保slug唯��性
+        base_slug = slug
+        counter = 1
+        while db.query(Article).filter(Article.slug == slug).first():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+        
+        # 解析日期
+        article_date = datetime.now().date()
+        if article_data.date:
+            try:
+                article_date = datetime.strptime(article_data.date, '%Y-%m-%d').date()
+            except ValueError:
+                logger.warning(f"日期格式错误，使用当前日期: {article_data.date}")
+        
+        # 状态映射
+        status_map = {'draft': 0, 'published': 1, 'recycled': 2}
+        status = status_map.get(article_data.status, 0)
         
         # 创建文章记录
         new_article = Article(
@@ -216,7 +542,8 @@ def create_article(article_data: CreateArticleRequest, db: Session = Depends(dat
             slug=slug,
             summary=article_data.summary,
             category=article_data.category,
-            date=datetime.now().date()
+            date=article_date,
+            status=status
         )
         
         db.add(new_article)
@@ -225,12 +552,14 @@ def create_article(article_data: CreateArticleRequest, db: Session = Depends(dat
         
         # 处理标签
         for tag_name in article_data.tags or []:
-            tag = db.query(Tag).filter(Tag.name == tag_name).first()
+            if not tag_name.strip():
+                continue
+                
+            tag = db.query(Tag).filter(Tag.name == tag_name.strip()).first()
             if not tag:
-                tag = Tag(name=tag_name)
+                tag = Tag(name=tag_name.strip())
                 db.add(tag)
-                db.commit()
-                db.refresh(tag)
+                db.flush()
             
             # 创建文章-标签关联
             article_tag = ArticleTag(article_id=new_article.id, tag_id=tag.id)
@@ -238,35 +567,74 @@ def create_article(article_data: CreateArticleRequest, db: Session = Depends(dat
         
         db.commit()
         
-        # 创建markdown文件
+        # 创建markdown文件，确保分类文件夹存在
         try:
-            file_path = f"frontend/dist/articles/knowledge"
-            if article_data.category:
-                file_path += f"/{article_data.category}"
-            
-            os.makedirs(file_path, exist_ok=True)
-            
-            markdown_content = f"# {article_data.title}\n\n"
-            if article_data.summary:
-                markdown_content += f"{article_data.summary}\n\n"
-            markdown_content += "<!-- 请在此处添加文章内容 -->\n"
-            
-            with open(f"{file_path}/{slug}.md", 'w', encoding='utf-8') as f:
-                f.write(markdown_content)
-                
-            logger.info(f"成功创建markdown文件: {file_path}/{slug}.md")
+            save_article_file(new_article, article_data.content, article_data.category)
         except Exception as e:
-            logger.warning(f"创建markdown文件失败: {str(e)}")
+            logger.warning(f"保存文章文件失败: {str(e)}")
         
         logger.info(f"成功创建文章: {new_article.title}")
-        return {"message": "文章创建成功", "id": new_article.id}
+        return {
+            "message": "文章上传成功", 
+            "id": new_article.id,
+            "slug": new_article.slug
+        }
         
     except HTTPException:
+        db.rollback()
         raise
     except Exception as e:
         db.rollback()
         logger.error(f"创建文章时发生错误: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"创建文章时发生错误: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"创��文章时发生错误: {str(e)}")
+
+def generate_safe_slug(text: str) -> str:
+    """生成安全的slug"""
+    if not text:
+        return "untitled"
+    
+    import re
+    # 转换为小写
+    slug = text.lower().strip()
+    # 保留中文、英文、数字，其他字符替换为连字符
+    slug = re.sub(r'[^\w\u4e00-\u9fa5]+', '-', slug)
+    # 去除连续的连字符
+    slug = re.sub(r'-+', '-', slug)
+    # 去除首尾连字符
+    slug = slug.strip('-')
+    
+    return slug or "untitled"
+
+def save_article_file(article: Article, content: str, category: str = None):
+    """保存文章文件到磁盘，确保分类文件夹存在"""
+    try:
+        # 构建文件路径 - 修正路径
+        base_path = "../frontend/dist/articles/knowledge"
+        if category:
+            file_path = os.path.join(base_path, category.replace('/', os.sep))
+        else:
+            file_path = base_path
+        
+        # 确保目录存在
+        os.makedirs(file_path, exist_ok=True)
+        
+        # 构建文件内容
+        file_content = content
+        
+        # 如果内容中没有标题，添加标题
+        if not content.strip().startswith('#'):
+            file_content = f"# {article.title}\n\n{content}"
+        
+        # 保存文件
+        file_full_path = os.path.join(file_path, f"{article.slug}.md")
+        with open(file_full_path, 'w', encoding='utf-8') as f:
+            f.write(file_content)
+            
+        logger.info(f"成功保存文章文件: {file_full_path}")
+        
+    except Exception as e:
+        logger.error(f"保存文章��件失败: {str(e)}")
+        raise
 
 @router.delete("/articles/{article_id}")
 def delete_article(article_id: int, db: Session = Depends(database.get_db)):
@@ -281,9 +649,9 @@ def delete_article(article_id: int, db: Session = Depends(database.get_db)):
         # 删除文章-标签关联
         db.query(ArticleTag).filter(ArticleTag.article_id == article_id).delete()
         
-        # 删除markdown文件
+        # 删除markdown文件 - 修正路径
         try:
-            file_path = f"frontend/dist/articles/knowledge"
+            file_path = f"../frontend/dist/articles/knowledge"
             if article.category:
                 file_path += f"/{article.category}"
             file_path += f"/{article.slug}.md"
@@ -319,7 +687,7 @@ def get_all_tags(db: Session = Depends(database.get_db)):
         all_tags = []
         tag_counts = {}
 
-        # 获取所有已发布文章的标签统计
+        # 获取所有已发布文章���标签统计
         articles = db.query(Article).filter(Article.status == 1).all()
         for article in articles:
             article_tags = db.query(Tag).join(ArticleTag).filter(ArticleTag.article_id == article.id).all()
@@ -335,50 +703,8 @@ def get_all_tags(db: Session = Depends(database.get_db)):
         }
     except Exception as e:
         logger.error(f"获取标签时发生错误: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"获取标签时发生错误: {str(e)}")
-
-@router.get("/articles/categories")
-def get_article_categories(db: Session = Depends(database.get_db)):
-    """获取所有文章分类树结构"""
-    logger.info("收到获取文章分类树的请求")
-    try:
-        articles = db.query(Article).filter(Article.status == 1).all()
-        logger.info(f"从数据库获取到 {len(articles)} 篇已发布文章用于构建分类树")
-
-        # 构建分类树数据
-        categories = {}
-        for article in articles:
-            if not article.category:
-                continue
-
-            category_path = article.category
-            if category_path not in categories:
-                categories[category_path] = {
-                    "path": category_path,
-                    "count": 0,
-                    "articles": []
-                }
-            categories[category_path]["count"] += 1
-            categories[category_path]["articles"].append({
-                "id": article.id,
-                "title": article.title,
-                "slug": article.slug
-            })
-
-        # 转换为树形结构数据
-        tree_data = []
-        for category_path, category_info in categories.items():
-            tree_data.append({
-                "path": category_path,
-                "count": category_info["count"],
-                "articles": category_info["articles"]
-            })
-
-        logger.info(f"成功构建分类树，包含 {len(tree_data)} 个分类")
+        # 即使出错，也返回空数据，避免前端报错
         return {
-            "categories": tree_data,
-            "total": len(categories)
+            "tags": [],
+            "counts": {}
         }
-    except Exception as e:
-        logger.error(f"获取文章分类树时发生错误: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"获取文章分类树时发生错误: {str(e)}")
