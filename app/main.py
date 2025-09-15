@@ -11,6 +11,8 @@ from fastapi.staticfiles import StaticFiles
 
 # 修复导入问题 - 直接导入而不使用相对导入
 from crud import articles, books, favorite_images, figures, projects, timeline, tools, admin
+# 导入工具路由
+from crud.tools import router as tools_router
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -37,6 +39,8 @@ app.include_router(figures.router, prefix="/api", tags=["figures"])
 app.include_router(favorite_images.router, prefix="/api", tags=["favorite-images"])
 app.include_router(tools.router, prefix="/api", tags=["tools"])
 app.include_router(admin.router, prefix="/api", tags=["admin"])
+# 注册路由
+app.include_router(tools_router, prefix="/api", tags=["tools"])
 
 # 添加根路径API测试端点
 @app.get("/api/health")

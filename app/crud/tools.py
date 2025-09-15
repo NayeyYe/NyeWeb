@@ -238,3 +238,105 @@ def delete_tool(tool_id: int, db: Session = Depends(database.get_db)):
         logger.error(f"删除工具时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"删除工具时发生错误: {str(e)}")
 
+# 新增更新工具的接口
+@router.put("/tools/{tool_id}")
+def update_tool(tool_id: int, tool_data: dict, db: Session = Depends(database.get_db)):
+    """更新工具信息"""
+    logger.info(f"收到更新工具请求: ID={tool_id}, 数据={tool_data}")
+    try:
+        # 查找工具
+        tool = db.query(Tool).filter(Tool.id == tool_id).first()
+        if not tool:
+            logger.warning(f"工具不存在: ID={tool_id}")
+            raise HTTPException(status_code=404, detail="工具不存在或已被删除")
+        
+        # 数据验证
+        title = tool_data.get('title', '').strip()
+        url = tool_data.get('url', '').strip()
+        description = tool_data.get('description', '').strip()
+        status = tool_data.get('status', 'draft')
+        tags = tool_data.get('tags', [])
+        
+        if not title:
+            raise HTTPException(status_code=400, detail="工具标题不能为空")
+        
+        if not url:
+            raise HTTPException(status_code=400, detail="工具链接不能为空")
+            
+        # URL格式验证
+        if not (url.startswith('http://') or url.startswith('https://')):
+            raise HTTPException(status_code=400, detail="请输入有效的URL地址")
+        
+        # 检查标题是否重复（排除当前工具）
+        existing_tool = db.query(Tool).filter(Tool.title == title, Tool.id != tool_id).first()
+        if existing_tool:
+            raise HTTPException(status_code=409, detail="工具标题已存在")
+            
+        # 检查URL是否重复（排除当前工具）
+        existing_url = db.query(Tool).filter(Tool.url == url, Tool.id != tool_id).first()
+        if existing_url:
+            raise HTTPException(status_code=409, detail="工具链接已存在")
+        
+        # 状态映射
+        status_map = {'draft': 0, 'published': 1, 'recycled': 2}
+        if status not in status_map:
+            status = 'draft'  # 默认值
+        
+        # 更新工具基本信息
+        old_title = tool.title
+        tool.title = title
+        tool.description = description
+        tool.url = url
+        tool.status = status_map[status]
+        
+        # 更新标签关联
+        # 先删除现有的标签关联
+        db.query(ToolTag).filter(ToolTag.tool_id == tool_id).delete()
+        
+        # 添加新的标签关联
+        for tag_name in tags:
+            tag_name = tag_name.strip()
+            if not tag_name:
+                continue
+                
+            # 查找或创建标签
+            tag = db.query(Tag).filter(Tag.name == tag_name).first()
+            if not tag:
+                tag = Tag(name=tag_name)
+                db.add(tag)
+                db.flush()  # 获取新创建标签的ID
+                logger.info(f"创建新标签: {tag_name}")
+            
+            # 创建工具-标签关联
+            tool_tag = ToolTag(tool_id=tool_id, tag_id=tag.id)
+            db.add(tool_tag)
+        
+        # 提交所有更改
+        db.commit()
+        db.refresh(tool)
+        
+        # 返回更新后的工具信息
+        updated_tool_tags = db.query(Tag).join(ToolTag).filter(ToolTag.tool_id == tool.id).all()
+        updated_tags = [tag.name for tag in updated_tool_tags]
+        
+        result = {
+            "id": tool.id,
+            "title": tool.title,
+            "description": tool.description,
+            "url": tool.url,
+            "tags": updated_tags,
+            "status": status,
+            "updated_at": tool.updated_at.isoformat() if hasattr(tool, 'updated_at') and tool.updated_at else None
+        }
+        
+        logger.info(f"成功更新工具: {old_title} -> {tool.title}")
+        return result
+        
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"更新工具时发生错误: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"服务器内部错误: {str(e)}")
+
