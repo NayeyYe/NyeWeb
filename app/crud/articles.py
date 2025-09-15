@@ -111,7 +111,7 @@ def create_category(request: CreateCategoryRequest, db: Session = Depends(databa
 
         # 检查路径是否为空
         if not path:
-            raise HTTPException(status_code=400, detail="分类路径不能为空")
+            raise HTTPException(status_code=400, detail="分类路径不���为空")
 
         # 检查物理文件夹是否已存在
         base_path = "../frontend/dist/articles/knowledge"
@@ -393,8 +393,8 @@ def update_article_status(article_id: int, status_data: dict, db: Session = Depe
 
 @router.delete("/articles/{article_id}")
 def delete_article(article_id: int, db: Session = Depends(database.get_db)):
-    """删除文章"""
-    logger.info(f"收到删除文��请求: ID={article_id}")
+    """删除文章，同时删除dist和public中的文件"""
+    logger.info(f"收到删除文章请求: ID={article_id}")
     try:
         # 查找文章
         article = db.query(Article).filter(Article.id == article_id).first()
@@ -404,22 +404,21 @@ def delete_article(article_id: int, db: Session = Depends(database.get_db)):
         # 删除文章-标签关联
         db.query(ArticleTag).filter(ArticleTag.article_id == article_id).delete()
         
-        # 删除markdown文件
-        try:
-            file_path = f"../frontend/dist/articles/knowledge"
-            if article.category:
-                file_path += f"/{article.category}"
-            file_path += f"/{article.slug}.md"
-            
-            if os.path.exists(file_path):
-                os.remove(file_path)
-                logger.info(f"成功删除markdown文件: {file_path}")
-            else:
-                logger.warning(f"markdown文件不存在: {file_path}")
-                
-        except Exception as e:
-            logger.warning(f"删除markdown文件失败: {str(e)}")
-        
+        # 删除markdown文件（dist和public）
+        for base_path in ["../frontend/dist/articles/knowledge", "../frontend/public/articles/knowledge"]:
+            try:
+                file_path = base_path
+                if article.category:
+                    file_path += f"/{article.category}"
+                file_path += f"/{article.slug}.md"
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                    logger.info(f"成功删除markdown文件: {file_path}")
+                else:
+                    logger.warning(f"markdown文件不存在: {file_path}")
+            except Exception as e:
+                logger.warning(f"删除markdown文件失败: {str(e)}")
+
         # 删除文章记录
         db.delete(article)
         db.commit()
@@ -646,31 +645,31 @@ def generate_safe_slug(text: str) -> str:
     return slug or "untitled"
 
 def save_article_file(article: Article, content: str, category: str = None):
-    """保存文章文件到磁盘，确保分类文件夹存在"""
+    """保存文章文件到磁盘，确保分类文件夹存在（dist和public）"""
     try:
         # 构建文件路径
-        base_path = "../frontend/dist/articles/knowledge"
-        if category:
-            file_path = os.path.join(base_path, category.replace('/', os.sep))
-        else:
-            file_path = base_path
-
-        # 确保目录存在
-        os.makedirs(file_path, exist_ok=True)
+        dist_base_path = "../frontend/dist/articles/knowledge"
+        public_base_path = "../frontend/public/articles/knowledge"
+        paths = []
+        for base_path in [dist_base_path, public_base_path]:
+            if category:
+                file_path = os.path.join(base_path, category.replace('/', os.sep))
+            else:
+                file_path = base_path
+            os.makedirs(file_path, exist_ok=True)
+            file_full_path = os.path.join(file_path, f"{article.slug}.md")
+            paths.append(file_full_path)
 
         # 构建文件内容
         file_content = content
-
-        # 如果内容中没有标题，添加标题
         if not content.strip().startswith('#'):
             file_content = f"# {article.title}\n\n{content}"
 
-        # 保存文件
-        file_full_path = os.path.join(file_path, f"{article.slug}.md")
-        with open(file_full_path, 'w', encoding='utf-8') as f:
-            f.write(file_content)
-
-        logger.info(f"成功保存文章文件: {file_full_path}")
+        # 保存到两个位置
+        for file_full_path in paths:
+            with open(file_full_path, 'w', encoding='utf-8') as f:
+                f.write(file_content)
+            logger.info(f"成功保存文章文件: {file_full_path}")
 
     except Exception as e:
         logger.error(f"保存文章文件失败: {str(e)}")

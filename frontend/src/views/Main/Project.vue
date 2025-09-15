@@ -34,6 +34,7 @@ import mdAnchor from 'markdown-it-anchor'
 import slugify from 'slugify'
 import mdKatex from '@iktakahiro/markdown-it-katex'
 import hljs from 'highlight.js'
+import mdTable from 'markdown-it-multimd-table'
 
 // CSS imports
 import 'highlight.js/styles/github.css'
@@ -57,6 +58,8 @@ const md = markdownit({
   html: true,
   linkify: true,
   typographer: true,
+  tables: true, // 启用表格支持
+  breaks: true, // 启用换行符转换
   highlight: function (str, lang) {
     if (lang && hljs.getLanguage(lang)) {
       try {
@@ -75,6 +78,11 @@ const md = markdownit({
     permalinkSymbol: '¶', // 你可以自定义这个符号，或者设为空字符串''来隐藏它
     permalinkBefore: true,
     permalinkClass: 'header-anchor'
+  })
+  .use(mdTable, {
+    multiline: true,
+    rowspan: true,
+    headerless: true
   })
 
 // 自定义代码块渲染，支持 Mermaid
