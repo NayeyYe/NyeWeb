@@ -380,6 +380,12 @@ def get_article_categories(db: Session = Depends(database.get_db)):
         for article in articles:
             if article.category:
                 categories_set.add(article.category)
+                # 添加所有父级路径
+                path_parts = article.category.split('/')
+                for i in range(1, len(path_parts)):
+                    parent_path = '/'.join(path_parts[:i])
+                    if parent_path:
+                        categories_set.add(parent_path)
 
         # 扫描物理文件夹补充分类
         try:
@@ -388,40 +394,46 @@ def get_article_categories(db: Session = Depends(database.get_db)):
             for cat in physical_categories:
                 if cat["path"]:  # 确保路径不为空
                     categories_set.add(cat["path"])
+                    # 添加所有父级路径
+                    path_parts = cat["path"].split('/')
+                    for i in range(1, len(path_parts)):
+                        parent_path = '/'.join(path_parts[:i])
+                        if parent_path:
+                            categories_set.add(parent_path)
         except Exception as e:
             logger.warning(f"扫描物理文件夹失败: {str(e)}")
 
-        # 转换为树形结构数据
-        tree_data = []
+        # 转换为分类数据格式，包含文章统计
+        categories_data = []
         for category_path in sorted(categories_set):
             if category_path:  # 排除空分类
-                tree_data.append({
+                article_count = len([a for a in articles if a.category == category_path])
+                categories_data.append({
                     "path": category_path,
-                    "count": len([a for a in articles if a.category == category_path]),
-                    "articles": []
+                    "count": article_count
                 })
 
         # 如果没有分类，创建一个默认分类
-        if len(tree_data) == 0:
-            tree_data = [{
+        if len(categories_data) == 0:
+            categories_data = [{
                 "path": "default",
-                "count": 0,
-                "articles": []
+                "count": 0
             }]
 
-        logger.info(f"成功构建分类树，包含 {len(tree_data)} 个分类: {[cat['path'] for cat in tree_data]}")
+        logger.info(f"成功构建分类数据，包含 {len(categories_data)} 个分类: {[cat['path'] for cat in categories_data]}")
         return {
-            "categories": tree_data,
-            "total": len(tree_data)
+            "categories": categories_data,
+            "total": len(categories_data)
         }
     except Exception as e:
         logger.error(f"获取文章分类树时发生错误: {str(e)}")
+        import traceback
+        logger.error(f"详细错误信息: {traceback.format_exc()}")
         # 即使出错，也返回一个默认分类，避免前端报错
         return {
             "categories": [{
                 "path": "default",
-                "count": 0,
-                "articles": []
+                "count": 0
             }],
             "total": 1
         }
