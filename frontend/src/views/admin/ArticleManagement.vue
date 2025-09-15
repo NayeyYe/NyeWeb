@@ -3,8 +3,14 @@
     <!-- 操作栏 -->
     <div class="action-bar">
       <div class="action-buttons">
-        <el-button type="primary" @click="openEditor('create')">新建文章</el-button>
-        <el-button @click="openUploadDialog">上传文章</el-button>
+        <el-button type="primary" @click="showDevelopingMessage" disabled>
+          新建文章
+          <el-text type="warning" size="small" style="margin-left: 8px;">(待开发)</el-text>
+        </el-button>
+        <el-button @click="showDevelopingMessage" disabled>
+          上传文章
+          <el-text type="warning" size="small" style="margin-left: 8px;">(待开发)</el-text>
+        </el-button>
         <el-button @click="refreshArticles" :icon="Refresh" circle />
       </div>
     </div>
@@ -181,8 +187,10 @@
           <el-table-column label="操作" min-width="160" align="center">
             <template #default="scope">
               <div class="action-buttons-table">
-                <el-button size="small" type="primary" @click="openEditor('edit', scope.row)">编辑</el-button>
-                <el-button 
+                <el-button size="small" type="primary" @click="showDevelopingMessage" disabled>
+                  编辑
+                </el-button>
+                <el-button
                   v-if="scope.row.status !== 'recycled'"
                   size="small" 
                   type="warning" 
@@ -439,13 +447,16 @@ const formatDate = (dateStr) => {
 
 // 文章操作
 const openEditor = (mode, article = null) => {
-  editorMode.value = mode
-  currentArticle.value = article
-  showEditor.value = true
+  showDevelopingMessage()
 }
 
 const openUploadDialog = () => {
-  showUploadDialog.value = true
+  showDevelopingMessage()
+}
+
+// 显示待开发提示
+const showDevelopingMessage = () => {
+  ElMessage.info('该功能正在开发中，敬请期待！')
 }
 
 const deleteArticle = async (article) => {
@@ -779,5 +790,23 @@ onMounted(() => {
 
 .action-buttons-table .el-button {
   margin: 2px 0;
+}
+
+/* 禁用按钮样式 */
+.el-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.action-buttons .el-button:disabled {
+  background-color: #f5f7fa;
+  border-color: #e4e7ed;
+  color: #c0c4cc;
+}
+
+.action-buttons .el-button--primary:disabled {
+  background-color: #a0cfff;
+  border-color: #a0cfff;
+  color: #ffffff;
 }
 </style>
