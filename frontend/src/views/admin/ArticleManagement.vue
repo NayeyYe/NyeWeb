@@ -3,10 +3,7 @@
     <!-- 操作栏 -->
     <div class="action-bar">
       <div class="action-buttons">
-        <el-button type="primary" @click="showDevelopingMessage" disabled>
-          新建文章
-          <el-text type="warning" size="small" style="margin-left: 8px;">(待开发)</el-text>
-        </el-button>
+        <!-- 删除新建文章按钮 -->
         <el-button @click="openUploadDialog">
           上传文章
         </el-button>
@@ -186,9 +183,7 @@
           <el-table-column label="操作" min-width="160" align="center">
             <template #default="scope">
               <div class="action-buttons-table">
-                <el-button size="small" type="primary" @click="showDevelopingMessage" disabled>
-                  编辑
-                </el-button>
+                <!-- 删除编辑按钮 -->
                 <el-button
                   v-if="scope.row.status !== 'recycled'"
                   size="small" 
@@ -213,15 +208,6 @@
       </el-card>
     </div>
 
-    <!-- 文章编辑器 -->
-    <ArticleEditor
-      v-model="showEditor"
-      :mode="editorMode"
-      :article="currentArticle"
-      @save="onEditorSave"
-      @close="showEditor = false"
-    />
-
     <!-- 上传文章对话框 -->
     <UploadArticleDialog
       v-model="showUploadDialog"
@@ -235,7 +221,6 @@ import {computed, onMounted, reactive, ref} from 'vue'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import {Refresh} from '@element-plus/icons-vue'
 import axios from 'axios'
-import ArticleEditor from '@/components/Admin/ArticleEditor.vue'
 import UploadArticleDialog from '@/components/Admin/UploadArticleDialog.vue'
 
 const articles = ref([])
@@ -244,9 +229,6 @@ const categoryTree = ref([])
 const categoriesFromDB = ref([])
 const categoryLoading = ref(false)
 const categoryTreeRef = ref(null)
-const showEditor = ref(false)
-const editorMode = ref('create')
-const currentArticle = ref(null)
 const showUploadDialog = ref(false)
 const filterForm = reactive({
   category: '',
@@ -445,10 +427,6 @@ const formatDate = (dateStr) => {
 }
 
 // 文章操作
-const openEditor = (mode, article = null) => {
-  showDevelopingMessage()
-}
-
 const openUploadDialog = () => {
   showUploadDialog.value = true
 }
@@ -465,11 +443,6 @@ const deleteArticle = async (article) => {
     ElMessage.success('删��成功')
     refreshArticles()
   } catch {}
-}
-
-const onEditorSave = () => {
-  showEditor.value = false
-  refreshArticles()
 }
 
 const refreshArticles = async () => {
@@ -525,7 +498,7 @@ const getStatusType = (status) => {
 
 const getStatusText = (status) => {
   switch (status) {
-    case 'published': return '已发布'
+    case 'published': return '已��布'
     case 'draft': return '草稿'
     case 'recycled': return '已回收'
     default: return '未知'
