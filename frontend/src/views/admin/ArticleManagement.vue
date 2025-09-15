@@ -7,9 +7,8 @@
           新建文章
           <el-text type="warning" size="small" style="margin-left: 8px;">(待开发)</el-text>
         </el-button>
-        <el-button @click="showDevelopingMessage" disabled>
+        <el-button @click="openUploadDialog">
           上传文章
-          <el-text type="warning" size="small" style="margin-left: 8px;">(待开发)</el-text>
         </el-button>
         <el-button @click="refreshArticles" :icon="Refresh" circle />
       </div>
@@ -451,7 +450,7 @@ const openEditor = (mode, article = null) => {
 }
 
 const openUploadDialog = () => {
-  showDevelopingMessage()
+  showUploadDialog.value = true
 }
 
 // 显示待开发提示

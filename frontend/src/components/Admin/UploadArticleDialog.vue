@@ -39,7 +39,7 @@
         />
       </el-form-item>
 
-      <!-- 分类文件夹选择 -->
+      <!-- 分类文件夹�����择 -->
       <el-form-item label="分类文件夹" prop="category">
         <div class="category-section">
           <el-card class="category-selector-card" shadow="never">
@@ -54,8 +54,9 @@
                     <el-icon><RefreshIcon /></el-icon>
                     刷新
                   </el-button>
-                  <el-button @click="showCreateCategory = true" size="small" type="success">
+                  <el-button @click="showDevelopingMessage" size="small" type="success" disabled>
                     新建文件夹
+                    <el-text type="warning" size="small" style="margin-left: 8px;">(待开发)</el-text>
                   </el-button>
                 </div>
               </div>
@@ -76,17 +77,17 @@
               />
               <el-empty 
                 v-else-if="!categoryLoading && categoryTree.length === 0" 
-                description="暂无分类文件夹，请先创建" 
+                description="暂无分类文件夹，请先在系统中创建"
                 :image-size="60"
               >
-                <el-button @click="showCreateCategory = true" type="primary">
-                  创建第一个文件夹
+                <el-button @click="showDevelopingMessage" type="primary" disabled>
+                  创建分类功能开发中
                 </el-button>
               </el-empty>
             </div>
           </el-card>
         </div>
-        <div class="form-tip">选择文章存储的分类文件夹，会自动创建对应的文件夹结构</div>
+        <div class="form-tip">请选择已存在的分类文件夹</div>
         <div v-if="formData.category" class="selected-category">
           <el-icon><Folder /></el-icon>
           已选择: {{ formData.category }}
@@ -165,81 +166,6 @@
       </el-form-item>
     </el-form>
 
-    <!-- 创建分类文件夹对话框 -->
-    <el-dialog
-      v-model="showCreateCategory"
-      title="创建分类文件夹"
-      width="500px"
-      append-to-body
-      :close-on-click-modal="false"
-    >
-      <el-form :model="newCategory" :rules="categoryRules" label-width="100px" ref="categoryFormRef">
-        <el-form-item label="文件夹名称" prop="name" required>
-          <el-input
-            v-model="newCategory.name"
-            placeholder="请输入文件夹名称"
-            maxlength="100"
-          />
-          <div class="form-tip">文件夹名称将用作URL路径和文件系统路径</div>
-        </el-form-item>
-        
-        <el-form-item label="父级文件夹">
-          <el-card class="parent-selector-card" shadow="never">
-            <div v-loading="categoryLoading" class="parent-tree-container">
-              <el-tree
-                v-if="!categoryLoading && categoryTree.length > 0"
-                :data="categoryTree"
-                :props="treeProps"
-                @node-click="handleParentSelect"
-                :highlight-current="true"
-                :expand-on-click-node="false"
-                node-key="path"
-                ref="parentTreeRef"
-                class="parent-tree"
-                :current-node-key="newCategory.parent"
-              />
-              <div v-else-if="!categoryLoading && categoryTree.length === 0" class="no-parent">
-                <span>暂无现有文件夹，将创建在根目录</span>
-              </div>
-            </div>
-          </el-card>
-          <div class="form-tip">可以在现有文件夹下创建子文件夹，留空则创建在根目录</div>
-          <div v-if="newCategory.parent" class="selected-parent">
-            <el-icon><Folder /></el-icon>
-            父级文件夹: {{ newCategory.parent }}
-            <el-button link @click="clearParentSelection" class="clear-parent">清空</el-button>
-          </div>
-        </el-form-item>
-        
-        <el-form-item label="文件夹描述">
-          <el-input
-            v-model="newCategory.description"
-            type="textarea"
-            :rows="2"
-            placeholder="请输入文件夹描述（可选）"
-            maxlength="200"
-          />
-        </el-form-item>
-        
-        <el-form-item label="预览路径">
-          <el-input
-            :value="previewPath"
-            readonly
-            placeholder="文件夹路径预览"
-          />
-          <div class="form-tip">{{ previewPathTip }}</div>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="showCreateCategory = false">取消</el-button>
-          <el-button type="primary" @click="createCategory" :loading="categoryCreating">
-            创建文件夹
-          </el-button>
-        </div>
-      </template>
-    </el-dialog>
-
     <!-- 主对话框底部按钮 -->
     <template #footer>
       <div class="dialog-footer">
@@ -286,12 +212,6 @@ const formData = reactive({
   content: ''
 })
 
-const newCategory = reactive({
-  name: '',
-  parent: '',
-  description: ''
-})
-
 // 表单验证规则
 const formRules = {
   title: [
@@ -309,19 +229,10 @@ const formRules = {
   ]
 }
 
-const categoryRules = {
-  name: [
-    { required: true, message: '请输入文件夹名称', trigger: 'blur' },
-    { min: 1, max: 100, message: '文件夹名称长度应在1-100个字符之间', trigger: 'blur' }
-  ]
-}
-
 // 引用
 const formRef = ref(null)
-const categoryFormRef = ref(null)
 const uploadRef = ref(null)
 const categoryTreeRef = ref(null)
-const parentTreeRef = ref(null)
 
 // 状态数据
 const categoryTree = ref([])
@@ -329,7 +240,6 @@ const existingTags = ref([])
 const showCreateCategory = ref(false)
 const uploading = ref(false)
 const summaryLoading = ref(false)
-const categoryCreating = ref(false)
 const categoryLoading = ref(false)
 
 // 树形控件配置
@@ -378,33 +288,25 @@ const clearCategorySelection = () => {
   }
 }
 
-const handleParentSelect = (data) => {
-  console.log('选择父级:', data)
-  if (newCategory.parent === data.path) {
-    clearParentSelection()
-  } else {
-    newCategory.parent = data.path
-  }
+// 显示待开发提示
+const showDevelopingMessage = () => {
+  ElMessage.info('该功能正在开发中，敬请期待！')
 }
 
-const clearParentSelection = () => {
-  newCategory.parent = ''
-  if (parentTreeRef.value) {
-    parentTreeRef.value.setCurrentKey(null)
-  }
-}
-
-// 获取分类数据
+// 获取分类数据 - 使用API
 const fetchCategories = async () => {
   categoryLoading.value = true
   try {
     console.log('开始获取分类数据...')
+
     const response = await axios.get('/api/articles/categories', {
       timeout: 10000,
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
       }
     })
+
     console.log('分类数据响应:', response.data)
     
     if (response.data?.categories && Array.isArray(response.data.categories)) {
@@ -424,14 +326,21 @@ const fetchCategories = async () => {
       url: error.config?.url
     })
     
-    // 提供更友好的错误提示
-    if (error.response?.status === 404) {
-      console.warn('分类API接口不存在，使用默认分类')
-      categoryTree.value = []
+    if (error.code === 'NETWORK_ERROR' || error.message === 'Network Error') {
+      console.error('网络连接错误，请检查服务器状态')
+      ElMessage.error('无法连接到服务器，请检查网络连接和服务器状态')
+    } else if (error.response?.status === 404) {
+      console.warn('分类API接口不存在')
+      ElMessage.warning('分类接��暂不可用，请联系管理员')
+    } else if (error.response?.status >= 500) {
+      console.error('服务器内部错误:', error.response.data)
+      ElMessage.error('服务器错误，请稍后重试')
     } else {
-      categoryTree.value = []
-      ElMessage.error('获取分类列表失败，请检查网络连接')
+      console.error('其他错误:', error)
+      ElMessage.error('获取分类列表失败，请稍后重试')
     }
+
+    categoryTree.value = []
   } finally {
     categoryLoading.value = false
   }
@@ -527,138 +436,14 @@ const handleCategoryChange = (value) => {
   console.log('设置的分类路径:', formData.category)
 }
 
-// 分类文件夹相关 - 修复父级路径处理
-const createCategory = async () => {
-  if (!categoryFormRef.value) return
-  
+// 获取标签
+const fetchTags = async () => {
   try {
-    await categoryFormRef.value.validate()
-    categoryCreating.value = true
-    
-    // 构建完整路径
-    let fullPath = ''
-    let parentPath = newCategory.parent || ''
-    
-    if (newCategory.name) {
-      const safeName = newCategory.name.trim()
-      fullPath = parentPath ? `${parentPath}/${safeName}` : safeName
-    }
-    
-    console.log('创建分类参数:', {
-      name: newCategory.name,
-      path: fullPath,
-      parent: parentPath || null,
-      description: newCategory.description
-    })
-    
-    // 发送创建请求
-    await axios.post('/api/articles/categories', {
-      name: newCategory.name,
-      path: fullPath,
-      parent: parentPath || null,
-      description: newCategory.description
-    })
-    
-    ElMessage.success('分类文件夹创建成功')
-    
-    // 设置为当前选中的分类
-    formData.category = fullPath
-
-    // 重置表单并关闭对话框
-    resetCategoryForm()
-    showCreateCategory.value = false
-    
-    // 重新获取分类列表
-    await fetchCategories()
-    
-    // 设置树形控件选中状态
-    if (categoryTreeRef.value) {
-      categoryTreeRef.value.setCurrentKey(fullPath)
-    }
-  } catch (error) {
-    console.error('创建分类文件夹失败:', error)
-    if (error.response?.status === 409) {
-      ElMessage.error('分类文件夹已存在')
-    } else {
-      ElMessage.error('创建分类文件夹失败: ' + (error.response?.data?.detail || error.message))
-    }
-  } finally {
-    categoryCreating.value = false
+    const res = await axios.get('/api/tags')
+    existingTags.value = res.data.tags || []
+  } catch (e) {
+    existingTags.value = []
   }
-}
-
-const resetCategoryForm = () => {
-  Object.assign(newCategory, {
-    name: '',
-    parent: '',
-    description: ''
-  })
-  if (categoryFormRef.value) {
-    categoryFormRef.value.resetFields()
-  }
-  clearParentSelection()
-}
-
-// AI摘要生成
-const generateSummary = async () => {
-  if (!formData.content) {
-    ElMessage.warning('请先选择文件')
-    return
-  }
-  
-  summaryLoading.value = true
-  try {
-    // 调用后端API生成摘要
-    const response = await axios.post('/api/articles/generate-summary', {
-      content: formData.content,
-      title: formData.title
-    }, {
-      timeout: 30000 // 30秒超时
-    })
-    
-    if (response.data?.summary) {
-      formData.summary = response.data.summary
-      ElMessage.success('摘要生成成功')
-    } else {
-      throw new Error('摘要生成失败')
-    }
-  } catch (error) {
-    console.error('生成摘要失败:', error)
-    
-    // 降级方案：简单提取前200字符作为摘要
-    const fallbackSummary = extractSimpleSummary(formData.content)
-    if (fallbackSummary) {
-      formData.summary = fallbackSummary
-      ElMessage.success('已使用简化方式生成摘要')
-    } else {
-      ElMessage.error('摘要生成失败，请手动填写')
-    }
-  } finally {
-    summaryLoading.value = false
-  }
-}
-
-const extractSimpleSummary = (content) => {
-  if (!content) return ''
-  
-  // 移除markdown标记
-  let text = content
-    .replace(/^#{1,6}\s+/gm, '') // 移除标题标记
-    .replace(/\*\*(.*?)\*\*/g, '$1') // 秘除粗体标记
-    .replace(/\*(.*?)\*/g, '$1') // 秾除斜体标记
-    .replace(/`(.*?)`/g, '$1') // 移除代码标记
-    .replace(/\[(.*?)\]\(.*?\)/g, '$1') // 秼除链接标记
-    .replace(/!\[.*?\]\(.*?\)/g, '') // 秼除图片
-    .replace(/```[\s\S]*?```/g, '') // 秮除代码块
-    .replace(/\n{2,}/g, '\n') // 移除多余换行
-    .trim()
-  
-  // 提取前200字符
-  if (text.length > 200) {
-    text = text.substring(0, 200) + '...'
-  }
-  
-  return text
 }
 
 // 主要操作
@@ -673,6 +458,11 @@ const handleUpload = async () => {
       return
     }
     
+    if (!formData.category) {
+      ElMessage.warning('请选择分类文件夹')
+      return
+    }
+
     uploading.value = true
     
     // 自动生成slug从文件名
@@ -694,19 +484,37 @@ const handleUpload = async () => {
       content: formData.content
     }
     
-    await axios.post('/api/articles', uploadData)
-    
+    console.log('上传文章数据:', uploadData)
+
+    const response = await axios.post('/api/articles', uploadData, {
+      timeout: 30000,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    })
+
+    console.log('上传响应:', response.data)
     ElMessage.success('文章上传成功')
+
+    // 上传成功后立即重置表单，避免关闭时出现警告弹窗
+    resetForm()
+
     emit('upload-success')
-    handleClose()
+    emit('update:modelValue', false)
   } catch (error) {
     console.error('上传失败:', error)
-    if (error.response?.status === 409) {
+
+    if (error.code === 'NETWORK_ERROR' || error.message === 'Network Error') {
+      ElMessage.error('网络连接失败，请检查服务器状态')
+    } else if (error.response?.status === 409) {
       ElMessage.error('文章标题已存在')
     } else if (error.response?.status === 400) {
       ElMessage.error(error.response.data?.detail || '请求参数错误')
+    } else if (error.response?.status === 404) {
+      ElMessage.error('上传接口不可用，请联系管理员')
     } else {
-      ElMessage.error('上传失败，请稍后重试')
+      ElMessage.error('上传失败: ' + (error.response?.data?.detail || error.message))
     }
   } finally {
     uploading.value = false
@@ -715,13 +523,17 @@ const handleUpload = async () => {
 
 const handleClose = () => {
   // 检查是否有未保存的内容
-  if (formData.title || formData.content || formData.file) {
+  const hasUnsavedContent = formData.title || formData.content || formData.file ||
+                           formData.summary || formData.tags.length > 0 ||
+                           formData.category
+
+  if (hasUnsavedContent) {
     ElMessageBox.confirm(
       '确定要关闭吗？未保存的内容将丢失。',
       '提示',
       {
         confirmButtonText: '确定',
-        cancelButtonText: '取���',
+        cancelButtonText: '取消',
         type: 'warning'
       }
     ).then(() => {
@@ -740,7 +552,6 @@ const resetForm = () => {
   Object.assign(formData, {
     title: '',
     category: '',
-    categoryPath: [],
     date: new Date().toISOString().split('T')[0],
     summary: '',
     tags: [],
@@ -756,6 +567,38 @@ const resetForm = () => {
   if (formRef.value) {
     formRef.value.resetFields()
   }
+}
+
+// 文件上传处理
+const handleFileChange = (file) => {
+  console.log('文件变化:', file)
+  if (file && file.raw) {
+    formData.file = file.raw
+
+    // 自动从文件名提取标题（如果标题为空）
+    if (!formData.title) {
+      const fileName = file.name.replace(/\.(md|markdown)$/i, '')
+      formData.title = fileName
+    }
+
+    // 读取文件内容
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      formData.content = e.target.result
+      console.log('文件内���读取完成')
+    }
+    reader.onerror = (e) => {
+      console.error('文件读取失败:', e)
+      ElMessage.error('文件读取失败')
+    }
+    reader.readAsText(file.raw, 'utf-8')
+  }
+}
+
+const handleFileRemove = () => {
+  formData.file = null
+  formData.content = ''
+  console.log('文件移除')
 }
 
 // 监听新分类名称变化
@@ -877,6 +720,24 @@ onMounted(() => {
 
 .dialog-footer {
   text-align: right;
+}
+
+/* 禁用按钮样式 */
+.el-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.category-actions .el-button:disabled {
+  background-color: #f5f7fa;
+  border-color: #e4e7ed;
+  color: #c0c4cc;
+}
+
+.category-actions .el-button--success:disabled {
+  background-color: #b3d8b3;
+  border-color: #b3d8b3;
+  color: #ffffff;
 }
 
 /* ...existing code for other styles... */
