@@ -1,12 +1,12 @@
+import os
+import re
 import sys
+from datetime import datetime
+from typing import Optional, List
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from typing import Optional, List
-import os
-from datetime import datetime
-import re
+from sqlalchemy.orm import Session
 
 sys.path.append("..")
 import database

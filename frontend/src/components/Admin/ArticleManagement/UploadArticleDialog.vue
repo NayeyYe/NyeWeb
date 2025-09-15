@@ -180,16 +180,16 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref, watch, computed } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { 
-  Upload, 
-  Edit, 
-  Check, 
-  MagicStick, 
-  Upload as UploadIcon, 
+import {computed, onMounted, reactive, ref, watch} from 'vue'
+import {ElMessage, ElMessageBox} from 'element-plus'
+import {
+  Check,
+  Edit,
+  Folder,
+  MagicStick,
   Refresh as RefreshIcon,
-  Folder
+  Upload,
+  Upload as UploadIcon
 } from '@element-plus/icons-vue'
 import axios from 'axios'
 

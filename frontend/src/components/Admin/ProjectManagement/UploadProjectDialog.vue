@@ -125,15 +125,9 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import {
-  Upload,
-  Edit,
-  Check,
-  MagicStick,
-  Upload as UploadIcon
-} from '@element-plus/icons-vue'
+import {onMounted, reactive, ref} from 'vue'
+import {ElMessage, ElMessageBox} from 'element-plus'
+import {Check, Edit, MagicStick, Upload, Upload as UploadIcon} from '@element-plus/icons-vue'
 import axios from 'axios'
 
 // Props和Emits

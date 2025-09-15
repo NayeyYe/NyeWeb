@@ -57,7 +57,7 @@
 <script setup>
 import {computed} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {Box, Document, Folder, HomeFilled, House, SwitchButton, Tools, User} from '@element-plus/icons-vue'
+import {Box, Document, Folder, HomeFilled, House, SwitchButton, Tools} from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()
