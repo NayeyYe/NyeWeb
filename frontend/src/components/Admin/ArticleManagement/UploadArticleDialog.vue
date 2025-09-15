@@ -39,7 +39,7 @@
         />
       </el-form-item>
 
-      <!-- 分类文件夹�����择 -->
+      <!-- 分类文件夹�������择 -->
       <el-form-item label="分类文件夹" prop="category">
         <div class="category-section">
           <el-card class="category-selector-card" shadow="never">
@@ -403,7 +403,7 @@ const buildCategoryTreeFromData = (categories) => {
 
       nodeMap.set(fullPath, node)
 
-      // 找到父节点并添加到其children中
+      // 找到父节点并添加到其children���
       if (parentPath && nodeMap.has(parentPath)) {
         const parentNode = nodeMap.get(parentPath)
         if (!parentNode.children.find(child => child.path === fullPath)) {
