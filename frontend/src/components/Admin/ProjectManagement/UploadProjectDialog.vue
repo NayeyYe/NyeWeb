@@ -8,24 +8,33 @@
     :close-on-click-modal="false"
   >
     <el-form :model="formData" :rules="formRules" label-width="100px" ref="formRef">
+      <!-- 文件上传 -->
+      <el-form-item label="选择文件" prop="file" required>
+        <el-upload
+          ref="uploadRef"
+          :auto-upload="false"
+          :show-file-list="true"
+          :on-change="handleFileChange"
+          :on-remove="handleFileRemove"
+          accept=".md,.markdown"
+          :limit="1"
+          class="upload-section"
+        >
+          <el-button type="primary" :icon="UploadIcon">选择Markdown文件</el-button>
+          <template #tip>
+            <div class="el-upload__tip">
+              只能上传 .md 或 .markdown 文件
+            </div>
+          </template>
+        </el-upload>
+      </el-form-item>
+
       <!-- 项目标题 -->
       <el-form-item label="项目标题" prop="title" required>
         <el-input
           v-model="formData.title"
           placeholder="请输入项目标题"
           maxlength="255"
-          show-word-limit
-        />
-      </el-form-item>
-
-      <!-- 项目描述 -->
-      <el-form-item label="项目描述" prop="summary">
-        <el-input
-          v-model="formData.summary"
-          type="textarea"
-          :rows="4"
-          placeholder="请输入项目描述"
-          maxlength="500"
           show-word-limit
         />
       </el-form-item>
@@ -40,6 +49,30 @@
           value-format="YYYY-MM-DD"
           style="width: 100%"
         />
+      </el-form-item>
+
+      <!-- 项目描述 -->
+      <el-form-item label="项目描述" prop="summary">
+        <el-input
+          v-model="formData.summary"
+          type="textarea"
+          :rows="4"
+          placeholder="请输入项目描述，或使用AI生成"
+          maxlength="500"
+          show-word-limit
+        />
+        <div class="summary-actions">
+          <el-button
+            size="small"
+            @click="generateSummary"
+            :loading="summaryLoading"
+            :disabled="!formData.content"
+            type="primary"
+          >
+            <el-icon><MagicStick /></el-icon>
+            AI生成描述
+          </el-button>
+        </div>
       </el-form-item>
 
       <!-- 项目标签 -->
@@ -72,7 +105,7 @@
           </el-radio>
           <el-radio value="published">
             <el-icon><Check /></el-icon>
-            发布
+            ��布
           </el-radio>
         </el-radio-group>
       </el-form-item>
@@ -97,7 +130,9 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Upload,
   Edit,
-  Check
+  Check,
+  MagicStick,
+  Upload as UploadIcon
 } from '@element-plus/icons-vue'
 import axios from 'axios'
 
@@ -111,10 +146,12 @@ const emit = defineEmits(['update:modelValue', 'upload-success'])
 // 响应式数据
 const formData = reactive({
   title: '',
-  summary: '',
   date: new Date().toISOString().split('T')[0],
+  summary: '',
   tags: [],
-  status: 'draft'
+  status: 'draft',
+  file: null,
+  content: ''
 })
 
 // 表单验证规则
@@ -128,15 +165,20 @@ const formRules = {
   ],
   status: [
     { required: true, message: '请选择项目状态', trigger: 'change' }
+  ],
+  file: [
+    { required: true, message: '请选择要上传的文件', trigger: 'change' }
   ]
 }
 
 // 引用
 const formRef = ref(null)
+const uploadRef = ref(null)
 
 // 状态数据
 const existingTags = ref([])
 const uploading = ref(false)
+const summaryLoading = ref(false)
 
 // 获取标签
 const fetchTags = async () => {
@@ -148,6 +190,34 @@ const fetchTags = async () => {
   }
 }
 
+// 生成摘要
+const generateSummary = async () => {
+  if (!formData.content) {
+    ElMessage.warning('请先选择文件')
+    return
+  }
+
+  summaryLoading.value = true
+  try {
+    const response = await axios.post('/api/projects/generate-summary', {
+      content: formData.content,
+      title: formData.title
+    })
+
+    if (response.data.summary) {
+      formData.summary = response.data.summary
+      ElMessage.success('AI生成描述成功')
+    } else {
+      ElMessage.warning('生成描述失败，请手动输入')
+    }
+  } catch (error) {
+    console.error('生成摘要失败:', error)
+    ElMessage.error('AI生成功能暂不可用，请手动输入')
+  } finally {
+    summaryLoading.value = false
+  }
+}
+
 // 主要操作
 const handleUpload = async () => {
   if (!formRef.value) return
@@ -155,10 +225,16 @@ const handleUpload = async () => {
   try {
     await formRef.value.validate()
 
+    if (!formData.file) {
+      ElMessage.warning('请选择要上传的文件')
+      return
+    }
+
     uploading.value = true
 
-    // 自动生成slug从标题
-    const slug = formData.title
+    // 自动生成slug从文件名或标题
+    const fileName = formData.file.name.replace(/\.(md|markdown)$/i, '')
+    const slug = (fileName || formData.title)
       .toLowerCase()
       .replace(/[^\w\u4e00-\u9fa5]/g, '-')
       .replace(/-+/g, '-')
@@ -170,22 +246,21 @@ const handleUpload = async () => {
       summary: formData.summary,
       date: formData.date,
       tags: formData.tags,
-      status: formData.status
+      status: formData.status,
+      content: formData.content
     }
 
     console.log('上传项目数据:', uploadData)
 
-    // TODO: 实现项目上传API
-    // const response = await axios.post('/api/projects', uploadData, {
-    //   timeout: 30000,
-    //   headers: {
-    //     'Accept': 'application/json',
-    //     'Content-Type': 'application/json'
-    //   }
-    // })
+    const response = await axios.post('/api/projects', uploadData, {
+      timeout: 30000,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    })
 
-    // 模拟上传成功
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    console.log('上传响应:', response.data)
     ElMessage.success('项目上传成功')
 
     // 上传成功后立即重置表单，避免关闭时出现警告弹窗
@@ -195,7 +270,18 @@ const handleUpload = async () => {
     emit('update:modelValue', false)
   } catch (error) {
     console.error('上传失败:', error)
-    ElMessage.error('项目上传功能开发中，敬请期待！')
+
+    if (error.code === 'NETWORK_ERROR' || error.message === 'Network Error') {
+      ElMessage.error('网络连接失败，请检查服务器状态')
+    } else if (error.response?.status === 409) {
+      ElMessage.error('项目标题已存在')
+    } else if (error.response?.status === 400) {
+      ElMessage.error(error.response.data?.detail || '请求参数错误')
+    } else if (error.response?.status === 404) {
+      ElMessage.error('上传接口不可用，请联系管理员')
+    } else {
+      ElMessage.error('上传失败: ' + (error.response?.data?.detail || error.message))
+    }
   } finally {
     uploading.value = false
   }
@@ -203,8 +289,8 @@ const handleUpload = async () => {
 
 const handleClose = () => {
   // 检查是否有未保存的内容
-  const hasUnsavedContent = formData.title || formData.summary ||
-                           formData.tags.length > 0
+  const hasUnsavedContent = formData.title || formData.content || formData.file ||
+                           formData.summary || formData.tags.length > 0
 
   if (hasUnsavedContent) {
     ElMessageBox.confirm(
@@ -230,15 +316,53 @@ const handleClose = () => {
 const resetForm = () => {
   Object.assign(formData, {
     title: '',
-    summary: '',
     date: new Date().toISOString().split('T')[0],
+    summary: '',
     tags: [],
-    status: 'draft'
+    status: 'draft',
+    file: null,
+    content: ''
   })
+
+  if (uploadRef.value) {
+    uploadRef.value.clearFiles()
+  }
 
   if (formRef.value) {
     formRef.value.resetFields()
   }
+}
+
+// 文件上传处理
+const handleFileChange = (file) => {
+  console.log('文件变化:', file)
+  if (file && file.raw) {
+    formData.file = file.raw
+
+    // 自动从文件名提取标题（如果标题为空）
+    if (!formData.title) {
+      const fileName = file.name.replace(/\.(md|markdown)$/i, '')
+      formData.title = fileName
+    }
+
+    // 读取文件内容
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      formData.content = e.target.result
+      console.log('文件内容读取完成')
+    }
+    reader.onerror = (e) => {
+      console.error('文件读取失败:', e)
+      ElMessage.error('文件读取失败')
+    }
+    reader.readAsText(file.raw, 'utf-8')
+  }
+}
+
+const handleFileRemove = () => {
+  formData.file = null
+  formData.content = ''
+  console.log('文件移除')
 }
 
 // 组件挂载
@@ -248,6 +372,15 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.upload-section {
+  width: 100%;
+}
+
+.summary-actions {
+  margin-top: 8px;
+  text-align: right;
+}
+
 .form-tip {
   color: #909399;
   font-size: 12px;
@@ -284,4 +417,3 @@ onMounted(() => {
   border-radius: 6px;
 }
 </style>
-

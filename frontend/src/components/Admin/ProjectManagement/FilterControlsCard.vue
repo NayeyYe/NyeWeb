@@ -202,4 +202,3 @@ onMounted(() => {
   padding: 20px;
 }
 </style>
-

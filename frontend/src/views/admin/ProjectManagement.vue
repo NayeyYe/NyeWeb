@@ -119,9 +119,15 @@ const openUploadDialog = () => {
 const deleteProject = async (project) => {
   try {
     await ElMessageBox.confirm('确定要删除该项目吗？', '提示', { type: 'warning' })
-    // TODO: 实现删除API
-    ElMessage.info('删除项目功能开发中，敬请期待！')
-  } catch {}
+    await axios.delete(`/api/projects/${project.id}`)
+    ElMessage.success('删除成功')
+    refreshProjects()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('删除项目失败:', error)
+      ElMessage.error('删除项目失败')
+    }
+  }
 }
 
 const refreshProjects = async () => {
