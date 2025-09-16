@@ -1,4 +1,6 @@
 import sys
+from pydantic import BaseModel
+from typing import Optional, List
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -13,6 +15,21 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("figures_api")
 
 router = APIRouter()
+
+# 添加请求模型
+class CreateFigureRequest(BaseModel):
+    title: str
+    description: Optional[str] = None
+    url: str
+    tags: Optional[List[str]] = []
+    status: Optional[str] = 'draft'
+
+class UpdateFigureRequest(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    url: Optional[str] = None
+    tags: Optional[List[str]] = None
+    status: Optional[str] = None
 
 @router.get("/figures")
 def get_figures(db: Session = Depends(database.get_db)):
@@ -210,4 +227,129 @@ def delete_figure(figure_id: int, db: Session = Depends(database.get_db)):
         db.rollback()
         logger.error(f"删除图片时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"删除图片时发生错误: {str(e)}")
+
+@router.post("/admin/figures")
+def create_figure(figure_data: CreateFigureRequest, db: Session = Depends(database.get_db)):
+    """创建新图片"""
+    logger.info(f"收到创建图片请求: {figure_data.title}")
+    try:
+        # 状态映射
+        status_map = {'draft': 0, 'published': 1, 'recycled': 2}
+        status = status_map.get(figure_data.status, 0)
+        
+        # 验证URL格式
+        import re
+        url_pattern = r'^https?://.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$'
+        if not re.match(url_pattern, figure_data.url, re.IGNORECASE):
+            logger.warning(f"图片URL格式不正确: {figure_data.url}")
+            raise HTTPException(status_code=400, detail="请输入有效的图片URL（支持jpg、png、gif、webp格式）")
+        
+        # 创建图片记录
+        new_figure = Figure(
+            title=figure_data.title,
+            description=figure_data.description,
+            url=figure_data.url,
+            status=status
+        )
+        
+        db.add(new_figure)
+        db.commit()
+        db.refresh(new_figure)
+        
+        # 处理标签
+        for tag_name in figure_data.tags or []:
+            if not tag_name.strip():
+                continue
+                
+            tag = db.query(Tag).filter(Tag.name == tag_name.strip()).first()
+            if not tag:
+                tag = Tag(name=tag_name.strip())
+                db.add(tag)
+                db.flush()
+            
+            # 创建图片-标签关联
+            figure_tag = FigureTag(figure_id=new_figure.id, tag_id=tag.id)
+            db.add(figure_tag)
+        
+        db.commit()
+        
+        logger.info(f"成功创建图片: {new_figure.title}")
+        return {
+            "message": "图片上传成功", 
+            "id": new_figure.id,
+            "url": new_figure.url
+        }
+        
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"创建图片时发生错误: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"创建图片时发生错误: {str(e)}")
+
+@router.put("/admin/figures/{figure_id}")
+def update_figure(figure_id: int, figure_data: UpdateFigureRequest, db: Session = Depends(database.get_db)):
+    """编辑图片信息"""
+    logger.info(f"收到编辑图片信息请求: ID={figure_id}")
+    try:
+        # 查找图片
+        figure = db.query(Figure).filter(Figure.id == figure_id).first()
+        if not figure:
+            raise HTTPException(status_code=404, detail="图片未找到")
+        
+        # 更新图片信息
+        if figure_data.title is not None:
+            figure.title = figure_data.title
+        if figure_data.description is not None:
+            figure.description = figure_data.description
+        if figure_data.url is not None:
+            # 验证URL格式
+            import re
+            url_pattern = r'^https?://.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$'
+            if not re.match(url_pattern, figure_data.url, re.IGNORECASE):
+                logger.warning(f"图片URL格式不正确: {figure_data.url}")
+                raise HTTPException(status_code=400, detail="请输入有效的图片URL（支持jpg、png、gif、webp格式）")
+            
+            figure.url = figure_data.url
+        if figure_data.status is not None:
+            status_map = {'draft': 0, 'published': 1, 'recycled': 2}
+            if figure_data.status in status_map:
+                figure.status = status_map[figure_data.status]
+        
+        # 处理标签更新
+        if figure_data.tags is not None:
+            # 删除现有标签关联
+            db.query(FigureTag).filter(FigureTag.figure_id == figure_id).delete()
+            
+            # 添加新标签
+            for tag_name in figure_data.tags:
+                if not tag_name.strip():
+                    continue
+                    
+                tag = db.query(Tag).filter(Tag.name == tag_name.strip()).first()
+                if not tag:
+                    tag = Tag(name=tag_name.strip())
+                    db.add(tag)
+                    db.flush()
+                
+                # 创建图片-标签关联
+                figure_tag = FigureTag(figure_id=figure.id, tag_id=tag.id)
+                db.add(figure_tag)
+        
+        db.commit()
+        
+        logger.info(f"成功编辑图片信息: {figure.title}")
+        return {
+            "message": "图片信息编辑成功",
+            "id": figure.id,
+            "title": figure.title
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"编辑图片信息时发生错误: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"编辑图片信息时发生错误: {str(e)}")
 

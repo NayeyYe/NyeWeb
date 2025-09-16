@@ -168,7 +168,7 @@
         <!-- 图片操作栏 -->
         <div class="action-bar">
           <div class="action-buttons">
-            <el-button type="primary" @click="handleUploadFigure">上传图片</el-button>
+            <el-button type="primary" @click="showUploadFigureDialog = true">上传图片</el-button>
             <el-button @click="refreshFigures" :icon="Refresh" circle />
           </div>
         </div>
@@ -339,6 +339,19 @@
       :book="currentEditBook"
       @save-success="handleBookEditSuccess"
     />
+
+    <!-- 图片上传对话框 -->
+    <UploadFigureDialog
+      v-model="showUploadFigureDialog"
+      @upload-success="handleFigureUploadSuccess"
+    />
+
+    <!-- 图片编辑对话框 -->
+    <EditFigureDialog
+      v-model="showEditFigureDialog"
+      :figure="currentEditFigure"
+      @save-success="handleFigureEditSuccess"
+    />
   </div>
 </template>
 
@@ -349,6 +362,8 @@ import {Refresh} from '@element-plus/icons-vue'
 import axios from 'axios'
 import UploadBookDialog from '@/components/Admin/ResourceManagement/UploadBookDialog.vue'
 import EditBookDialog from '@/components/Admin/ResourceManagement/EditBookDialog.vue'
+import UploadFigureDialog from '@/components/Admin/ResourceManagement/UploadFigureDialog.vue'
+import EditFigureDialog from '@/components/Admin/ResourceManagement/EditFigureDialog.vue'
 
 const activeTab = ref('books')
 const books = ref([])
@@ -358,6 +373,9 @@ const allFigureTags = ref([])
 const showUploadBookDialog = ref(false)
 const showEditBookDialog = ref(false)
 const currentEditBook = ref(null)
+const showUploadFigureDialog = ref(false)
+const showEditFigureDialog = ref(false)
+const currentEditFigure = ref(null)
 
 const bookFilterForm = reactive({
   tags: [],
@@ -496,11 +514,21 @@ const refreshBooks = async () => {
 
 // 图片操作
 const handleUploadFigure = () => {
-  ElMessage.info('上传图片功能开发中，敬请期待！')
+  showUploadFigureDialog.value = true
+}
+
+const handleFigureUploadSuccess = () => {
+  refreshFigures()
 }
 
 const handleEditFigure = (figure) => {
-  ElMessage.info(`编辑图片 "${figure.title}" 功能开发中，敬请期待！`)
+  console.log('编辑图片:', figure)
+  currentEditFigure.value = figure
+  showEditFigureDialog.value = true
+}
+
+const handleFigureEditSuccess = () => {
+  refreshFigures()
 }
 
 const deleteFigure = async (figure) => {
