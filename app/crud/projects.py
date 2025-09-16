@@ -29,10 +29,6 @@ class CreateProjectRequest(BaseModel):
     content: str
     date: Optional[str] = None
 
-class GenerateSummaryRequest(BaseModel):
-    content: str
-    title: Optional[str] = None
-
 @router.get("/projects")
 def get_projects(db: Session = Depends(database.get_db)):
     """获取所有项目，按日期倒序排列"""
@@ -272,28 +268,6 @@ def create_project(project_data: CreateProjectRequest, db: Session = Depends(dat
         logger.error(f"创建项目时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"创建项目时发生错误: {str(e)}")
 
-@router.post("/projects/generate-summary")
-async def generate_summary(request: GenerateSummaryRequest):
-    """使用AI生成项目摘要"""
-    logger.info(f"收到生成项目摘要请求，标题: {request.title}")
-    try:
-        # 这里可以集成各种大模型API
-        summary = await call_ai_api_for_summary(request.content, request.title)
-
-        if summary:
-            logger.info("项目摘要生成成功")
-            return {"summary": summary}
-        else:
-            # 降级方案：简单文本提取
-            fallback_summary = extract_simple_summary(request.content)
-            return {"summary": fallback_summary}
-
-    except Exception as e:
-        logger.error(f"生成项目摘要时发生错误: {str(e)}")
-        # 返回降级方案而不是抛出异常
-        fallback_summary = extract_simple_summary(request.content)
-        return {"summary": fallback_summary}
-
 @router.delete("/projects/{project_id}")
 def delete_project(project_id: int, db: Session = Depends(database.get_db)):
     """删除项目，同时删除文件"""
@@ -383,40 +357,3 @@ def delete_project_file(project: Project):
     except Exception as e:
         logger.error(f"删除项目文件失败: {str(e)}")
         raise
-
-async def call_ai_api_for_summary(content: str, title: str = None) -> str:
-    """调用AI API生成摘要"""
-    try:
-        # 模拟AI响应
-        import asyncio
-        await asyncio.sleep(1)  # 模拟API调用延迟
-
-        # 简单的文本处理作为示例
-        summary = extract_simple_summary(content)
-        return summary
-
-    except Exception as e:
-        logger.error(f"调用AI API失败: {str(e)}")
-        return None
-
-def extract_simple_summary(content: str) -> str:
-    """简单的摘要提取降级方案"""
-    if not content:
-        return ""
-
-    # 移除markdown标记
-    text = re.sub(r'^#{1,6}\s+', '', content, flags=re.MULTILINE)  # 移除标题
-    text = re.sub(r'\*\*(.*?)\*\*', r'\1', text)  # 移除粗体
-    text = re.sub(r'\*(.*?)\*', r'\1', text)  # 移除斜体
-    text = re.sub(r'`(.*?)`', r'\1', text)  # 移除行内代码
-    text = re.sub(r'\[(.*?)\]\(.*?\)', r'\1', text)  # 移除链接
-    text = re.sub(r'!\[.*?\]\(.*?\)', '', text)  # 移除图片
-    text = re.sub(r'```[\s\S]*?```', '', text)  # 移除代码块
-    text = re.sub(r'\n{2,}', '\n', text)  # 移除多余换行
-    text = text.strip()
-
-    # 取前150字符作为摘要
-    if len(text) > 150:
-        text = text[:150] + "..."
-
-    return text

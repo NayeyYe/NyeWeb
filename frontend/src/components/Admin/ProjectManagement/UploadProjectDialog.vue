@@ -57,22 +57,10 @@
           v-model="formData.summary"
           type="textarea"
           :rows="4"
-          placeholder="请输入项目描述，或使用AI生成"
+          placeholder="请输入项目描述"
           maxlength="500"
           show-word-limit
         />
-        <div class="summary-actions">
-          <el-button
-            size="small"
-            @click="generateSummary"
-            :loading="summaryLoading"
-            :disabled="!formData.content"
-            type="primary"
-          >
-            <el-icon><MagicStick /></el-icon>
-            AI生成描述
-          </el-button>
-        </div>
       </el-form-item>
 
       <!-- 项目标签 -->
@@ -127,7 +115,7 @@
 <script setup>
 import {onMounted, reactive, ref} from 'vue'
 import {ElMessage, ElMessageBox} from 'element-plus'
-import {Check, Edit, MagicStick, Upload, Upload as UploadIcon} from '@element-plus/icons-vue'
+import {Check, Edit, Upload, Upload as UploadIcon} from '@element-plus/icons-vue'
 import axios from 'axios'
 
 // Props和Emits
@@ -172,7 +160,6 @@ const uploadRef = ref(null)
 // 状态数据
 const existingTags = ref([])
 const uploading = ref(false)
-const summaryLoading = ref(false)
 
 // 获取标签
 const fetchTags = async () => {
@@ -181,34 +168,6 @@ const fetchTags = async () => {
     existingTags.value = res.data.tags || []
   } catch (e) {
     existingTags.value = []
-  }
-}
-
-// 生成摘要
-const generateSummary = async () => {
-  if (!formData.content) {
-    ElMessage.warning('请先选择文件')
-    return
-  }
-
-  summaryLoading.value = true
-  try {
-    const response = await axios.post('/api/projects/generate-summary', {
-      content: formData.content,
-      title: formData.title
-    })
-
-    if (response.data.summary) {
-      formData.summary = response.data.summary
-      ElMessage.success('AI生成描述成功')
-    } else {
-      ElMessage.warning('生成描述失败，请手动输入')
-    }
-  } catch (error) {
-    console.error('生成摘要失败:', error)
-    ElMessage.error('AI生成功能暂不可用，请手动输入')
-  } finally {
-    summaryLoading.value = false
   }
 }
 
@@ -368,11 +327,6 @@ onMounted(() => {
 <style scoped>
 .upload-section {
   width: 100%;
-}
-
-.summary-actions {
-  margin-top: 8px;
-  text-align: right;
 }
 
 .form-tip {

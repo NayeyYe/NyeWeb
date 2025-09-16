@@ -131,22 +131,10 @@
           v-model="formData.summary"
           type="textarea"
           :rows="4"
-          placeholder="请输入文章摘要，或使用AI生成"
+          placeholder="请输入文章摘要"
           maxlength="500"
           show-word-limit
         />
-        <div class="summary-actions">
-          <el-button 
-            size="small" 
-            @click="generateSummary" 
-            :loading="summaryLoading"
-            :disabled="!formData.content"
-            type="primary"
-          >
-            <el-icon><MagicStick /></el-icon>
-            AI生成摘要
-          </el-button>
-        </div>
       </el-form-item>
 
       <!-- 文章标签 -->
@@ -377,7 +365,6 @@ const categoryTreeRef = ref(null)
 const categoryTree = ref([])
 const existingTags = ref([])
 const uploading = ref(false)
-const summaryLoading = ref(false)
 const categoryLoading = ref(false)
 
 // 树形控件配置
@@ -855,36 +842,6 @@ const handleFileRemove = () => {
   formData.file = null
   formData.content = ''
   console.log('文件移除')
-}
-
-// 生成AI摘要
-const generateSummary = async () => {
-  if (!formData.content) {
-    ElMessage.warning('请先选择文件')
-    return
-  }
-
-  summaryLoading.value = true
-  try {
-    const response = await axios.post('/api/articles/generate-summary', {
-      content: formData.content,
-      title: formData.title
-    }, {
-      timeout: 30000
-    })
-
-    if (response.data.summary) {
-      formData.summary = response.data.summary
-      ElMessage.success('摘要生成成功')
-    } else {
-      ElMessage.warning('AI生成摘要为空，请手动输入')
-    }
-  } catch (error) {
-    console.error('生成摘要失败:', error)
-    ElMessage.error('生成摘要失败，请手动输入')
-  } finally {
-    summaryLoading.value = false
-  }
 }
 
 // 组件挂载

@@ -30,10 +30,6 @@ class CreateArticleRequest(BaseModel):
     content: str
     date: Optional[str] = None
 
-class GenerateSummaryRequest(BaseModel):
-    content: str
-    title: Optional[str] = None
-
 class CreateCategoryRequest(BaseModel):
     name: str
     path: Optional[str] = None
@@ -431,59 +427,6 @@ def delete_article(article_id: int, db: Session = Depends(database.get_db)):
         logger.error(f"删除文章时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"删除文章时发生错误: {str(e)}")
 
-# ===== AI & UTILITY APIs =====
-@router.post("/articles/generate-summary")
-async def generate_summary(request: GenerateSummaryRequest):
-    """使用AI生成文章摘要"""
-    logger.info(f"收到生成摘要请求，标题: {request.title}")
-    try:
-        # 这里可以集成各种大模型API
-        summary = await call_ai_api_for_summary(request.content, request.title)
-
-        if summary:
-            logger.info("摘要生成成功")
-            return {"summary": summary}
-        else:
-            # 降级方案：简单文本提取
-            fallback_summary = extract_simple_summary(request.content)
-            return {"summary": fallback_summary}
-
-    except Exception as e:
-        logger.error(f"生成摘要时发生错误: {str(e)}")
-        # 返回降级方案而不是抛出异常
-        fallback_summary = extract_simple_summary(request.content)
-        return {"summary": fallback_summary}
-
-@router.get("/tags")
-def get_all_tags(db: Session = Depends(database.get_db)):
-    """获取所有标签及其文章数量"""
-    logger.info("收到获取所有标签的请求")
-    try:
-        all_tags = []
-        tag_counts = {}
-
-        # 获取所有已发布文章的标签统计
-        articles = db.query(Article).filter(Article.status == 1).all()
-        for article in articles:
-            article_tags = db.query(Tag).join(ArticleTag).filter(ArticleTag.article_id == article.id).all()
-            for tag in article_tags:
-                if tag.name not in all_tags:
-                    all_tags.append(tag.name)
-                tag_counts[tag.name] = tag_counts.get(tag.name, 0) + 1
-
-        logger.info(f"成功获取 {len(all_tags)} 个标签")
-        return {
-            "tags": all_tags,
-            "counts": tag_counts
-        }
-    except Exception as e:
-        logger.error(f"获取标签时发生错误: {str(e)}")
-        # 即使出错，也返回空数据，避免前端报错
-        return {
-            "tags": [],
-            "counts": {}
-        }
-
 # ===== HELPER FUNCTIONS =====
 def scan_physical_categories():
     """扫描物理文件夹获取分类（完全基于文件系统）"""
@@ -568,60 +511,6 @@ def create_physical_category_folder(category_path: str):
         logger.error(f"创建物理文件夹失败: {str(e)}")
         raise
 
-# ...existing AI helper functions...
-async def call_ai_api_for_summary(content: str, title: str = None) -> str:
-    """调用AI API生成摘要"""
-    try:
-        # 这里可以调用不同的AI服务
-        # 例如：OpenAI GPT, 百度千帆, 阿里云通义千问等
-
-        # 示例：调用OpenAI API
-        # import openai
-        # response = await openai.ChatCompletion.acreate(
-        #     model="gpt-3.5-turbo",
-        #     messages=[
-        #         {"role": "system", "content": "你是一个专业的文章摘要生成助手。请为以下文章生成一个简洁、准确的摘要，长度控制在100-200字之间。"},
-        #         {"role": "user", "content": f"标题：{title}\n\n内容：{content[:2000]}"}
-        #     ],
-        #     max_tokens=300
-        # )
-        # return response.choices[0].message.content.strip()
-
-        # ��例：模拟AI响应
-        import asyncio
-        await asyncio.sleep(1)  # 模拟API调用延迟
-
-        # 简单的文本处理作为示例
-        summary = extract_simple_summary(content)
-        return summary
-
-    except Exception as e:
-        logger.error(f"调用AI API失败: {str(e)}")
-        return None
-
-def extract_simple_summary(content: str) -> str:
-    """简单的摘要提取降级方案"""
-    if not content:
-        return ""
-
-    # 移除markdown标记
-    import re
-    text = re.sub(r'^#{1,6}\s+', '', content, flags=re.MULTILINE)  # 移除标题
-    text = re.sub(r'\*\*(.*?)\*\*', r'\1', text)  # 移除粗体
-    text = re.sub(r'\*(.*?)\*', r'\1', text)  # 移除斜体
-    text = re.sub(r'`(.*?)`', r'\1', text)  # 移除行内代码
-    text = re.sub(r'\[(.*?)\]\(.*?\)', r'\1', text)  # 移除链接
-    text = re.sub(r'!\[.*?\]\(.*?\)', '', text)  # 移除图片
-    text = re.sub(r'```[\s\S]*?```', '', text)  # 移除代码块
-    text = re.sub(r'\n{2,}', '\n', text)  # 移除多余换行
-    text = text.strip()
-
-    # 取前150字符作为摘要
-    if len(text) > 150:
-        text = text[:150] + "..."
-
-    return text
-
 def generate_safe_slug(text: str) -> str:
     """生成安全的slug"""
     if not text:
@@ -669,13 +558,26 @@ def save_article_file(article: Article, content: str, category: str = None):
     except Exception as e:
         logger.error(f"保存文章文件失败: {str(e)}")
         raise
-        raise
-        for file_full_path in paths:
-            with open(file_full_path, 'w', encoding='utf-8') as f:
-                f.write(file_content)
-            logger.info(f"成功保存文章文件: {file_full_path}")
 
-    except Exception as e:
-        logger.error(f"保存文章文件失败: {str(e)}")
-        raise
-        raise
+def extract_simple_summary(content: str) -> str:
+    """简单的摘要提取降级方案"""
+    if not content:
+        return ""
+
+    # 移除markdown标记
+    import re
+    text = re.sub(r'^#{1,6}\s+', '', content, flags=re.MULTILINE)  # 移除标题
+    text = re.sub(r'\*\*(.*?)\*\*', r'\1', text)  # 移除粗体
+    text = re.sub(r'\*(.*?)\*', r'\1', text)  # 移除斜体
+    text = re.sub(r'`(.*?)`', r'\1', text)  # 移除行内代码
+    text = re.sub(r'\[(.*?)\]\(.*?\)', r'\1', text)  # 移除链接
+    text = re.sub(r'!\[.*?\]\(.*?\)', '', text)  # 移除图片
+    text = re.sub(r'```[\s\S]*?```', '', text)  # 移除代码块
+    text = re.sub(r'\n{2,}', '\n', text)  # 移除多余换行
+    text = text.strip()
+
+    # 取前150字符作为摘要
+    if len(text) > 150:
+        text = text[:150] + "..."
+
+    return text
