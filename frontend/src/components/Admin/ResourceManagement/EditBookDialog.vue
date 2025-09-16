@@ -34,10 +34,31 @@
       <el-form-item label="图书封面" prop="cover">
         <el-input
           v-model="formData.cover"
-          placeholder="封面图片URL（功能开发中）"
-          disabled
+          placeholder="请输入图床链接URL"
         />
-        <div class="form-tip">封面功能开发中，暂时无法修改</div>
+        <div class="form-tip">请输入完整的图床链接URL，如：https://s21.ax1x.com/xxx.png</div>
+        <!-- 封面预览 -->
+        <div class="cover-preview" v-if="formData.cover">
+          <el-image
+            :src="formData.cover"
+            fit="cover"
+            style="width: 100px; height: 120px;"
+            :preview-src-list="[formData.cover]"
+          >
+            <template #placeholder>
+              <div class="image-slot">
+                <el-icon><Picture /></el-icon>
+                <div>加载中...</div>
+              </div>
+            </template>
+            <template #error>
+              <div class="image-slot">
+                <el-icon><Picture /></el-icon>
+                <div>加载失败</div>
+              </div>
+            </template>
+          </el-image>
+        </div>
       </el-form-item>
 
       <!-- 图书标签 -->
@@ -104,7 +125,8 @@ import { onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { 
   Edit, 
-  Check
+  Check,
+  Picture
 } from '@element-plus/icons-vue'
 import axios from 'axios'
 
@@ -120,7 +142,7 @@ const emit = defineEmits(['update:modelValue', 'save-success'])
 const formData = reactive({
   title: '',
   description: '',
-  cover: '/avatar.jpg',
+  cover: 'https://s21.ax1x.com/2025/09/16/pVfLCfe.png',  // 默认图床封面
   tags: [],
   status: 'draft'
 })
@@ -130,6 +152,14 @@ const formRules = {
   title: [
     { required: true, message: '请输入图书标题', trigger: 'blur' },
     { min: 1, max: 255, message: '标题长度应在1-255个字符之间', trigger: 'blur' }
+  ],
+  cover: [
+    { required: true, message: '请输入封面URL', trigger: 'blur' },
+    { 
+      pattern: /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i, 
+      message: '请输入有效的图片URL（支持jpg、png、gif、webp格式）', 
+      trigger: 'blur' 
+    }
   ],
   status: [
     { required: true, message: '请选择图书状态', trigger: 'change' }
@@ -171,7 +201,7 @@ const initFormData = () => {
     Object.assign(formData, {
       title: props.book.title || '',
       description: props.book.description || '',
-      cover: props.book.cover || '/avatar.jpg',
+      cover: props.book.cover || 'https://s21.ax1x.com/2025/09/16/pVfLCfe.png',  // 使用图床URL
       tags: props.book.tags || [],
       status: props.book.status || 'draft'
     })
@@ -180,7 +210,7 @@ const initFormData = () => {
     originalData.value = {
       title: props.book.title || '',
       description: props.book.description || '',
-      cover: props.book.cover || '/avatar.jpg',
+      cover: props.book.cover || 'https://s21.ax1x.com/2025/09/16/pVfLCfe.png',
       tags: [...(props.book.tags || [])],
       status: props.book.status || 'draft'
     }
@@ -299,6 +329,23 @@ onMounted(() => {
   color: #909399;
   font-size: 12px;
   margin-top: 4px;
+}
+
+.cover-preview {
+  margin-top: 8px;
+}
+
+.image-slot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background: var(--el-fill-color-light);
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .dialog-footer {

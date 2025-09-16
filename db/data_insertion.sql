@@ -33,14 +33,14 @@ VALUES ('人脸识别系统 MTCNN+FaceNet', 'FaceLogin', '2024-05-20',
        ('温度数据可视化系统', 'Visualization', '2024-04-15',
         '提供完整的温度数据可视化解决方案，支持使用Matplotlib和PyEcharts生成24种专业图表，满足从基础趋势分析到复杂三维建模的全方位需求。', 1);
 
--- 插入书籍数据
+-- 插入书籍数据（更新封面为图床链接）
 INSERT INTO `books` (`title`, `description`, `filename`, `cover`, status)
 VALUES ('C++从入门到项目实践', '一本关于Git版本控制系统的专业书籍，从基础到高级，内容全面。', 'C++从入门到项目实践',
-        '/avatar.jpg', 1),
+        'https://s21.ax1x.com/2025/09/16/pVfLCfe.png', 1),
        ('C++项目开发全程实录', '计算机科学的经典之作，帮助程序员从底层理解计算机的工作原理。', 'C++项目开发全程实录',
-        '/avatar.jpg', 1),
+        'https://s21.ax1x.com/2025/09/16/pVfL9YD.png', 1),
        ('Node.js+Express+Vue.js项目开发实战', '全面深入地介绍了JavaScript语言的核心概念和最佳实践。',
-        'Node.js+Express+Vue.js项目开发实战', '/avatar.jpg', 1);
+        'Node.js+Express+Vue.js项目开发实战', 'https://s21.ax1x.com/2025/09/16/pVfqzTK.png', 1);
 
 -- 插入图表数据
 INSERT INTO `figures` (`title`, `description`, `url`, status)

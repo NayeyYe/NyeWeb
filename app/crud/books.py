@@ -52,7 +52,7 @@ def get_books(db: Session = Depends(database.get_db)):
                 "id": book.id,
                 "title": book.title,
                 "description": book.description,
-                "cover": book.cover,
+                "cover": book.cover if book.cover and book.cover.startswith('http') else "https://s21.ax1x.com/2025/09/16/pVfLCfe.png",  # 使用图床URL
                 "filename": book.filename,
                 "tags": tags
             }
@@ -82,7 +82,7 @@ def get_book_by_id(book_id: int, db: Session = Depends(database.get_db)):
             "id": book.id,
             "title": book.title,
             "description": book.description,
-            "cover": book.cover,
+            "cover": book.cover if book.cover and book.cover.startswith('http') else "https://s21.ax1x.com/2025/09/16/pVfLCfe.png",  # 使用图床URL
             "filename": book.filename,
             "tags": tags
         }
@@ -144,7 +144,7 @@ def get_all_books_admin(db: Session = Depends(database.get_db)):
                 "id": book.id,
                 "title": book.title,
                 "description": book.description,
-                "cover": book.cover,
+                "cover": book.cover if book.cover and book.cover.startswith('http') else "https://s21.ax1x.com/2025/09/16/pVfLCfe.png",  # 使用图床URL
                 "filename": book.filename,
                 "tags": tags,
                 "status": status_map.get(book.status, 'draft')
@@ -227,11 +227,23 @@ def create_book(book_data: CreateBookRequest, db: Session = Depends(database.get
         status_map = {'draft': 0, 'published': 1, 'recycled': 2}
         status = status_map.get(book_data.status, 0)
         
+        # 处理封面URL，确保是有效的图床链接
+        cover_url = book_data.cover
+        if not cover_url or cover_url == "/avatar.jpg":
+            cover_url = "https://s21.ax1x.com/2025/09/16/pVfLCfe.png"
+        
+        # 验证URL格式
+        import re
+        url_pattern = r'^https?://.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$'
+        if not re.match(url_pattern, cover_url, re.IGNORECASE):
+            logger.warning(f"封面URL格式不正确，使用默认封面: {cover_url}")
+            cover_url = "https://s21.ax1x.com/2025/09/16/pVfLCfe.png"
+        
         # 创建图书记录
         new_book = Book(
             title=book_data.title,
             description=book_data.description,
-            cover=book_data.cover,
+            cover=cover_url,  # 使用处理后的封面URL
             filename=book_data.filename,
             status=status
         )
@@ -257,7 +269,7 @@ def create_book(book_data: CreateBookRequest, db: Session = Depends(database.get
         
         db.commit()
         
-        logger.info(f"成功创建图书: {new_book.title}")
+        logger.info(f"成功创建图书: {new_book.title}, 封面: {cover_url}")
         return {
             "message": "图书上传成功", 
             "id": new_book.id,
@@ -352,7 +364,19 @@ def update_book(book_id: int, book_data: UpdateBookRequest, db: Session = Depend
         if book_data.description is not None:
             book.description = book_data.description
         if book_data.cover is not None:
-            book.cover = book_data.cover
+            # 处理封面URL，验证格式
+            cover_url = book_data.cover
+            if cover_url == "/avatar.jpg":
+                cover_url = "https://s21.ax1x.com/2025/09/16/pVfLCfe.png"
+            else:
+                # 验证URL格式
+                import re
+                url_pattern = r'^https?://.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$'
+                if not re.match(url_pattern, cover_url, re.IGNORECASE):
+                    logger.warning(f"封面URL格式不正确，使用默认封面: {cover_url}")
+                    cover_url = "https://s21.ax1x.com/2025/09/16/pVfLCfe.png"
+            
+            book.cover = cover_url
         if book_data.status is not None:
             status_map = {'draft': 0, 'published': 1, 'recycled': 2}
             if book_data.status in status_map:
