@@ -4,20 +4,34 @@
     <AdminSidebar />
     <div class="main-content">
       <router-view v-if="$route.path !== '/admin/dashboard'" />
-      <div v-else class="welcome-panel">
-        <div class="welcome-container">
-          <h1>欢迎来到管理后台!</h1>
-          <p>您已成功登录管理员系统。</p>
-          <div class="admin-info">
-            <h3>管理功能:</h3>
-            <ul>
-              <li>项目管理 - 管理网站展示的项目信息</li>
-              <li>文章管理 - 管理知识分享文章</li>
-              <li>工具管理 - 管理小工具功能</li>
-              <li>资源管理 - 管理下载资源</li>
-            </ul>
+      <div v-else class="dashboard-container">
+        <!-- 第一行：时间线编辑器和右侧占位卡片 -->
+        <div class="top-row">
+          <div class="top-left">
+            <TimelineEditor />
           </div>
-          <p class="tip">请从左侧侧边栏选择要管理的功能模块。</p>
+          <div class="top-right">
+            <el-card class="placeholder-card" shadow="never">
+              <template #header>
+                <span>右侧内容区域</span>
+              </template>
+              <div class="placeholder-content">
+                <el-empty description="右侧内容待添加" :image-size="80" />
+              </div>
+            </el-card>
+          </div>
+        </div>
+
+        <!-- 第二行：预留给其他组件 -->
+        <div class="bottom-row">
+          <el-card class="future-content-card" shadow="never">
+            <template #header>
+              <span>下方内容区域</span>
+            </template>
+            <div class="future-content">
+              <el-empty description="下方内容待添加" :image-size="100" />
+            </div>
+          </el-card>
         </div>
       </div>
     </div>
@@ -26,6 +40,7 @@
 
 <script setup>
 import AdminSidebar from '@/components/Admin/AdminSidebar.vue'
+import TimelineEditor from '@/components/Admin/DashBoard/TimelineEditor.vue'
 </script>
 
 <style scoped>
@@ -42,54 +57,58 @@ import AdminSidebar from '@/components/Admin/AdminSidebar.vue'
   overflow-y: auto;
 }
 
-.welcome-panel {
+.dashboard-container {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
+  gap: 20px;
+  height: calc(100vh - 40px);
+}
+
+.top-row {
+  display: flex;
+  gap: 20px;
+  height: 400px;
+}
+
+.top-left {
+  width: 50%;
   height: 100%;
 }
 
-.welcome-container {
-  background: #ffffff;
-  padding: 40px;
+.top-right {
+  width: 50%;
+  height: 100%;
+}
+
+.bottom-row {
+  flex: 1;
+  min-height: 300px;
+}
+
+.placeholder-card,
+.future-content-card {
+  height: 100%;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  max-width: 600px;
-  text-align: center;
-  border: 1px solid #f0f0f0;
+  border: 1px solid #e1e8ed;
 }
 
-h1 {
-  color: #409eff;
-  margin-bottom: 20px;
+.placeholder-content,
+.future-content {
+  height: calc(100% - 60px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.admin-info {
-  background-color: #f8f9fa;
-  padding: 30px;
-  border-radius: 8px;
-  margin: 30px 0;
-  border: 1px solid #e9ecef;
+:deep(.placeholder-card .el-card__body),
+:deep(.future-content-card .el-card__body) {
+  height: calc(100% - 60px);
 }
 
-.admin-info h3 {
-  color: #2c3e50;
-  margin-bottom: 20px;
-}
-
-ul {
-  text-align: left;
-  display: inline-block;
-}
-
-li {
-  margin: 10px 0;
-  color: #666;
-}
-
-.tip {
-  color: #909399;
-  font-style: italic;
-  margin-top: 20px;
+:deep(.placeholder-card .el-card__header),
+:deep(.future-content-card .el-card__header) {
+  padding: 16px 20px;
+  background: #fafafa;
+  border-bottom: 1px solid #ebeef5;
 }
 </style>

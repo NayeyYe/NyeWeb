@@ -2,7 +2,7 @@
   <div class="home-container">
     <div class="left-column">
       <ProfileCard class="profile-card-container" />
-      <TimelineEditor class="timeline-editor-container" />
+      <Timeline class="timeline-editor-container" />
     </div>
     <div class="right-column-content">
       <el-card class="content-card">
@@ -50,7 +50,7 @@
 import {computed, onMounted, ref} from 'vue'
 import axios from 'axios'
 import ProfileCard from '@/components/Main/Home/ProfileCard.vue'
-import TimelineEditor from '@/components/Main/Home/TimelineEditor.vue'
+import Timeline from '@/components/Main/Home/Timeline.vue'
 import ArticleCard from '@/components/Main/Article/ArticleCard.vue'
 import ProjectCard from '@/components/Main/Project/ProjectCard.vue'
 
