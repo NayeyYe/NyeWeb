@@ -1,7 +1,11 @@
 import sys
-
-from fastapi import APIRouter, Depends, HTTPException
+# todo: 上传文件之后，pdf名字不是中文，是编码格式
+# todo: 图书编辑功能还没实现
+# todo: 图书封面要改成url格式
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
+from typing import Optional, List
 
 sys.path.append("..")
 import database
@@ -13,6 +17,15 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("books_api")
 
 router = APIRouter()
+
+# 添加请求模型
+class CreateBookRequest(BaseModel):
+    title: str
+    description: Optional[str] = None
+    cover: Optional[str] = "/avatar.jpg"  # 默认封面
+    tags: Optional[List[str]] = []
+    status: Optional[str] = 'draft'
+    filename: str
 
 @router.get("/books")
 def get_books(db: Session = Depends(database.get_db)):
@@ -198,4 +211,105 @@ def delete_book(book_id: int, db: Session = Depends(database.get_db)):
         db.rollback()
         logger.error(f"删除书籍时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"删除书籍时发生错误: {str(e)}")
+
+@router.post("/books")
+def create_book(book_data: CreateBookRequest, db: Session = Depends(database.get_db)):
+    """创建新图书"""
+    logger.info(f"收到创建图书请求: {book_data.title}")
+    try:
+        # 状态映射
+        status_map = {'draft': 0, 'published': 1, 'recycled': 2}
+        status = status_map.get(book_data.status, 0)
+        
+        # 创建图书记录
+        new_book = Book(
+            title=book_data.title,
+            description=book_data.description,
+            cover=book_data.cover,
+            filename=book_data.filename,
+            status=status
+        )
+        
+        db.add(new_book)
+        db.commit()
+        db.refresh(new_book)
+        
+        # 处理标签
+        for tag_name in book_data.tags or []:
+            if not tag_name.strip():
+                continue
+                
+            tag = db.query(Tag).filter(Tag.name == tag_name.strip()).first()
+            if not tag:
+                tag = Tag(name=tag_name.strip())
+                db.add(tag)
+                db.flush()
+            
+            # 创建图书-标签关联
+            book_tag = BookTag(book_id=new_book.id, tag_id=tag.id)
+            db.add(book_tag)
+        
+        db.commit()
+        
+        logger.info(f"成功创建图书: {new_book.title}")
+        return {
+            "message": "图书上传成功", 
+            "id": new_book.id,
+            "filename": new_book.filename
+        }
+        
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"创建图书时发生错误: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"创建图书时发生错误: {str(e)}")
+
+@router.post("/books/upload")
+async def upload_book_file(file: UploadFile = File(...)):
+    """上传图书文件（PDF）"""
+    logger.info(f"收到文件上传请求: {file.filename}")
+    
+    # 检查文件类型
+    if not file.filename.lower().endswith('.pdf'):
+        raise HTTPException(status_code=400, detail="只能上传PDF文件")
+    
+    try:
+        # 生成安全的文件名
+        import uuid
+        import os
+        file_extension = os.path.splitext(file.filename)[1]
+        safe_filename = f"{uuid.uuid4().hex}{file_extension}"
+        
+        # 确保目录存在
+        dist_dir = "../frontend/dist/resources/book"
+        public_dir = "../frontend/public/resources/book"
+        os.makedirs(dist_dir, exist_ok=True)
+        os.makedirs(public_dir, exist_ok=True)
+        
+        # 保存文件到两个位置
+        dist_path = os.path.join(dist_dir, safe_filename)
+        public_path = os.path.join(public_dir, safe_filename)
+        
+        # 读取文件内容
+        contents = await file.read()
+        
+        # 写入文件
+        with open(dist_path, "wb") as f:
+            f.write(contents)
+        with open(public_path, "wb") as f:
+            f.write(contents)
+            
+        logger.info(f"成功保存文件: {safe_filename}")
+        
+        return {
+            "message": "文件上传成功",
+            "filename": safe_filename,
+            "original_filename": file.filename
+        }
+        
+    except Exception as e:
+        logger.error(f"文件上传失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"文件上传失败: {str(e)}")
 

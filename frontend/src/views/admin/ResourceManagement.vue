@@ -6,7 +6,7 @@
         <!-- 图书操作栏 -->
         <div class="action-bar">
           <div class="action-buttons">
-            <el-button type="primary" @click="handleUploadBook">上传图书</el-button>
+            <el-button type="primary" @click="showUploadBookDialog = true">上传图书</el-button>
             <el-button @click="refreshBooks" :icon="Refresh" circle />
           </div>
         </div>
@@ -326,6 +326,12 @@
         </div>
       </el-tab-pane>
     </el-tabs>
+
+    <!-- 图书上传对话框 -->
+    <UploadBookDialog
+      v-model="showUploadBookDialog"
+      @upload-success="handleBookUploadSuccess"
+    />
   </div>
 </template>
 
@@ -334,12 +340,14 @@ import {computed, onMounted, reactive, ref} from 'vue'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import {Refresh} from '@element-plus/icons-vue'
 import axios from 'axios'
+import UploadBookDialog from '@/components/Admin/ResourceManagement/UploadBookDialog.vue'
 
 const activeTab = ref('books')
 const books = ref([])
 const figures = ref([])
 const allBookTags = ref([])
 const allFigureTags = ref([])
+const showUploadBookDialog = ref(false)
 
 const bookFilterForm = reactive({
   tags: [],
@@ -440,7 +448,12 @@ const resetFigureFilters = () => {
 
 // 图书操作
 const handleUploadBook = () => {
-  ElMessage.info('上传图书功能开发中，敬请期待！')
+  showUploadBookDialog.value = true
+}
+
+const handleBookUploadSuccess = () => {
+  refreshBooks()
+  ElMessage.success('图书上传成功')
 }
 
 const handleEditBook = (book) => {
