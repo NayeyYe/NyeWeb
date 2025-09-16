@@ -200,11 +200,16 @@
     <el-dialog
       v-model="showCreateFolder"
       title="创建分类文件夹"
-      width="650px"
+      width="600px"
       :close-on-click-modal="false"
       :before-close="handleCreateDialogClose"
     >
       <el-form :model="newFolder" :rules="folderRules" label-width="100px" ref="folderFormRef">
+        <!-- 选择父文件夹提示 -->
+        <div class="create-folder-tip">
+          <el-text type="info">请选择一个现有文件夹作为父级，或留空在根目录创建</el-text>
+        </div>
+
         <!-- 父文件夹选择器 -->
         <el-form-item label="父文件夹">
           <div class="parent-folder-section">
@@ -245,12 +250,11 @@
                 </el-tree>
                 <div v-else-if="!categoryLoading && categoryTree.length === 0" class="no-parent">
                   <span>暂无分类文件夹</span>
-                  <div class="form-tip">将在根目录创建</div>
+                  <div class="empty-tip">将在根目录创建</div>
                 </div>
               </div>
             </el-card>
           </div>
-          <div class="form-tip">选择一个现有文件夹作为父级，或留空在根目录创建</div>
           <div v-if="newFolder.parentPath" class="selected-parent">
             <el-icon><Folder /></el-icon>
             已选择父目录: {{ newFolder.parentPath }}
@@ -270,10 +274,9 @@
 
         <!-- 预览完整路径 -->
         <el-form-item label="完整路径">
-          <div class="path-preview">
-            <el-text type="info">{{ previewFolderPath }}</el-text>
+          <div class="path-display">
+            <el-text type="primary" class="path-text">{{ previewFolderPath }}</el-text>
           </div>
-          <div class="form-tip">{{ previewFolderTip }}</div>
         </el-form-item>
       </el-form>
 
@@ -940,7 +943,7 @@ onMounted(() => {
 .parent-selector-card {
   border: 1px solid #e1e8ed;
   border-radius: 6px;
-  height: 220px;
+  height: 200px;
 }
 
 .parent-header {
@@ -957,7 +960,7 @@ onMounted(() => {
 }
 
 .parent-tree-container {
-  height: 170px;
+  height: 150px;
   overflow-y: auto;
 }
 
@@ -974,6 +977,11 @@ onMounted(() => {
   font-style: italic;
   flex-direction: column;
   gap: 8px;
+}
+
+.empty-tip {
+  font-size: 12px;
+  color: #999;
 }
 
 .selected-category,
@@ -1134,13 +1142,17 @@ onMounted(() => {
   font-style: italic;
 }
 
-.path-preview {
+.path-display {
   padding: 8px 12px;
-  background-color: #f0f9ff;
-  border: 1px solid #bae7ff;
-  border-radius: 4px;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+}
+
+.path-text {
   font-family: 'Monaco', 'Consolas', monospace;
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 /* 对话框样式 */
@@ -1164,5 +1176,93 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+.create-folder-tip {
+  margin-bottom: 20px;
+  padding: 12px;
+  background-color: #f0f9ff;
+  border: 1px solid #bae7ff;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.parent-folder-section {
+  width: 100%;
+}
+
+.parent-selector-card {
+  border: 1px solid #e1e8ed;
+  border-radius: 6px;
+  height: 200px;
+}
+
+.parent-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+}
+
+.parent-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.parent-tree-container {
+  height: 150px;
+  overflow-y: auto;
+}
+
+.parent-tree {
+  background: transparent;
+}
+
+.no-parent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #909399;
+  font-style: italic;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.empty-tip {
+  font-size: 12px;
+  color: #999;
+}
+
+.selected-parent {
+  color: #409eff;
+  font-size: 12px;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.clear-parent {
+  color: #666 !important;
+  font-weight: normal !important;
+}
+
+.clear-parent:hover {
+  color: #f56c6c !important;
+}
+
+.path-display {
+  padding: 8px 12px;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+}
+
+.path-text {
+  font-family: 'Monaco', 'Consolas', monospace;
+  font-size: 14px;
+  font-weight: 500;
 }
 </style>

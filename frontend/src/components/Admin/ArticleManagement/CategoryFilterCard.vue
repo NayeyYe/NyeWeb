@@ -3,7 +3,12 @@
     <template #header>
       <div class="filter-header">
         <span>文章分类</span>
-        <el-button link @click="clearCategoryFilter" v-if="modelValue" class="reset-link-btn">清空</el-button>
+        <div class="header-actions">
+          <el-button link @click="clearCategoryFilter" v-if="modelValue" class="reset-link-btn">清空</el-button>
+          <el-button link @click="handleRefresh" :loading="categoryLoading" class="refresh-btn">
+            <el-icon><Refresh /></el-icon>
+          </el-button>
+        </div>
       </div>
     </template>
     <div v-loading="categoryLoading" class="category-content">
@@ -26,6 +31,7 @@
 
 <script setup>
 import {onMounted, ref} from 'vue'
+import {Refresh} from '@element-plus/icons-vue'
 import axios from 'axios'
 
 const props = defineProps({
@@ -112,6 +118,11 @@ const clearCategoryFilter = () => {
   }
 }
 
+// 刷新分类数据
+const handleRefresh = async () => {
+  await fetchCategories()
+}
+
 onMounted(() => {
   fetchCategories()
 })
@@ -135,12 +146,28 @@ onMounted(() => {
   align-items: center;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .reset-link-btn {
   color: #666 !important;
   font-weight: normal !important;
 }
 
 .reset-link-btn:hover {
+  color: #409eff !important;
+  background: transparent !important;
+}
+
+.refresh-btn {
+  color: #666 !important;
+  font-weight: normal !important;
+}
+
+.refresh-btn:hover {
   color: #409eff !important;
   background: transparent !important;
 }

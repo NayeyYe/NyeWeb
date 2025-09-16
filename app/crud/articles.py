@@ -548,22 +548,19 @@ def scan_physical_categories():
     return categories
 
 def create_physical_category_folder(category_path: str):
-    """创建物理分类文件夹"""
+    """创建物理分类文件夹，同时在dist和public目录创建"""
     try:
-        # 构建完整的文件系统路径
-        for base_path in ["../frontend/dist/articles/knowledge", "../frontend/public/articles/knowledge"]:
+        # 构建完整的文件系统路径，同时在两个目录创建
+        base_paths = [
+            "../frontend/dist/articles/knowledge", 
+            "../frontend/public/articles/knowledge"
+        ]
+        
+        for base_path in base_paths:
             full_path = os.path.join(base_path, category_path.replace('/', os.sep))
             
             # 创建目录
             os.makedirs(full_path, exist_ok=True)
-
-            # 创建README.md文件说明该分类
-            readme_path = os.path.join(full_path, 'README.md')
-            if not os.path.exists(readme_path):
-                with open(readme_path, 'w', encoding='utf-8') as f:
-                    f.write(f"# {category_path.split('/')[-1]}\n\n")
-                    f.write(f"分类路径: {category_path}\n\n")
-                    f.write("此文件夹用于存储相关文章。\n")
 
             logger.info(f"成功创建物理文件夹: {full_path}")
 
@@ -664,6 +661,15 @@ def save_article_file(article: Article, content: str, category: str = None):
             file_content = f"# {article.title}\n\n{content}"
 
         # 保存到两个位置
+        for file_full_path in paths:
+            with open(file_full_path, 'w', encoding='utf-8') as f:
+                f.write(file_content)
+            logger.info(f"成功保存文章文件: {file_full_path}")
+
+    except Exception as e:
+        logger.error(f"保存文章文件失败: {str(e)}")
+        raise
+        raise
         for file_full_path in paths:
             with open(file_full_path, 'w', encoding='utf-8') as f:
                 f.write(file_content)

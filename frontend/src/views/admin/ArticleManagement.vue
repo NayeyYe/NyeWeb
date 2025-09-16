@@ -14,14 +14,14 @@
     <div class="filter-section">
       <el-row :gutter="20">
         <!-- 分类筛选 -->
-        <el-col :span="8">
+        <el-col :span="6">
           <CategoryFilterCard
             v-model="filterForm.category"
           />
         </el-col>
 
         <!-- 其他筛选条件 -->
-        <el-col :span="16">
+        <el-col :span="18">
           <FilterControlsCard
             :filters="filterForm"
             :sort-order="sortOrder"
@@ -189,6 +189,14 @@ const getStatusText = (status) => {
     case 'recycled': return '已回收'
     default: return '未知'
   }
+}
+
+// 刷新所有数据
+const refreshAllData = async () => {
+  await Promise.all([
+    fetchArticles(),
+    fetchTags()
+  ])
 }
 
 onMounted(() => {
