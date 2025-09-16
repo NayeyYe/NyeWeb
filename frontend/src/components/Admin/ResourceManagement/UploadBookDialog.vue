@@ -167,13 +167,23 @@ const handleFileChange = (file) => {
   if (file && file.raw) {
     formData.file = file.raw
     
-    // 如果标题为空，从文件名提取标题
+    // 如果标题为空，从文件名提取标题，正确处理中文编码
     if (!formData.title) {
-      const fileName = file.name.replace(/\.pdf$/i, '')
+      let fileName = file.name.replace(/\.pdf$/i, '')
+      
+      // 确保文件名正确解码中文字符
+      try {
+        // 如果文件名已经是正确编码，直接使用
+        fileName = decodeURIComponent(fileName)
+      } catch (e) {
+        // 如果解码失败，使用原文件名
+        console.warn('文件名解码失败，使用原文件名:', e)
+      }
+      
       formData.title = fileName
     }
     
-    console.log('文件选择完成:', file.name)
+    console.log('文件选择完成:', file.name, '提取标题:', formData.title)
   }
 }
 
@@ -223,7 +233,7 @@ const handleUpload = async () => {
     fileFormData.append('file', formData.file)
     
     console.log('开始上传文件...')
-    const fileResponse = await axios.post('/api/books/upload', fileFormData, {
+    const fileResponse = await axios.post('/api/admin/books/upload', fileFormData, {
       timeout: 300000, // 5分钟超时，适应大文件上传
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -245,7 +255,7 @@ const handleUpload = async () => {
     
     console.log('创建图书记录:', bookData)
     
-    const bookResponse = await axios.post('/api/books', bookData, {
+    const bookResponse = await axios.post('/api/admin/books', bookData, {
       timeout: 30000,
       headers: {
         'Accept': 'application/json',

@@ -1,7 +1,5 @@
 import sys
-# todo: 上传文件之后，pdf名字不是中文，是编码格式
-# todo: 图书编辑功能还没实现
-# todo: 图书封面要改成url格式
+
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -212,7 +210,7 @@ def delete_book(book_id: int, db: Session = Depends(database.get_db)):
         logger.error(f"删除书籍时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"删除书籍时发生错误: {str(e)}")
 
-@router.post("/books")
+@router.post("/admin/books")
 def create_book(book_data: CreateBookRequest, db: Session = Depends(database.get_db)):
     """创建新图书"""
     logger.info(f"收到创建图书请求: {book_data.title}")
@@ -266,7 +264,7 @@ def create_book(book_data: CreateBookRequest, db: Session = Depends(database.get
         logger.error(f"创建图书时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"创建图书时发生错误: {str(e)}")
 
-@router.post("/books/upload")
+@router.post("/admin/books/upload")
 async def upload_book_file(file: UploadFile = File(...)):
     """上传图书文件（PDF）"""
     logger.info(f"收到文件上传请求: {file.filename}")
@@ -276,11 +274,27 @@ async def upload_book_file(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="只能上传PDF文件")
     
     try:
-        # 生成安全的文件名
+        # 生成安全的文件名，保持原文件名的可读性
         import uuid
         import os
+        import re
+        
+        # 获取原始文件名（不含扩展名）和扩展名
+        original_name = os.path.splitext(file.filename)[0]
         file_extension = os.path.splitext(file.filename)[1]
-        safe_filename = f"{uuid.uuid4().hex}{file_extension}"
+        
+        # 清理文件名，保留中文、英文、数字、下划线和连字符
+        safe_name = re.sub(r'[^\w\u4e00-\u9fa5\-]', '_', original_name)
+        safe_name = re.sub(r'_+', '_', safe_name).strip('_')
+        
+        # 如果清理后文件名为空，使用UUID
+        if not safe_name:
+            safe_name = uuid.uuid4().hex[:8]
+        
+        # 添加时间戳确保唯一性
+        from datetime import datetime
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        safe_filename = f"{safe_name}_{timestamp}{file_extension}"
         
         # 确保目录存在
         dist_dir = "../frontend/dist/resources/book"
@@ -295,7 +309,7 @@ async def upload_book_file(file: UploadFile = File(...)):
         # 读取文件内容
         contents = await file.read()
         
-        # 写入文件
+        # 写入文件，使用二进制模式避免编码问题
         with open(dist_path, "wb") as f:
             f.write(contents)
         with open(public_path, "wb") as f:
