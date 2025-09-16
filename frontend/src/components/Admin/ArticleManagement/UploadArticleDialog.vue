@@ -682,10 +682,21 @@ const confirmCreateFolder = async () => {
 // 获取标签
 const fetchTags = async () => {
   try {
+    console.log('开始获取文章标签数据...')
     const res = await axios.get('/api/tags')
-    existingTags.value = res.data.tags || []
-  } catch (e) {
+    console.log('标签数据响应:', res.data)
+    
+    if (res.data?.tags && Array.isArray(res.data.tags)) {
+      existingTags.value = res.data.tags
+      console.log('成功获取标签:', existingTags.value)
+    } else {
+      console.warn('标签数据格式异常或为空:', res.data)
+      existingTags.value = []
+    }
+  } catch (error) {
+    console.error('获取标签失败:', error)
     existingTags.value = []
+    // 不显示错误消息，静默失败
   }
 }
 

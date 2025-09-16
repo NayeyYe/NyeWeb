@@ -427,6 +427,43 @@ def delete_article(article_id: int, db: Session = Depends(database.get_db)):
         logger.error(f"删除文章时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"删除文章时发生错误: {str(e)}")
 
+@router.get("/tags")
+def get_all_tags(db: Session = Depends(database.get_db)):
+    """获取所有标签及其文章数量"""
+    logger.info("收到获取所有标签的请求")
+    try:
+        all_tags = []
+        tag_counts = {}
+
+        # 获取所有已发布文章的标签统计
+        articles = db.query(Article).filter(Article.status == 1).all()
+        for article in articles:
+            article_tags = db.query(Tag).join(ArticleTag).filter(ArticleTag.article_id == article.id).all()
+            for tag in article_tags:
+                if tag.name not in all_tags:
+                    all_tags.append(tag.name)
+                tag_counts[tag.name] = tag_counts.get(tag.name, 0) + 1
+
+        # 同时获取所有标签（包括未关联到已发布文章的标签）
+        all_db_tags = db.query(Tag).all()
+        for tag in all_db_tags:
+            if tag.name not in all_tags:
+                all_tags.append(tag.name)
+                tag_counts[tag.name] = 0
+
+        logger.info(f"成功获取 {len(all_tags)} 个标签")
+        return {
+            "tags": all_tags,
+            "counts": tag_counts
+        }
+    except Exception as e:
+        logger.error(f"获取标签时发生错误: {str(e)}")
+        # 即使出错，也返回空数据，避免前端报错
+        return {
+            "tags": [],
+            "counts": {}
+        }
+
 # ===== HELPER FUNCTIONS =====
 def scan_physical_categories():
     """扫描物理文件夹获取分类（完全基于文件系统）"""
