@@ -8,7 +8,7 @@
     <div v-loading="loading">
       <el-carousel :interval="4000" height="200px" v-if="shuffledImages.length > 0" indicator-position="none">
         <el-carousel-item v-for="image in shuffledImages" :key="image.id">
-          <img :src="getImageUrl(image.filename)" class="carousel-image" alt="Favorite Image" />
+          <img :src="image.url" class="carousel-image" alt="Favorite Image" />
         </el-carousel-item>
       </el-carousel>
       <div v-else-if="!loading" class="empty-state">
@@ -54,11 +54,6 @@ const fetchFavoriteImages = async () => {
 const shuffledImages = computed(() => {
   return [...imagesFromDB.value].sort(() => Math.random() - 0.5);
 });
-
-// 生成图片URL
-const getImageUrl = (filename) => {
-  return `/favorite/${filename}`;
-};
 
 onMounted(() => {
   fetchFavoriteImages();

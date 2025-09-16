@@ -1,7 +1,7 @@
 <template>
   <div class="figure-card">
     <el-image
-      :src="`/resources/figure/${figure.filename}`"
+      :src="figure.url"
       fit="cover"
       class="figure-image"
     >
@@ -16,7 +16,7 @@
           <el-button type="primary" circle @click="handlePreview">
             <el-icon><View /></el-icon>
           </el-button>
-          <a :href="`/resources/figure/${figure.filename}`" download>
+          <a :href="figure.url" download target="_blank">
             <el-button type="success" circle>
               <el-icon><Download /></el-icon>
             </el-button>
@@ -26,7 +26,7 @@
     </div>
     <el-image-viewer
       v-if="showViewer"
-      :url-list="[`/resources/figure/${figure.filename}`]"
+      :url-list="[figure.url]"
       @close="showViewer = false"
       :initial-index="0"
     />

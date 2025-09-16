@@ -25,17 +25,24 @@ def get_favorite_images(db: Session = Depends(database.get_db)):
         # 转换为前端需要的格式
         images_data = []
         for image in images:
-            image_dict = {
-                "id": image.id,
-                "filename": image.filename
-            }
-            images_data.append(image_dict)
-            logger.info(f"收藏图片数据: ID={image.id}, 文件名={image.filename}")
+            try:
+                image_dict = {
+                    "id": image.id,
+                    "url": image.url or "https://s21.ax1x.com/2025/09/16/pVfLCfe.png"
+                }
+                images_data.append(image_dict)
+                logger.info(f"收藏图片数据: ID={image.id}, URL={image.url}")
+            except Exception as e:
+                logger.error(f"处理收藏图片数据时发生错误 ID={image.id}: {str(e)}")
+                continue
 
         return images_data
     except Exception as e:
         logger.error(f"获取收藏图片数据时发生错误: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"获取收藏图片数据时发生错误: {str(e)}")
+        import traceback
+        logger.error(f"详细错误信息: {traceback.format_exc()}")
+        # 返回空数据而不是抛出异常
+        return []
 
 @router.get("/favorite-images/{image_id}")
 def get_favorite_image_by_id(image_id: int, db: Session = Depends(database.get_db)):
@@ -49,10 +56,10 @@ def get_favorite_image_by_id(image_id: int, db: Session = Depends(database.get_d
 
         image_dict = {
             "id": image.id,
-            "filename": image.filename
+            "url": image.url or "https://s21.ax1x.com/2025/09/16/pVfLCfe.png"
         }
 
-        logger.info(f"成功获取收藏图片详情: {image.filename}")
+        logger.info(f"成功获取收藏图片详情: {image.url}")
         return image_dict
     except HTTPException:
         raise

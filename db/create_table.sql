@@ -1,4 +1,5 @@
 -- 创建数据库
+drop database if exists nyeweb;
 CREATE DATABASE IF NOT EXISTS `nyeweb` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 USE `nyeweb`;
@@ -40,13 +41,13 @@ CREATE TABLE IF NOT EXISTS `books`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
--- 图表示
+-- 图表表
 CREATE TABLE IF NOT EXISTS `figures`
 (
     `id`          INT AUTO_INCREMENT PRIMARY KEY,
     `title`       VARCHAR(255) NOT NULL,
     `description` TEXT,
-    `filename`    VARCHAR(255),
+    `url`         VARCHAR(2083),  -- 改为url字段，存储图床链接
     `status`      TINYINT NOT NULL DEFAULT 1 COMMENT '0=未发布, 1=已发布, 2=已回收'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
@@ -134,11 +135,11 @@ CREATE TABLE IF NOT EXISTS `timeline`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
--- 收藏图片表
+-- 收藏图片表（修复：使用正确的图床链接）
 CREATE TABLE IF NOT EXISTS `favorite_images`
 (
-    `id`       INT AUTO_INCREMENT PRIMARY KEY,
-    `filename` VARCHAR(255) NOT NULL
+    `id`  INT AUTO_INCREMENT PRIMARY KEY,
+    `url` VARCHAR(2083) NOT NULL  -- 改为url字段，存储图床链接
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 

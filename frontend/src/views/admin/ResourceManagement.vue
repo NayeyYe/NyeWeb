@@ -256,9 +256,9 @@
                   <div class="resource-title">{{ scope.row.title }}</div>
                 </template>
               </el-table-column>
-              <el-table-column prop="filename" label="文件名" min-width="150" show-overflow-tooltip>
+              <el-table-column prop="url" label="图床链接" min-width="200" show-overflow-tooltip>
                 <template #default="scope">
-                  <div class="resource-filename">{{ scope.row.filename || '暂无文件' }}</div>
+                  <div class="resource-filename">{{ scope.row.url || '暂无链接' }}</div>
                 </template>
               </el-table-column>
               <el-table-column prop="description" label="图片描述" min-width="200" show-overflow-tooltip>

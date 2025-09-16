@@ -102,8 +102,8 @@ class Figure(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(255), nullable=False)
     description = Column(Text)
-    filename = Column(String(255))  # 图片文件名
-    status = Column(TINYINT, nullable=False, default=1)  # 0=未发布, 1=已发布, 2=已回收
+    url = Column(String(2083))  # 改为url字段，与数据库表结构一致
+    status = Column(Integer, default=0)  # 0:草稿, 1:发布, 2:回收站
 
 # 图表标签关联模型
 class FigureTag(Base):
@@ -117,7 +117,7 @@ class FavoriteImage(Base):
     __tablename__ = "favorite_images"
 
     id = Column(Integer, primary_key=True, index=True)
-    filename = Column(String(255), nullable=False)
+    url = Column(String(2083), nullable=False)  # 改为url字段，与数据库表结构一致
 
 # 工具模型
 class Tool(Base):
