@@ -332,6 +332,13 @@
       v-model="showUploadBookDialog"
       @upload-success="handleBookUploadSuccess"
     />
+
+    <!-- 图书编辑对话框 -->
+    <EditBookDialog
+      v-model="showEditBookDialog"
+      :book="currentEditBook"
+      @save-success="handleBookEditSuccess"
+    />
   </div>
 </template>
 
@@ -341,6 +348,7 @@ import {ElMessage, ElMessageBox} from 'element-plus'
 import {Refresh} from '@element-plus/icons-vue'
 import axios from 'axios'
 import UploadBookDialog from '@/components/Admin/ResourceManagement/UploadBookDialog.vue'
+import EditBookDialog from '@/components/Admin/ResourceManagement/EditBookDialog.vue'
 
 const activeTab = ref('books')
 const books = ref([])
@@ -348,6 +356,8 @@ const figures = ref([])
 const allBookTags = ref([])
 const allFigureTags = ref([])
 const showUploadBookDialog = ref(false)
+const showEditBookDialog = ref(false)
+const currentEditBook = ref(null)
 
 const bookFilterForm = reactive({
   tags: [],
@@ -453,11 +463,16 @@ const handleUploadBook = () => {
 
 const handleBookUploadSuccess = () => {
   refreshBooks()
-  ElMessage.success('图书上传成功')
 }
 
 const handleEditBook = (book) => {
-  ElMessage.info(`编辑图书 "${book.title}" 功能开发中，敬请期待！`)
+  console.log('编辑图书:', book)
+  currentEditBook.value = book
+  showEditBookDialog.value = true
+}
+
+const handleBookEditSuccess = () => {
+  refreshBooks()
 }
 
 const deleteBook = async (book) => {

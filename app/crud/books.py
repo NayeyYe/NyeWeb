@@ -25,6 +25,14 @@ class CreateBookRequest(BaseModel):
     status: Optional[str] = 'draft'
     filename: str
 
+# 添加编辑图书请求模型
+class UpdateBookRequest(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    cover: Optional[str] = None
+    tags: Optional[List[str]] = None
+    status: Optional[str] = None
+
 @router.get("/books")
 def get_books(db: Session = Depends(database.get_db)):
     """获取所有书籍"""
@@ -326,4 +334,63 @@ async def upload_book_file(file: UploadFile = File(...)):
     except Exception as e:
         logger.error(f"文件上传失败: {str(e)}")
         raise HTTPException(status_code=500, detail=f"文件上传失败: {str(e)}")
+
+# 新增编辑书籍信息的接口
+@router.put("/admin/books/{book_id}")
+def update_book(book_id: int, book_data: UpdateBookRequest, db: Session = Depends(database.get_db)):
+    """编辑图书信息"""
+    logger.info(f"收到编辑图书信息请求: ID={book_id}")
+    try:
+        # 查找书籍
+        book = db.query(Book).filter(Book.id == book_id).first()
+        if not book:
+            raise HTTPException(status_code=404, detail="书籍未找到")
+        
+        # 更新图书信息
+        if book_data.title is not None:
+            book.title = book_data.title
+        if book_data.description is not None:
+            book.description = book_data.description
+        if book_data.cover is not None:
+            book.cover = book_data.cover
+        if book_data.status is not None:
+            status_map = {'draft': 0, 'published': 1, 'recycled': 2}
+            if book_data.status in status_map:
+                book.status = status_map[book_data.status]
+        
+        # 处理标签更新
+        if book_data.tags is not None:
+            # 删除现有标签关联
+            db.query(BookTag).filter(BookTag.book_id == book_id).delete()
+            
+            # 添加新标签
+            for tag_name in book_data.tags:
+                if not tag_name.strip():
+                    continue
+                    
+                tag = db.query(Tag).filter(Tag.name == tag_name.strip()).first()
+                if not tag:
+                    tag = Tag(name=tag_name.strip())
+                    db.add(tag)
+                    db.flush()
+                
+                # 创建图书-标签关联
+                book_tag = BookTag(book_id=book.id, tag_id=tag.id)
+                db.add(book_tag)
+        
+        db.commit()
+        
+        logger.info(f"成功编辑图书信息: {book.title}")
+        return {
+            "message": "图书信息编辑成功",
+            "id": book.id,
+            "title": book.title
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"编辑图书信息时发生错误: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"编辑图书信息时发生错误: {str(e)}")
 
