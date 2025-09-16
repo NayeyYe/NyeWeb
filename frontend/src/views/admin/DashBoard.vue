@@ -5,20 +5,13 @@
     <div class="main-content">
       <router-view v-if="$route.path !== '/admin/dashboard'" />
       <div v-else class="dashboard-container">
-        <!-- 第一行：时间线编辑器和右侧占位卡片 -->
+        <!-- 第一行：时间线编辑器和最喜欢图片编辑器 -->
         <div class="top-row">
           <div class="top-left">
             <TimelineEditor />
           </div>
           <div class="top-right">
-            <el-card class="placeholder-card" shadow="never">
-              <template #header>
-                <span>右侧内容区域</span>
-              </template>
-              <div class="placeholder-content">
-                <el-empty description="右侧内容待添加" :image-size="80" />
-              </div>
-            </el-card>
+            <FavoriteImagesEditor />
           </div>
         </div>
 
@@ -41,6 +34,7 @@
 <script setup>
 import AdminSidebar from '@/components/Admin/AdminSidebar.vue'
 import TimelineEditor from '@/components/Admin/DashBoard/TimelineEditor.vue'
+import FavoriteImagesEditor from '@/components/Admin/DashBoard/FavoriteImagesEditor.vue'
 </script>
 
 <style scoped>
