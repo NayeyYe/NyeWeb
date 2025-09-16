@@ -111,4 +111,28 @@ const router = createRouter({
   routes
 })
 
+// 路由守卫
+router.beforeEach((to, from, next) => {
+  // 检查是否访问管理后台路由（除了登录页面）
+  if (to.path.startsWith('/admin') && to.path !== '/admin/login') {
+    // 检查是否已登录
+    const token = localStorage.getItem('admin_token')
+    const isLoggedIn = localStorage.getItem('admin_logged_in') === 'true'
+
+    if (!token || !isLoggedIn) {
+      // 未登录，重定向到登录页
+      next({
+        path: '/admin/login',
+        query: { redirect: to.fullPath }
+      })
+    } else {
+      // 已登录，继续访问
+      next()
+    }
+  } else {
+    // 不是管理后台路由或者是登录页，直接访问
+    next()
+  }
+})
+
 export default router

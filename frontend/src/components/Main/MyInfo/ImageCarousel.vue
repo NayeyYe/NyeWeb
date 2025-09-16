@@ -6,7 +6,7 @@
       </div>
     </template>
     <div v-loading="loading">
-      <el-carousel :interval="4000" height="200px" v-if="shuffledImages.length > 0" indicator-position="none">
+      <el-carousel :interval="4000" height="400px" v-if="shuffledImages.length > 0" indicator-position="none">
         <el-carousel-item v-for="image in shuffledImages" :key="image.id">
           <img :src="image.url" class="carousel-image" alt="Favorite Image" />
         </el-carousel-item>
@@ -88,7 +88,7 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 200px;
+  height: 400px;
   color: #909399;
   background-color: #f5f7fa;
   border-radius: 6px;
