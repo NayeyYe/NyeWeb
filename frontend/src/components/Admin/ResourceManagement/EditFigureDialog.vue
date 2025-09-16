@@ -37,28 +37,6 @@
           placeholder="请输入图床链接URL"
         />
         <div class="form-tip">请输入完整的图床链接URL，如：https://s21.ax1x.com/xxx.png</div>
-        <!-- 图片预览 -->
-        <div class="image-preview" v-if="formData.url">
-          <el-image
-            :src="formData.url"
-            fit="contain"
-            style="width: 200px; height: 150px;"
-            :preview-src-list="[formData.url]"
-          >
-            <template #placeholder>
-              <div class="image-slot">
-                <el-icon><Picture /></el-icon>
-                <div>加载中...</div>
-              </div>
-            </template>
-            <template #error>
-              <div class="image-slot">
-                <el-icon><Picture /></el-icon>
-                <div>加载失败</div>
-              </div>
-            </template>
-          </el-image>
-        </div>
       </el-form-item>
 
       <!-- 图片标签 -->
@@ -115,8 +93,7 @@ import { onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { 
   Edit, 
-  Check,
-  Picture
+  Check
 } from '@element-plus/icons-vue'
 import axios from 'axios'
 
@@ -319,25 +296,6 @@ onMounted(() => {
   color: #909399;
   font-size: 12px;
   margin-top: 4px;
-}
-
-.image-preview {
-  margin-top: 8px;
-  display: flex;
-  justify-content: center;
-}
-
-.image-slot {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  background: var(--el-fill-color-light);
-  color: var(--el-text-color-secondary);
-  font-size: 12px;
-  flex-direction: column;
-  gap: 4px;
 }
 
 .dialog-footer {

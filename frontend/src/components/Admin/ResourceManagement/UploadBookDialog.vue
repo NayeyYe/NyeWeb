@@ -58,28 +58,6 @@
           placeholder="请输入图床链接URL，如：https://s21.ax1x.com/xxx.png"
         />
         <div class="form-tip">请输入完整的图床链接URL，支持JPG、PNG等格式</div>
-        <!-- 封面预览 -->
-        <div class="cover-preview" v-if="formData.cover">
-          <el-image
-            :src="formData.cover"
-            fit="cover"
-            style="width: 100px; height: 120px;"
-            :preview-src-list="[formData.cover]"
-          >
-            <template #placeholder>
-              <div class="image-slot">
-                <el-icon><Picture /></el-icon>
-                <div>加载中...</div>
-              </div>
-            </template>
-            <template #error>
-              <div class="image-slot">
-                <el-icon><Picture /></el-icon>
-                <div>加载失败</div>
-              </div>
-            </template>
-          </el-image>
-        </div>
       </el-form-item>
 
       <!-- 图书标签 -->
@@ -138,8 +116,7 @@ import {
   Upload, 
   Edit, 
   Check, 
-  Upload as UploadIcon,
-  Picture
+  Upload as UploadIcon
 } from '@element-plus/icons-vue'
 import axios from 'axios'
 
@@ -394,22 +371,5 @@ onMounted(() => {
 :deep(.el-textarea .el-input__count) {
   color: #909399;
   font-size: 12px;
-}
-
-.cover-preview {
-  margin-top: 8px;
-}
-
-.image-slot {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  background: var(--el-fill-color-light);
-  color: var(--el-text-color-secondary);
-  font-size: 12px;
-  flex-direction: column;
-  gap: 4px;
 }
 </style>
