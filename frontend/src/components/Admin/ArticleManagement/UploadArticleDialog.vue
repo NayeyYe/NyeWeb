@@ -54,9 +54,9 @@
                     <el-icon><RefreshIcon /></el-icon>
                     刷新
                   </el-button>
-                  <el-button @click="showDevelopingMessage" size="small" type="success" disabled>
+                  <el-button @click="showCreateCategoryDialog" size="small" type="success">
+                    <el-icon><FolderAdd /></el-icon>
                     新建文件夹
-                    <el-text type="warning" size="small" style="margin-left: 8px;">(待开发)</el-text>
                   </el-button>
                 </div>
               </div>
@@ -67,6 +67,7 @@
                 :data="categoryTree"
                 :props="treeProps"
                 @node-click="handleCategorySelect"
+                @node-contextmenu="handleCategoryContextMenu"
                 :highlight-current="true"
                 :expand-on-click-node="false"
                 node-key="path"
@@ -74,20 +75,38 @@
                 class="category-tree"
                 :current-node-key="formData.category"
                 default-expand-all
-              />
+              >
+                <template #default="{ node, data }">
+                  <div class="tree-node-content">
+                    <span class="tree-node-label">{{ node.label }}</span>
+                    <div class="tree-node-actions" @click.stop>
+                      <el-button 
+                        size="small" 
+                        type="text" 
+                        @click="createSubFolder(data)"
+                        class="create-sub-btn"
+                        title="在此文件夹下创建子文件夹"
+                      >
+                        <el-icon><Plus /></el-icon>
+                      </el-button>
+                    </div>
+                  </div>
+                </template>
+              </el-tree>
               <el-empty 
                 v-else-if="!categoryLoading && categoryTree.length === 0" 
-                description="暂无分类文件夹，请先在系统中创建"
+                description="暂无分类文件夹，请先创建"
                 :image-size="60"
               >
-                <el-button @click="showDevelopingMessage" type="primary" disabled>
-                  创建分类功能开发中
+                <el-button @click="showCreateCategoryDialog" type="primary">
+                  <el-icon><FolderAdd /></el-icon>
+                  创建分类文件夹
                 </el-button>
               </el-empty>
             </div>
           </el-card>
         </div>
-        <div class="form-tip">请选择已存在的分类文件夹</div>
+        <div class="form-tip">请选择已存在的分类文件夹，或右键/点击+号创建新文件夹</div>
         <div v-if="formData.category" class="selected-category">
           <el-icon><Folder /></el-icon>
           已选择: {{ formData.category }}
@@ -176,6 +195,98 @@
         </el-button>
       </div>
     </template>
+
+    <!-- 创建文件夹对话框 -->
+    <el-dialog
+      v-model="showCreateFolder"
+      title="创建分类文件夹"
+      width="650px"
+      :close-on-click-modal="false"
+      :before-close="handleCreateDialogClose"
+    >
+      <el-form :model="newFolder" :rules="folderRules" label-width="100px" ref="folderFormRef">
+        <!-- 父文件夹选择器 -->
+        <el-form-item label="父文件夹">
+          <div class="parent-folder-section">
+            <el-card class="parent-selector-card" shadow="never">
+              <template #header>
+                <div class="parent-header">
+                  <span>选择父文件夹</span>
+                  <div class="parent-actions">
+                    <el-button link @click="clearParentSelection" v-if="newFolder.parentPath" class="clear-parent">
+                      清空选择
+                    </el-button>
+                    <el-button link @click="refreshCategories" :loading="categoryLoading">
+                      <el-icon><RefreshIcon /></el-icon>
+                      刷新
+                    </el-button>
+                  </div>
+                </div>
+              </template>
+              <div v-loading="categoryLoading" class="parent-tree-container">
+                <el-tree
+                  v-if="!categoryLoading && categoryTree.length > 0"
+                  :data="categoryTree"
+                  :props="treeProps"
+                  @node-click="handleParentSelect"
+                  :highlight-current="true"
+                  :expand-on-click-node="false"
+                  node-key="path"
+                  ref="parentTreeRef"
+                  class="parent-tree"
+                  :current-node-key="newFolder.parentPath"
+                  default-expand-all
+                >
+                  <template #default="{ node, data }">
+                    <div class="tree-node-content">
+                      <span class="tree-node-label">{{ node.label }}</span>
+                    </div>
+                  </template>
+                </el-tree>
+                <div v-else-if="!categoryLoading && categoryTree.length === 0" class="no-parent">
+                  <span>暂无分类文件夹</span>
+                  <div class="form-tip">将在根目录创建</div>
+                </div>
+              </div>
+            </el-card>
+          </div>
+          <div class="form-tip">选择一个现有文件夹作为父级，或留空在根目录创建</div>
+          <div v-if="newFolder.parentPath" class="selected-parent">
+            <el-icon><Folder /></el-icon>
+            已选择父目录: {{ newFolder.parentPath }}
+          </div>
+        </el-form-item>
+
+        <!-- 文件夹名称 -->
+        <el-form-item label="文件夹名称" prop="name" required>
+          <el-input
+            v-model="newFolder.name"
+            placeholder="请输入文件夹名称"
+            maxlength="50"
+            show-word-limit
+          />
+          <div class="form-tip">只能包含中文、英文、数字、下划线和连字符</div>
+        </el-form-item>
+
+        <!-- 预览完整路径 -->
+        <el-form-item label="完整路径">
+          <div class="path-preview">
+            <el-text type="info">{{ previewFolderPath }}</el-text>
+          </div>
+          <div class="form-tip">{{ previewFolderTip }}</div>
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="cancelCreateFolder">取消</el-button>
+          <el-button type="primary" @click="confirmCreateFolder" :loading="creatingFolder">
+            <el-icon><Check /></el-icon>
+            创建文件夹
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </el-dialog>
 </template>
 
@@ -186,7 +297,9 @@ import {
   Check,
   Edit,
   Folder,
+  FolderAdd,
   MagicStick,
+  Plus,
   Refresh as RefreshIcon,
   Upload,
   Upload as UploadIcon
@@ -211,6 +324,29 @@ const formData = reactive({
   file: null,
   content: ''
 })
+
+// 新增文件夹相关状态
+const showCreateFolder = ref(false)
+const creatingFolder = ref(false)
+const folderFormRef = ref(null)
+const parentTreeRef = ref(null)
+
+const newFolder = reactive({
+  name: '',
+  parentPath: ''
+})
+
+const folderRules = {
+  name: [
+    { required: true, message: '请输入文件夹名称', trigger: 'blur' },
+    { min: 1, max: 50, message: '文件夹名称长度应在1-50个字符之间', trigger: 'blur' },
+    {
+      pattern: /^[\w\u4e00-\u9fa5\-]+$/,
+      message: '只能包含中文、英文、数字、下划线和连字符',
+      trigger: 'blur'
+    }
+  ]
+}
 
 // 表单验证规则
 const formRules = {
@@ -237,7 +373,6 @@ const categoryTreeRef = ref(null)
 // 状态数据
 const categoryTree = ref([])
 const existingTags = ref([])
-const showCreateCategory = ref(false)
 const uploading = ref(false)
 const summaryLoading = ref(false)
 const categoryLoading = ref(false)
@@ -249,26 +384,26 @@ const treeProps = {
 }
 
 // 计算预览路径
-const previewPath = computed(() => {
-  let path = ''
+const previewFolderPath = computed(() => {
+  let path = 'articles/knowledge'
   
-  if (newCategory.parent) {
-    path = newCategory.parent
+  if (newFolder.parentPath) {
+    path += `/${newFolder.parentPath}`
   }
   
-  if (newCategory.name) {
-    const safeName = newCategory.name.trim()
-    path = path ? `${path}/${safeName}` : safeName
+  if (newFolder.name) {
+    const safeName = newFolder.name.trim()
+    path += `/${safeName}`
   }
   
-  return path || '根目录'
+  return path
 })
 
-const previewPathTip = computed(() => {
-  if (!previewPath.value || previewPath.value === '根目录') {
-    return '文件夹将创建在根目录下'
+const previewFolderTip = computed(() => {
+  if (!newFolder.name) {
+    return '请输入文件夹名称查看完整路径'
   }
-  return `文件夹路径: articles/knowledge/${previewPath.value}`
+  return `文件夹将创建在: ${previewFolderPath.value}`
 })
 
 // 分类操作
@@ -279,6 +414,12 @@ const handleCategorySelect = (data) => {
   } else {
     formData.category = data.path
   }
+}
+
+const handleCategoryContextMenu = (event, data) => {
+  // 阻止默认右键菜单
+  event.preventDefault()
+  createSubFolder(data)
 }
 
 const clearCategorySelection = () => {
@@ -331,7 +472,7 @@ const fetchCategories = async () => {
       ElMessage.error('无法连接到服务器，请检查网络连接和服务器状态')
     } else if (error.response?.status === 404) {
       console.warn('分类API接口不存在')
-      ElMessage.warning('分类接��暂不可用，请联系管理员')
+      ElMessage.warning('分类接口暂不可用，请联系管理员')
     } else if (error.response?.status >= 500) {
       console.error('服务器内部错误:', error.response.data)
       ElMessage.error('服务器错误，请稍后重试')
@@ -403,7 +544,7 @@ const buildCategoryTreeFromData = (categories) => {
 
       nodeMap.set(fullPath, node)
 
-      // 找到父节点并添加到其children���
+      // 找到父节点并添加到其children中
       if (parentPath && nodeMap.has(parentPath)) {
         const parentNode = nodeMap.get(parentPath)
         if (!parentNode.children.find(child => child.path === fullPath)) {
@@ -422,18 +563,130 @@ const buildCategoryTreeFromData = (categories) => {
   return root
 }
 
-// 处理分类变化 - 修复级联选择器的值处理
-const handleCategoryChange = (value) => {
-  console.log('分类变化:', value)
-  if (value && value.length > 0) {
-    // 级联选择器返回的是路径数组，我们取最后一个值作为完整路径
-    formData.category = value[value.length - 1]
-    formData.categoryPath = value
+// 创建文件夹相关方法
+const showCreateCategoryDialog = () => {
+  newFolder.parentPath = ''
+  newFolder.name = ''
+  showCreateFolder.value = true
+}
+
+const createSubFolder = (parentData) => {
+  console.log('创建子文件夹，父级:', parentData)
+  newFolder.parentPath = parentData.path
+  newFolder.name = ''
+  showCreateFolder.value = true
+}
+
+// 父文件夹选择相关方法
+const handleParentSelect = (data) => {
+  console.log('选择父文件夹:', data)
+  if (newFolder.parentPath === data.path) {
+    clearParentSelection()
   } else {
-    formData.category = ''
-    formData.categoryPath = []
+    newFolder.parentPath = data.path
   }
-  console.log('设置的分类路径:', formData.category)
+}
+
+const clearParentSelection = () => {
+  newFolder.parentPath = ''
+  if (parentTreeRef.value) {
+    parentTreeRef.value.setCurrentKey(null)
+  }
+}
+
+const handleCreateDialogClose = () => {
+  // 检查是否有未保存的内容
+  if (newFolder.name) {
+    ElMessageBox.confirm(
+      '确定要关闭吗？未保存的内容将丢失。',
+      '提示',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    ).then(() => {
+      cancelCreateFolder()
+    }).catch(() => {
+      // 用户取消
+    })
+  } else {
+    cancelCreateFolder()
+  }
+}
+
+const cancelCreateFolder = () => {
+  showCreateFolder.value = false
+  newFolder.parentPath = ''
+  newFolder.name = ''
+  if (folderFormRef.value) {
+    folderFormRef.value.resetFields()
+  }
+  if (parentTreeRef.value) {
+    parentTreeRef.value.setCurrentKey(null)
+  }
+}
+
+const confirmCreateFolder = async () => {
+  if (!folderFormRef.value) return
+  
+  try {
+    await folderFormRef.value.validate()
+    
+    creatingFolder.value = true
+    
+    // 构建完整路径
+    const fullPath = newFolder.parentPath 
+      ? `${newFolder.parentPath}/${newFolder.name.trim()}`
+      : newFolder.name.trim()
+    
+    const createData = {
+      name: newFolder.name.trim(),
+      path: fullPath,
+      parent: newFolder.parentPath || null
+    }
+    
+    console.log('创建文件夹数据:', createData)
+    
+    const response = await axios.post('/api/articles/categories', createData, {
+      timeout: 15000,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    })
+    
+    console.log('创建文件夹响应:', response.data)
+    ElMessage.success(`文件夹 "${newFolder.name}" 创建成功`)
+    
+    // 刷新分类树
+    await refreshCategories()
+    
+    // 自动选择新创建的文件夹
+    formData.category = fullPath
+    if (categoryTreeRef.value) {
+      categoryTreeRef.value.setCurrentKey(fullPath)
+    }
+    
+    // 关闭对话框
+    showCreateFolder.value = false
+    cancelCreateFolder()
+    
+  } catch (error) {
+    console.error('创建文件夹失败:', error)
+    
+    if (error.code === 'NETWORK_ERROR' || error.message === 'Network Error') {
+      ElMessage.error('网络连接失败，请检查服务器状态')
+    } else if (error.response?.status === 409) {
+      ElMessage.error('文件夹已存在，请选择其他名称')
+    } else if (error.response?.status === 400) {
+      ElMessage.error(error.response.data?.detail || '请求参数错误')
+    } else {
+      ElMessage.error('创建文件夹失败: ' + (error.response?.data?.detail || error.message))
+    }
+  } finally {
+    creatingFolder.value = false
+  }
 }
 
 // 获取标签
@@ -585,7 +838,7 @@ const handleFileChange = (file) => {
     const reader = new FileReader()
     reader.onload = (e) => {
       formData.content = e.target.result
-      console.log('文件内���读取完成')
+      console.log('文件内容读取完成')
     }
     reader.onerror = (e) => {
       console.error('文件读取失败:', e)
@@ -601,14 +854,35 @@ const handleFileRemove = () => {
   console.log('文件移除')
 }
 
-// 监听新分类名称变化
-watch(() => newCategory.name, () => {
-  // 触发预览路径更新
-})
+// 生成AI摘要
+const generateSummary = async () => {
+  if (!formData.content) {
+    ElMessage.warning('请先选择文件')
+    return
+  }
 
-watch(() => newCategory.parent, () => {
-  // 触发预览路径更新
-})
+  summaryLoading.value = true
+  try {
+    const response = await axios.post('/api/articles/generate-summary', {
+      content: formData.content,
+      title: formData.title
+    }, {
+      timeout: 30000
+    })
+
+    if (response.data.summary) {
+      formData.summary = response.data.summary
+      ElMessage.success('摘要生成成功')
+    } else {
+      ElMessage.warning('AI生成摘要为空，请手动输入')
+    }
+  } catch (error) {
+    console.error('生成摘要失败:', error)
+    ElMessage.error('生成摘要失败，请手动输入')
+  } finally {
+    summaryLoading.value = false
+  }
+}
 
 // 组件挂载
 onMounted(() => {
@@ -666,11 +940,24 @@ onMounted(() => {
 .parent-selector-card {
   border: 1px solid #e1e8ed;
   border-radius: 6px;
-  height: 200px;
+  height: 220px;
+}
+
+.parent-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+}
+
+.parent-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .parent-tree-container {
-  height: 150px;
+  height: 170px;
   overflow-y: auto;
 }
 
@@ -685,6 +972,8 @@ onMounted(() => {
   height: 100%;
   color: #909399;
   font-style: italic;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .selected-category,
@@ -700,7 +989,6 @@ onMounted(() => {
 .clear-parent {
   color: #666 !important;
   font-weight: normal !important;
-  margin-left: 8px;
 }
 
 .clear-parent:hover {
@@ -740,8 +1028,6 @@ onMounted(() => {
   color: #ffffff;
 }
 
-/* ...existing code for other styles... */
-
 /* 自定义滚动条样式 */
 .category-tree-container::-webkit-scrollbar,
 .parent-tree-container::-webkit-scrollbar {
@@ -776,8 +1062,9 @@ onMounted(() => {
 }
 
 :deep(.el-tree-node__content) {
-  padding: 6px 0;
+  padding: 8px 0;
   border-radius: 4px;
+  position: relative;
 }
 
 :deep(.el-tree-node__content:hover) {
@@ -786,10 +1073,96 @@ onMounted(() => {
 
 :deep(.el-tree-node__label) {
   font-size: 14px;
+  flex: 1;
 }
 
 :deep(.el-tree .el-tree-node.is-current > .el-tree-node__content) {
   background-color: #e8f4fd;
   color: #409eff;
+}
+
+.tree-node-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding-right: 8px;
+}
+
+.tree-node-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tree-node-actions {
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.tree-node-content:hover .tree-node-actions {
+  opacity: 1;
+}
+
+.create-sub-btn {
+  padding: 2px 4px;
+  min-height: unset;
+  color: #409eff;
+  border-radius: 4px;
+}
+
+.create-sub-btn:hover {
+  background-color: #ecf5ff;
+}
+
+.parent-folder-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #f5f7fa;
+  border: 1px solid #e4e7ed;
+  border-radius: 4px;
+  color: #606266;
+}
+
+.root-folder {
+  color: #909399;
+  font-style: italic;
+}
+
+.path-preview {
+  padding: 8px 12px;
+  background-color: #f0f9ff;
+  border: 1px solid #bae7ff;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Consolas', monospace;
+  font-size: 13px;
+}
+
+/* 对话框样式 */
+.dialog-footer {
+  text-align: right;
+}
+
+/* 表单提示样式 */
+.form-tip {
+  color: #909399;
+  font-size: 12px;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* 选中分类显示 */
+.selected-category {
+  color: #409eff;
+  font-size: 12px;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 </style>

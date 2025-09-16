@@ -38,7 +38,6 @@ class CreateCategoryRequest(BaseModel):
     name: str
     path: Optional[str] = None
     parent: Optional[str] = None
-    description: Optional[str] = None
 
 # ===== CATEGORY MANAGEMENT APIs =====
 @router.get("/articles/categories")
@@ -110,7 +109,7 @@ def create_category(request: CreateCategoryRequest, db: Session = Depends(databa
 
         # 检查路径是否为空
         if not path:
-            raise HTTPException(status_code=400, detail="分类路径不���为空")
+            raise HTTPException(status_code=400, detail="分类路径不能为空")
 
         # 检查物理文件夹是否已存在
         base_path = "../frontend/dist/articles/knowledge"
@@ -552,21 +551,21 @@ def create_physical_category_folder(category_path: str):
     """创建物理分类文件夹"""
     try:
         # 构建完整的文件系统路径
-        base_path = "../frontend/dist/articles/knowledge"
-        full_path = os.path.join(base_path, category_path.replace('/', os.sep))
+        for base_path in ["../frontend/dist/articles/knowledge", "../frontend/public/articles/knowledge"]:
+            full_path = os.path.join(base_path, category_path.replace('/', os.sep))
+            
+            # 创建目录
+            os.makedirs(full_path, exist_ok=True)
 
-        # 创建目录
-        os.makedirs(full_path, exist_ok=True)
+            # 创建README.md文件说明该分类
+            readme_path = os.path.join(full_path, 'README.md')
+            if not os.path.exists(readme_path):
+                with open(readme_path, 'w', encoding='utf-8') as f:
+                    f.write(f"# {category_path.split('/')[-1]}\n\n")
+                    f.write(f"分类路径: {category_path}\n\n")
+                    f.write("此文件夹用于存储相关文章。\n")
 
-        # 创建README.md文件说明该分类
-        readme_path = os.path.join(full_path, 'README.md')
-        if not os.path.exists(readme_path):
-            with open(readme_path, 'w', encoding='utf-8') as f:
-                f.write(f"# {category_path.split('/')[-1]}\n\n")
-                f.write(f"分类路径: {category_path}\n\n")
-                f.write("此文件夹用于存储相关文章。\n")
-
-        logger.info(f"成功创建物理文件夹: {full_path}")
+            logger.info(f"成功创建物理文件夹: {full_path}")
 
     except Exception as e:
         logger.error(f"创建物理文件夹失败: {str(e)}")
@@ -672,4 +671,5 @@ def save_article_file(article: Article, content: str, category: str = None):
 
     except Exception as e:
         logger.error(f"保存文章文件失败: {str(e)}")
+        raise
         raise
