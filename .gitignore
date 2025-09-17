@@ -46,5 +46,5 @@ __pycache__/
 .venv
 venv/
 
-frontend/public/resources
-frontend/public/favorite
+frontend/public
+!frontend/public/avatar.jpg
