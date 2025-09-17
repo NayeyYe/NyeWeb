@@ -23,7 +23,7 @@ const isAdminLogin = computed(() => {
       <!-- 左侧Logo -->
       <div class="admin-logo-section">
         <router-link to="/" class="admin-logo-link" title="转跳到首页">
-          <span class="admin-logo-text">Nye Web</span>
+          <span class="admin-logo-text">NyeWeb</span>
         </router-link>
       </div>
 
@@ -42,7 +42,7 @@ const isAdminLogin = computed(() => {
       <el-col :span="4">
         <div class="logo-section">
           <router-link to="/" class="logo-link">
-            <span class="logo-text">Nye Web</span>
+            <span class="logo-text">NyeWeb</span>
           </router-link>
         </div>
       </el-col>
