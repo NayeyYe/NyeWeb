@@ -39,7 +39,7 @@
         />
       </el-form-item>
 
-      <!-- 分类文件夹�������择 -->
+      <!-- 分类文件夹���������������择 -->
       <el-form-item label="分类文件夹" prop="category">
         <div class="category-section">
           <el-card class="category-selector-card" shadow="never">
@@ -93,16 +93,12 @@
                   </div>
                 </template>
               </el-tree>
-              <el-empty 
-                v-else-if="!categoryLoading && categoryTree.length === 0" 
-                description="暂无分类文件夹，请先创建"
-                :image-size="60"
+              <div
+                v-else-if="!categoryLoading"
+                class="no-categories-tip"
               >
-                <el-button @click="showCreateCategoryDialog" type="primary">
-                  <el-icon><FolderAdd /></el-icon>
-                  创建分类文件夹
-                </el-button>
-              </el-empty>
+                <el-text type="info">暂无分类文件夹，请先创建文件夹</el-text>
+              </div>
             </div>
           </el-card>
         </div>
@@ -195,11 +191,17 @@
       <el-form :model="newFolder" :rules="folderRules" label-width="100px" ref="folderFormRef">
         <!-- 选择父文件夹提示 -->
         <div class="create-folder-tip">
-          <el-text type="info">请选择一个现有文件夹作为父级，或留空在根目录创建</el-text>
+          <el-text type="info">
+            {{ categoryTree.length > 0 ?
+              (newFolder.parentPath ?
+                `将在 ${newFolder.parentPath} 目录下创建新文件夹` :
+                '将在knowledge目录下创建新文件夹') :
+              '将在knowledge目录下创建新文件夹' }}
+          </el-text>
         </div>
 
-        <!-- 父文件夹选择器 -->
-        <el-form-item label="父文件夹">
+        <!-- 父文件夹选择器 - 只有在存在分类文件夹时才显示 -->
+        <el-form-item label="父文件夹" v-if="categoryTree.length > 0">
           <div class="parent-folder-section">
             <el-card class="parent-selector-card" shadow="never">
               <template #header>
@@ -263,7 +265,15 @@
         <!-- 预览完整路径 -->
         <el-form-item label="完整路径">
           <div class="path-display">
-            <el-text type="primary" class="path-text">{{ previewFolderPath }}</el-text>
+            <el-text type="primary" class="path-text">
+              articles/knowledge/{{
+                categoryTree.length > 0 ?
+                  (newFolder.parentPath ?
+                    `${newFolder.parentPath}/${newFolder.name || '...'}` :
+                    `${newFolder.name || '...'}`) :
+                  `${newFolder.name || '...'}`
+              }}
+            </el-text>
           </div>
         </el-form-item>
       </el-form>
@@ -428,7 +438,7 @@ const showDevelopingMessage = () => {
 const fetchCategories = async () => {
   categoryLoading.value = true
   try {
-    console.log('开始获取分类数据...')
+    console.log('开��获取分类数据...')
 
     const response = await axios.get('/api/articles/categories', {
       timeout: 10000,
@@ -625,15 +635,22 @@ const confirmCreateFolder = async () => {
     
     creatingFolder.value = true
     
-    // 构建完整路径
-    const fullPath = newFolder.parentPath 
-      ? `${newFolder.parentPath}/${newFolder.name.trim()}`
-      : newFolder.name.trim()
-    
+    // 根据是否存在分类文件夹决定路径构建方式
+    let fullPath
+    if (categoryTree.value.length > 0) {
+      // 有分类文件夹时，使用父文件夹选择器的结果
+      fullPath = newFolder.parentPath ?
+        `${newFolder.parentPath}/${newFolder.name.trim()}` :
+        newFolder.name.trim()
+    } else {
+      // 没有分类文件夹时，直接在knowledge下创建
+      fullPath = newFolder.name.trim()
+    }
+
     const createData = {
       name: newFolder.name.trim(),
       path: fullPath,
-      parent: newFolder.parentPath || null
+      parent: (categoryTree.value.length > 0) ? (newFolder.parentPath || null) : null
     }
     
     console.log('创建文件夹数据:', createData)
@@ -1232,5 +1249,16 @@ onMounted(() => {
   font-family: 'Monaco', 'Consolas', monospace;
   font-size: 14px;
   font-weight: 500;
+}
+
+.no-categories-tip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #909399;
+  font-size: 14px;
+  text-align: center;
+  padding: 20px;
 }
 </style>

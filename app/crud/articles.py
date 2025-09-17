@@ -56,14 +56,6 @@ def get_article_categories():
                     "articles": cat.get("articles", [])
                 })
 
-        # 如果没有分类，创建一个默认提示
-        if len(categories_data) == 0:
-            categories_data = [{
-                "path": "请先创建分类文件夹",
-                "count": 0,
-                "articles": []
-            }]
-
         logger.info(f"成功构建分类树，包含 {len(categories_data)} 个分类")
         return {
             "categories": categories_data,
@@ -73,14 +65,10 @@ def get_article_categories():
         logger.error(f"获取文章分类树时发生错误: {str(e)}")
         import traceback
         logger.error(f"详细错误信息: {traceback.format_exc()}")
-        # 即使出错，也返回一个默认分类，避免前端报错
+        # 出错时返回空分类列表
         return {
-            "categories": [{
-                "path": "error",
-                "count": 0,
-                "articles": []
-            }],
-            "total": 1
+            "categories": [],
+            "total": 0
         }
 
 @router.post("/articles/categories")
@@ -566,7 +554,7 @@ def generate_safe_slug(text: str) -> str:
     return slug or "untitled"
 
 def save_article_file(article: Article, content: str, category: str = None):
-    """保存文章文件到磁盘，确保分类文件夹存在（dist和public）"""
+    """保存文章文件���磁盘，确保分类文件夹存在（dist和public）"""
     try:
         # 构建文件路径
         dist_base_path = "../frontend/dist/articles/knowledge"

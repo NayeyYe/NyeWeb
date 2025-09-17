@@ -74,29 +74,84 @@ const fetchCategories = async () => {
 
 // 从数据库数据构建分类树
 const buildCategoryTreeFromData = (categories) => {
+  if (!categories || categories.length === 0) {
+    categoryTree.value = []
+    return
+  }
+
+  // 过滤掉错误的分类数据
+  const validCategories = categories.filter(cat =>
+    cat.path &&
+    cat.path !== "请先创建分类文件夹" &&
+    cat.path !== "error" &&
+    !cat.path.includes("请先创建")
+  )
+
+  if (validCategories.length === 0) {
+    categoryTree.value = []
+    return
+  }
+
   const root = []
   const map = new Map()
 
-  categories.forEach(cat => {
-    const pathParts = cat.path.split('/')
-    let currentLevel = root
+  // 收集所有路径段
+  const allPaths = new Set()
+
+  validCategories.forEach(category => {
+    if (!category.path) return
+
+    const pathParts = category.path.split('/')
     let currentPath = ''
 
+    // 为每个路径段创建完整路径
     pathParts.forEach((part, index) => {
-      currentPath += (index > 0 ? '/' : '') + part
-      let node = map.get(currentPath)
+      if (!part.trim()) return // 跳过空路径段
 
-      if (!node) {
-        node = {
-          label: part,
-          path: currentPath,
-          children: [],
-        }
-        map.set(currentPath, node)
-        currentLevel.push(node)
-      }
-      currentLevel = node.children
+      const parentPath = currentPath
+      currentPath = currentPath ? `${currentPath}/${part}` : part
+      allPaths.add(currentPath)
     })
+  })
+
+  // 按路径长度排序，确保父节点先创建
+  const sortedPaths = Array.from(allPaths).sort((a, b) => {
+    const aDepth = a.split('/').length
+    const bDepth = b.split('/').length
+    if (aDepth !== bDepth) return aDepth - bDepth
+    return a.localeCompare(b)
+  })
+
+  // 创建所有节点
+  const nodeMap = new Map()
+
+  sortedPaths.forEach(fullPath => {
+    if (!nodeMap.has(fullPath)) {
+      const pathParts = fullPath.split('/')
+      const label = pathParts[pathParts.length - 1]
+      const parentPath = pathParts.slice(0, -1).join('/')
+
+      const node = {
+        path: fullPath,
+        label: label,
+        children: []
+      }
+
+      nodeMap.set(fullPath, node)
+
+      // 找到父节点并添加到其children中
+      if (parentPath && nodeMap.has(parentPath)) {
+        const parentNode = nodeMap.get(parentPath)
+        if (!parentNode.children.find(child => child.path === fullPath)) {
+          parentNode.children.push(node)
+        }
+      } else if (!parentPath) {
+        // 根节点
+        if (!root.find(child => child.path === fullPath)) {
+          root.push(node)
+        }
+      }
+    }
   })
 
   categoryTree.value = root
@@ -213,4 +268,3 @@ onMounted(() => {
   background-color: #f5f7fa;
 }
 </style>
-
