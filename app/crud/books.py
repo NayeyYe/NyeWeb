@@ -23,7 +23,7 @@ class CreateBookRequest(BaseModel):
     cover: Optional[str] = "/avatar.jpg"  # 默认封面
     tags: Optional[List[str]] = []
     status: Optional[str] = 'draft'
-    filename: str
+    filename: str  # 现在存储网盘URL
 
 # 添加编辑图书请求模型
 class UpdateBookRequest(BaseModel):
@@ -239,12 +239,16 @@ def create_book(book_data: CreateBookRequest, db: Session = Depends(database.get
             logger.warning(f"封面URL格式不正确，使用默认封面: {cover_url}")
             cover_url = "https://s21.ax1x.com/2025/09/16/pVfLCfe.png"
         
+        # 验证网盘URL格式
+        if not book_data.filename.startswith(('http://', 'https://')):
+            raise HTTPException(status_code=400, detail="网盘链接必须以http://或https://开头")
+        
         # 创建图书记录
         new_book = Book(
             title=book_data.title,
             description=book_data.description,
-            cover=cover_url,  # 使用处理后的封面URL
-            filename=book_data.filename,
+            cover=cover_url,
+            filename=book_data.filename,  # 现在存储网盘URL
             status=status
         )
         
@@ -269,9 +273,9 @@ def create_book(book_data: CreateBookRequest, db: Session = Depends(database.get
         
         db.commit()
         
-        logger.info(f"成功创建图书: {new_book.title}, 封面: {cover_url}")
+        logger.info(f"成功创建图书: {new_book.title}, 网盘链接: {book_data.filename}")
         return {
-            "message": "图书上传成功", 
+            "message": "图书创建成功", 
             "id": new_book.id,
             "filename": new_book.filename
         }
@@ -284,68 +288,8 @@ def create_book(book_data: CreateBookRequest, db: Session = Depends(database.get
         logger.error(f"创建图书时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"创建图书时发生错误: {str(e)}")
 
-@router.post("/admin/books/upload")
-async def upload_book_file(file: UploadFile = File(...)):
-    """上传图书文件（PDF）"""
-    logger.info(f"收到文件上传请求: {file.filename}")
-    
-    # 检查文件类型
-    if not file.filename.lower().endswith('.pdf'):
-        raise HTTPException(status_code=400, detail="只能上传PDF文件")
-    
-    try:
-        # 生成安全的文件名，保持原文件名的可读性
-        import uuid
-        import os
-        import re
-        
-        # 获取原始文件名（不含扩展名）和扩展名
-        original_name = os.path.splitext(file.filename)[0]
-        file_extension = os.path.splitext(file.filename)[1]
-        
-        # 清理文件名，保留中文、英文、数字、下划线和连字符
-        safe_name = re.sub(r'[^\w\u4e00-\u9fa5\-]', '_', original_name)
-        safe_name = re.sub(r'_+', '_', safe_name).strip('_')
-        
-        # 如果清理后文件名为空，使用UUID
-        if not safe_name:
-            safe_name = uuid.uuid4().hex[:8]
-        
-        # 添加时间戳确保唯一性
-        from datetime import datetime
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        safe_filename = f"{safe_name}_{timestamp}{file_extension}"
-        
-        # 确保目录存在
-        dist_dir = "../frontend/dist/resources/book"
-        public_dir = "../frontend/public/resources/book"
-        os.makedirs(dist_dir, exist_ok=True)
-        os.makedirs(public_dir, exist_ok=True)
-        
-        # 保存文件到两个位置
-        dist_path = os.path.join(dist_dir, safe_filename)
-        public_path = os.path.join(public_dir, safe_filename)
-        
-        # 读取文件内容
-        contents = await file.read()
-        
-        # 写入文件，使用二进制模式避免编码问题
-        with open(dist_path, "wb") as f:
-            f.write(contents)
-        with open(public_path, "wb") as f:
-            f.write(contents)
-            
-        logger.info(f"成功保存文件: {safe_filename}")
-        
-        return {
-            "message": "文件上传成功",
-            "filename": safe_filename,
-            "original_filename": file.filename
-        }
-        
-    except Exception as e:
-        logger.error(f"文件上传失败: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"文件上传失败: {str(e)}")
+# 删除文件上传接口
+# @router.post("/admin/books/upload") 整个接口已删除
 
 # 新增编辑书籍信息的接口
 @router.put("/admin/books/{book_id}")
@@ -361,6 +305,62 @@ def update_book(book_id: int, book_data: UpdateBookRequest, db: Session = Depend
         # 更新图书信息
         if book_data.title is not None:
             book.title = book_data.title
+        if book_data.description is not None:
+            book.description = book_data.description
+        if book_data.cover is not None:
+            # 处理封面URL，验证格式
+            cover_url = book_data.cover
+            if cover_url == "/avatar.jpg":
+                cover_url = "https://s21.ax1x.com/2025/09/16/pVfLCfe.png"
+            else:
+                # 验证URL格式
+                import re
+                url_pattern = r'^https?://.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$'
+                if not re.match(url_pattern, cover_url, re.IGNORECASE):
+                    logger.warning(f"封面URL格式不正确，使用默认封面: {cover_url}")
+                    cover_url = "https://s21.ax1x.com/2025/09/16/pVfLCfe.png"
+            
+            book.cover = cover_url
+        if book_data.status is not None:
+            status_map = {'draft': 0, 'published': 1, 'recycled': 2}
+            if book_data.status in status_map:
+                book.status = status_map[book_data.status]
+        
+        # 处理标签更新
+        if book_data.tags is not None:
+            # 删除现有标签关联
+            db.query(BookTag).filter(BookTag.book_id == book_id).delete()
+            
+            # 添加新标签
+            for tag_name in book_data.tags:
+                if not tag_name.strip():
+                    continue
+                    
+                tag = db.query(Tag).filter(Tag.name == tag_name.strip()).first()
+                if not tag:
+                    tag = Tag(name=tag_name.strip())
+                    db.add(tag)
+                    db.flush()
+                
+                # 创建图书-标签关联
+                book_tag = BookTag(book_id=book.id, tag_id=tag.id)
+                db.add(book_tag)
+        
+        db.commit()
+        
+        logger.info(f"成功编辑图书信息: {book.title}")
+        return {
+            "message": "图书信息编辑成功",
+            "id": book.id,
+            "title": book.title
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"编辑图书信息时发生错误: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"编辑图书信息时发生错误: {str(e)}")
         if book_data.description is not None:
             book.description = book_data.description
         if book_data.cover is not None:

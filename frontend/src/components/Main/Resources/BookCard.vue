@@ -17,7 +17,6 @@
 </template>
 
 <script setup>
-import {computed} from 'vue';
 import {ElMessage} from 'element-plus';
 
 const props = defineProps({
@@ -27,50 +26,22 @@ const props = defineProps({
   },
 });
 
-// 确保文件名总是有 .pdf 后缀
-const downloadFilename = computed(() => {
-  return props.book.filename.endsWith('.pdf') ? props.book.filename : `${props.book.filename}.pdf`;
-});
-
-// 构建完整的下载 URL
-const pdfUrl = computed(() => {
-  return `/resources/book/${encodeURIComponent(downloadFilename.value)}`;
-});
-
-const downloadPdf = async () => {
-  console.log('开始下载PDF:', downloadFilename.value);
-  console.log('请求URL:', pdfUrl.value);
+const downloadPdf = () => {
+  console.log('点击下载按钮，跳转到网盘链接:', props.book.filename);
 
   try {
-    const response = await fetch(pdfUrl.value);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    // 验证URL格式
+    if (!props.book.filename || !props.book.filename.startsWith(('http://', 'https://'))) {
+      ElMessage.error('无效的下载链接');
+      return;
     }
 
-    // 检查响应的 Content-Type 是否为 PDF
-    const contentType = response.headers.get('content-type');
-    console.log('响应Content-Type:', contentType);
-
-    if (!contentType || !contentType.includes('application/pdf')) {
-      console.error('服务器返回的不是 PDF 文件，而是:', contentType);
-      throw new Error('服务器返回的不是 PDF 文件');
-    }
-
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = downloadFilename.value;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-
-    ElMessage.success('下载成功');
+    // 在新窗口打开网盘链接
+    window.open(props.book.filename, '_blank');
+    ElMessage.success('正在跳转到下载页面');
   } catch (error) {
-    console.error('下载失败:', error);
-    ElMessage.error('下载失败，请稍后重试');
+    console.error('跳转失败:', error);
+    ElMessage.error('跳转失败，请稍后重试');
   }
 };
 </script>
