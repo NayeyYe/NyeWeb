@@ -423,21 +423,14 @@ def get_all_tags(db: Session = Depends(database.get_db)):
         all_tags = []
         tag_counts = {}
 
-        # 获取所有已发布文章的标签统计
-        articles = db.query(Article).filter(Article.status == 1).all()
+        # 获取所有文章的标签统计（不限制状态）
+        articles = db.query(Article).all()
         for article in articles:
             article_tags = db.query(Tag).join(ArticleTag).filter(ArticleTag.article_id == article.id).all()
             for tag in article_tags:
                 if tag.name not in all_tags:
                     all_tags.append(tag.name)
                 tag_counts[tag.name] = tag_counts.get(tag.name, 0) + 1
-
-        # 同时获取所有标签（包括未关联到已发布文章的标签）
-        all_db_tags = db.query(Tag).all()
-        for tag in all_db_tags:
-            if tag.name not in all_tags:
-                all_tags.append(tag.name)
-                tag_counts[tag.name] = 0
 
         logger.info(f"成功获取 {len(all_tags)} 个标签")
         return {
@@ -454,7 +447,7 @@ def get_all_tags(db: Session = Depends(database.get_db)):
 
 # ===== HELPER FUNCTIONS =====
 def scan_physical_categories():
-    """扫描物理文件夹获取分类（完全基于文件系统）"""
+    """扫��物理文件夹获取分类（完全基于文件系统）"""
     categories = []
     base_path = "../frontend/dist/articles/knowledge"
 
@@ -516,7 +509,7 @@ def scan_physical_categories():
     return categories
 
 def create_physical_category_folder(category_path: str):
-    """创建物理分类文件夹，同时在dist和public目录创建"""
+    """创建物理分类文件夹，��时在dist和public目录创建"""
     try:
         # 构建完整的文件系统路径，同时在两个目录创建
         base_paths = [

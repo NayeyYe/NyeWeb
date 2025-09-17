@@ -3,7 +3,13 @@
     <template #header>
       <div class="filter-header">
         <span>筛选条件</span>
-        <el-button link @click="resetAllFilters" class="reset-link-btn">重置</el-button>
+        <div class="header-actions">
+          <el-button link @click="fetchTags" :loading="loading" class="refresh-btn">
+            <el-icon><Refresh /></el-icon>
+            刷新
+          </el-button>
+          <el-button link @click="resetAllFilters" class="reset-link-btn">重置</el-button>
+        </div>
       </div>
     </template>
     <div class="filter-controls">
@@ -17,7 +23,7 @@
             multiple
             filterable
             allow-create
-            placeholder="选择或输入标签（最多3个）"
+            placeholder="选择标签（最多3个）"
             style="width: 350px"
             size="default"
             :multiple-limit="3"
@@ -86,6 +92,7 @@
 <script setup>
 import {onMounted, ref} from 'vue'
 import axios from 'axios'
+import { Refresh } from '@element-plus/icons-vue'
 
 const props = defineProps({
   filters: Object,
@@ -95,15 +102,20 @@ const props = defineProps({
 const emit = defineEmits(['update:tags', 'update:title', 'update:status', 'update:sortOrder', 'reset'])
 
 const allTags = ref([])
+const loading = ref(false)
 
-// 获取标签
+// 获取标签（获取所有文章的标签，不限制状态）
 const fetchTags = async () => {
   try {
+    loading.value = true
     const res = await axios.get('/api/tags')
     allTags.value = res.data.tags || []
+    console.log('获取到的所有标签:', allTags.value)
   } catch (error) {
     console.error('获取标签失败:', error)
     allTags.value = []
+  } finally {
+    loading.value = false
   }
 }
 
@@ -163,6 +175,25 @@ onMounted(() => {
   align-items: center;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.refresh-btn {
+  color: #666 !important;
+  font-weight: normal !important;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.refresh-btn:hover {
+  color: #409eff !important;
+  background: transparent !important;
+}
+
 .reset-link-btn {
   color: #666 !important;
   font-weight: normal !important;
@@ -202,4 +233,3 @@ onMounted(() => {
   padding: 20px;
 }
 </style>
-
