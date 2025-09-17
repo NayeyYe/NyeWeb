@@ -48,3 +48,4 @@ venv/
 
 frontend/public
 !frontend/public/avatar.jpg
+!frontend/public/favicon.svg
