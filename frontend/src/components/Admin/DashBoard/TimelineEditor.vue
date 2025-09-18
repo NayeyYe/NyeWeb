@@ -5,9 +5,11 @@
         <div class="header">
           <span>时间线编辑</span>
           <div class="header-actions">
-            <el-button @click="refreshTimeline" :icon="Refresh" circle size="small" />
-            <el-button @click="showAddDialog = true" type="primary" size="small">
-              <el-icon><Plus /></el-icon>
+            <el-button :icon="Refresh" circle size="small" @click="refreshTimeline"/>
+            <el-button size="small" type="primary" @click="showAddDialog = true">
+              <el-icon>
+                <Plus/>
+              </el-icon>
               添加
             </el-button>
           </div>
@@ -16,10 +18,10 @@
 
       <div v-loading="loading" class="timeline-content">
         <div v-if="timelineList.length > 0" class="timeline-list">
-          <div 
-            v-for="item in timelineList" 
-            :key="item.id" 
-            class="timeline-item"
+          <div
+              v-for="item in timelineList"
+              :key="item.id"
+              class="timeline-item"
           >
             <div class="item-left">
               <span class="item-date">{{ formatDate(item.timestamp) }}</span>
@@ -27,19 +29,19 @@
             <div class="item-right">
               <div class="item-content">{{ item.content }}</div>
               <div class="item-actions">
-                <el-button 
-                  @click="editItem(item)" 
-                  type="primary" 
-                  size="small" 
-                  text
+                <el-button
+                    size="small"
+                    text
+                    type="primary"
+                    @click="editItem(item)"
                 >
                   编辑
                 </el-button>
-                <el-button 
-                  @click="deleteItem(item)" 
-                  type="danger" 
-                  size="small" 
-                  text
+                <el-button
+                    size="small"
+                    text
+                    type="danger"
+                    @click="deleteItem(item)"
                 >
                   删除
                 </el-button>
@@ -47,36 +49,36 @@
             </div>
           </div>
         </div>
-        <el-empty v-else description="暂无时间线数据" :image-size="60" />
+        <el-empty v-else :image-size="60" description="暂无时间线数据"/>
       </div>
     </el-card>
 
     <!-- 添加/编辑对话框 -->
     <el-dialog
-      v-model="showAddDialog"
-      :title="editingItem ? '编辑时间线' : '添加时间线'"
-      width="500px"
-      :before-close="handleDialogClose"
+        v-model="showAddDialog"
+        :before-close="handleDialogClose"
+        :title="editingItem ? '编辑时间线' : '添加时间线'"
+        width="500px"
     >
-      <el-form :model="formData" :rules="formRules" label-width="80px" ref="formRef">
+      <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px">
         <el-form-item label="日期时间" prop="timestamp" required>
           <el-date-picker
-            v-model="formData.timestamp"
-            type="datetime"
-            placeholder="选择日期时间"
-            format="YYYY-MM-DD HH:mm:ss"
-            value-format="YYYY-MM-DD HH:mm:ss"
-            style="width: 100%"
+              v-model="formData.timestamp"
+              format="YYYY-MM-DD HH:mm:ss"
+              placeholder="选择日期时间"
+              style="width: 100%"
+              type="datetime"
+              value-format="YYYY-MM-DD HH:mm:ss"
           />
         </el-form-item>
         <el-form-item label="内容" prop="content" required>
           <el-input
-            v-model="formData.content"
-            type="textarea"
-            :rows="4"
-            placeholder="请输入时间线内容"
-            maxlength="500"
-            show-word-limit
+              v-model="formData.content"
+              :rows="4"
+              maxlength="500"
+              placeholder="请输入时间线内容"
+              show-word-limit
+              type="textarea"
           />
         </el-form-item>
       </el-form>
@@ -84,7 +86,7 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="handleDialogClose">取消</el-button>
-          <el-button type="primary" @click="saveItem" :loading="saving">
+          <el-button :loading="saving" type="primary" @click="saveItem">
             {{ editingItem ? '更新' : '添加' }}
           </el-button>
         </div>
@@ -94,9 +96,9 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Refresh } from '@element-plus/icons-vue'
+import {onMounted, reactive, ref} from 'vue'
+import {ElMessage, ElMessageBox} from 'element-plus'
+import {Plus, Refresh} from '@element-plus/icons-vue'
 import axios from 'axios'
 
 const loading = ref(false)
@@ -113,11 +115,11 @@ const formData = reactive({
 
 const formRules = {
   timestamp: [
-    { required: true, message: '请选择日期时间', trigger: 'change' }
+    {required: true, message: '请选择日期时间', trigger: 'change'}
   ],
   content: [
-    { required: true, message: '请输入内容', trigger: 'blur' },
-    { min: 1, max: 500, message: '内容长度应在1-500个字符之间', trigger: 'blur' }
+    {required: true, message: '请输入内容', trigger: 'blur'},
+    {min: 1, max: 500, message: '内容长度应在1-500个字符之间', trigger: 'blur'}
   ]
 }
 
@@ -164,7 +166,7 @@ const deleteItem = async (item) => {
     await ElMessageBox.confirm('确定要删除这条时间线吗？', '提示', {
       type: 'warning'
     })
-    
+
     await axios.delete(`/api/timeline/${item.id}`)
     ElMessage.success('删除成功')
     fetchTimeline()
@@ -179,11 +181,11 @@ const deleteItem = async (item) => {
 // 保存项目
 const saveItem = async () => {
   if (!formRef.value) return
-  
+
   try {
     await formRef.value.validate()
     saving.value = true
-    
+
     if (editingItem.value) {
       // 更新
       await axios.put(`/api/timeline/${editingItem.value.id}`, formData)
@@ -193,7 +195,7 @@ const saveItem = async () => {
       await axios.post('/api/timeline', formData)
       ElMessage.success('添加成功')
     }
-    
+
     handleDialogClose()
     fetchTimeline()
   } catch (error) {

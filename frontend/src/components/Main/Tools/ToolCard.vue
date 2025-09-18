@@ -1,16 +1,16 @@
 <template>
-  <a :href="tool.url" target="_blank" rel="noopener noreferrer" class="tool-card-link">
+  <a :href="tool.url" class="tool-card-link" rel="noopener noreferrer" target="_blank">
     <el-card class="tool-card" shadow="hover">
       <div class="card-content">
         <h3 class="tool-title">{{ tool.title }}</h3>
         <p class="tool-description">{{ tool.description }}</p>
         <div class="tool-tags">
           <el-tag
-            v-for="tag in tool.tags"
-            :key="tag"
-            type="info"
-            size="small"
-            class="tool-tag"
+              v-for="tag in tool.tags"
+              :key="tag"
+              class="tool-tag"
+              size="small"
+              type="info"
           >
             {{ tag }}
           </el-tag>
@@ -27,10 +27,10 @@ defineProps({
     required: true,
     validator: (value) => {
       return (
-        typeof value.title === 'string' &&
-        typeof value.description === 'string' &&
-        Array.isArray(value.tags) &&
-        typeof value.url === 'string'
+          typeof value.title === 'string' &&
+          typeof value.description === 'string' &&
+          Array.isArray(value.tags) &&
+          typeof value.url === 'string'
       );
     },
   },

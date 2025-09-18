@@ -19,6 +19,7 @@ logger = logging.getLogger("projects_api")
 
 router = APIRouter()
 
+
 # ===== REQUEST MODELS =====
 class CreateProjectRequest(BaseModel):
     title: str
@@ -29,6 +30,7 @@ class CreateProjectRequest(BaseModel):
     content: str
     date: Optional[str] = None
 
+
 class UpdateProjectRequest(BaseModel):
     title: Optional[str] = None
     summary: Optional[str] = None
@@ -36,6 +38,7 @@ class UpdateProjectRequest(BaseModel):
     status: Optional[str] = None
     content: Optional[str] = None
     date: Optional[str] = None
+
 
 @router.get("/projects")
 def get_projects(db: Session = Depends(database.get_db)):
@@ -68,6 +71,7 @@ def get_projects(db: Session = Depends(database.get_db)):
         logger.error(f"获取项目数据时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取项目数据时发生错误: {str(e)}")
 
+
 @router.get("/projects/{project_slug}")
 def get_project_by_slug(project_slug: str, db: Session = Depends(database.get_db)):
     """根据slug获取单个项目详情"""
@@ -99,6 +103,7 @@ def get_project_by_slug(project_slug: str, db: Session = Depends(database.get_db
         logger.error(f"获取项目详情时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取项目详情时发生错误: {str(e)}")
 
+
 @router.get("/project-tags")
 def get_all_project_tags(db: Session = Depends(database.get_db)):
     """获取所有项目标签及其项目数量"""
@@ -125,6 +130,7 @@ def get_all_project_tags(db: Session = Depends(database.get_db)):
         logger.error(f"获取项目标签时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取项目标签时发生错误: {str(e)}")
 
+
 # 新增管理员获取全部项目的接口
 @router.get("/admin/projects")
 def get_all_projects_admin(db: Session = Depends(database.get_db)):
@@ -143,7 +149,7 @@ def get_all_projects_admin(db: Session = Depends(database.get_db)):
 
             # 状态映射
             status_map = {0: 'draft', 1: 'published', 2: 'recycled'}
-            
+
             project_dict = {
                 "id": project.id,
                 "title": project.title,
@@ -161,6 +167,7 @@ def get_all_projects_admin(db: Session = Depends(database.get_db)):
         logger.error(f"获取项目数据时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取项目数据时发生错误: {str(e)}")
 
+
 # 新增修改项目状态的接口
 @router.patch("/projects/{project_id}/status")
 def update_project_status(project_id: int, status_data: dict, db: Session = Depends(database.get_db)):
@@ -171,28 +178,29 @@ def update_project_status(project_id: int, status_data: dict, db: Session = Depe
         project = db.query(Project).filter(Project.id == project_id).first()
         if not project:
             raise HTTPException(status_code=404, detail="项目未找到")
-        
+
         # 状态映射
         status_map = {'draft': 0, 'published': 1, 'recycled': 2}
         new_status = status_data.get('status')
-        
+
         if new_status not in status_map:
             raise HTTPException(status_code=400, detail="无效的状态值")
-        
+
         # 更新状态
         old_status = project.status
         project.status = status_map[new_status]
         db.commit()
-        
+
         logger.info(f"成功修改项目状态: {project.title}, {old_status} -> {project.status}")
         return {"message": "项目状态修改成功", "status": new_status}
-        
+
     except HTTPException:
         raise
     except Exception as e:
         db.rollback()
         logger.error(f"修改项目状态时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"修改项目状态���发生错误: {str(e)}")
+
 
 # ===== PROJECT MANAGEMENT APIs =====
 @router.post("/projects")
@@ -276,6 +284,7 @@ def create_project(project_data: CreateProjectRequest, db: Session = Depends(dat
         logger.error(f"创建项目时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"创建项目时发生错误: {str(e)}")
 
+
 @router.put("/projects/{project_id}")
 def update_project(project_id: int, project_data: UpdateProjectRequest, db: Session = Depends(database.get_db)):
     """编辑项目信息"""
@@ -285,7 +294,7 @@ def update_project(project_id: int, project_data: UpdateProjectRequest, db: Sess
         project = db.query(Project).filter(Project.id == project_id).first()
         if not project:
             raise HTTPException(status_code=404, detail="项目未找到")
-        
+
         # 更新项目信息
         if project_data.title is not None:
             project.title = project_data.title
@@ -300,43 +309,43 @@ def update_project(project_id: int, project_data: UpdateProjectRequest, db: Sess
             status_map = {'draft': 0, 'published': 1, 'recycled': 2}
             if project_data.status in status_map:
                 project.status = status_map[project_data.status]
-        
+
         # 处理标签更新
         if project_data.tags is not None:
             # 删除现有标签关联
             db.query(ProjectTag).filter(ProjectTag.project_id == project_id).delete()
-            
+
             # 添加新标签
             for tag_name in project_data.tags:
                 if not tag_name.strip():
                     continue
-                    
+
                 tag = db.query(Tag).filter(Tag.name == tag_name.strip()).first()
                 if not tag:
                     tag = Tag(name=tag_name.strip())
                     db.add(tag)
                     db.flush()
-                
+
                 # 创建项目-标签关联
                 project_tag = ProjectTag(project_id=project.id, tag_id=tag.id)
                 db.add(project_tag)
-        
+
         # 更新文件内容
         if project_data.content is not None:
             try:
                 save_project_file(project, project_data.content)
             except Exception as e:
                 logger.warning(f"更新项目文件失败: {str(e)}")
-        
+
         db.commit()
-        
+
         logger.info(f"成功编辑项目信息: {project.title}")
         return {
             "message": "项目信息编辑成功",
             "id": project.id,
             "title": project.title
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -344,10 +353,12 @@ def update_project(project_id: int, project_data: UpdateProjectRequest, db: Sess
         logger.error(f"编辑项目信息时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"编辑项目信息时发生错误: {str(e)}")
 
+
 @router.post("/projects/{project_id}/edit")
 def update_project_post(project_id: int, project_data: UpdateProjectRequest, db: Session = Depends(database.get_db)):
     """编辑项目信息（POST方法，用于兼容性）"""
     return update_project(project_id, project_data, db)
+
 
 @router.delete("/projects/{project_id}")
 def delete_project(project_id: int, db: Session = Depends(database.get_db)):
@@ -382,6 +393,7 @@ def delete_project(project_id: int, db: Session = Depends(database.get_db)):
         logger.error(f"删除项目时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"删除项目时发生错误: {str(e)}")
 
+
 # ===== HELPER FUNCTIONS =====
 def generate_safe_slug(text: str) -> str:
     """生成安全的slug"""
@@ -398,6 +410,7 @@ def generate_safe_slug(text: str) -> str:
     slug = slug.strip('-')
 
     return slug or "untitled"
+
 
 def save_project_file(project: Project, content: str):
     """保存项目文件到磁盘"""
@@ -421,6 +434,7 @@ def save_project_file(project: Project, content: str):
     except Exception as e:
         logger.error(f"保存项目文件失败: {str(e)}")
         raise
+
 
 def delete_project_file(project: Project):
     """删除项目文件"""

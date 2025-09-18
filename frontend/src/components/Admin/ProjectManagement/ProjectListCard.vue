@@ -7,36 +7,36 @@
       </div>
     </template>
     <el-table
-      :data="projects"
-      stripe
-      class="project-table"
-      empty-text="暂无项目数据"
-      :header-cell-style="{ background: '#fafafa', color: '#333', fontWeight: '600' }"
+        :data="projects"
+        :header-cell-style="{ background: '#fafafa', color: '#333', fontWeight: '600' }"
+        class="project-table"
+        empty-text="暂无项目数据"
+        stripe
     >
-      <el-table-column prop="title" label="项目标题" min-width="200" show-overflow-tooltip>
+      <el-table-column label="项目标题" min-width="200" prop="title" show-overflow-tooltip>
         <template #default="scope">
           <div class="project-title">{{ scope.row.title }}</div>
         </template>
       </el-table-column>
-      <el-table-column prop="slug" label="项目标识" min-width="150" show-overflow-tooltip>
+      <el-table-column label="项目标识" min-width="150" prop="slug" show-overflow-tooltip>
         <template #default="scope">
           <div class="project-slug">{{ scope.row.slug }}</div>
         </template>
       </el-table-column>
-      <el-table-column prop="summary" label="项目描述" min-width="200" show-overflow-tooltip>
+      <el-table-column label="项目描述" min-width="200" prop="summary" show-overflow-tooltip>
         <template #default="scope">
           <div class="project-summary">{{ scope.row.summary || '暂无描述' }}</div>
         </template>
       </el-table-column>
-      <el-table-column prop="tags" label="标签" min-width="150" show-overflow-tooltip>
+      <el-table-column label="标签" min-width="150" prop="tags" show-overflow-tooltip>
         <template #default="scope">
           <div v-if="scope.row.tags && scope.row.tags.length > 0" class="project-tags">
             <el-tag
-              v-for="tag in scope.row.tags.slice(0, 3)"
-              :key="tag"
-              size="small"
-              type="info"
-              class="tag-item"
+                v-for="tag in scope.row.tags.slice(0, 3)"
+                :key="tag"
+                class="tag-item"
+                size="small"
+                type="info"
             >
               {{ tag }}
             </el-tag>
@@ -45,42 +45,42 @@
           <span v-else class="no-tags">暂无标签</span>
         </template>
       </el-table-column>
-      <el-table-column prop="status" label="状态" min-width="120" align="center">
+      <el-table-column align="center" label="状态" min-width="120" prop="status">
         <template #default="scope">
           <el-select
-            :model-value="scope.row.status"
-            @change="(value) => $emit('update-status', scope.row, value)"
-            size="small"
-            style="width: 100px"
+              :model-value="scope.row.status"
+              size="small"
+              style="width: 100px"
+              @change="(value) => $emit('update-status', scope.row, value)"
           >
-            <el-option label="草稿" value="draft" />
-            <el-option label="已发布" value="published" />
-            <el-option label="已回收" value="recycled" />
+            <el-option label="草稿" value="draft"/>
+            <el-option label="已发布" value="published"/>
+            <el-option label="已回收" value="recycled"/>
           </el-select>
         </template>
       </el-table-column>
-      <el-table-column prop="date" label="创建时间" min-width="120">
+      <el-table-column label="创建时间" min-width="120" prop="date">
         <template #default="scope">
           <div class="project-date">{{ formatDate(scope.row.date) }}</div>
         </template>
       </el-table-column>
-      <el-table-column label="操作" min-width="200" align="center">
+      <el-table-column align="center" label="操作" min-width="200">
         <template #default="scope">
           <div class="action-buttons-table">
             <el-button size="small" type="primary" @click="$emit('edit', scope.row)">编辑</el-button>
             <el-button
-              v-if="scope.row.status !== 'recycled'"
-              size="small"
-              type="warning"
-              @click="$emit('quick-update-status', scope.row, 'recycled')"
+                v-if="scope.row.status !== 'recycled'"
+                size="small"
+                type="warning"
+                @click="$emit('quick-update-status', scope.row, 'recycled')"
             >
               回收
             </el-button>
             <el-button
-              v-if="scope.row.status === 'recycled'"
-              size="small"
-              type="success"
-              @click="$emit('quick-update-status', scope.row, 'published')"
+                v-if="scope.row.status === 'recycled'"
+                size="small"
+                type="success"
+                @click="$emit('quick-update-status', scope.row, 'published')"
             >
               恢复
             </el-button>

@@ -1,9 +1,9 @@
 <template>
   <div class="figure-card">
     <el-image
-      :src="figure.url"
-      fit="cover"
-      class="figure-image"
+        :src="figure.url"
+        class="figure-image"
+        fit="cover"
     >
       <template #placeholder>
         <div class="image-slot">加载中<span class="dot">...</span></div>
@@ -13,22 +13,26 @@
       <div class="overlay-content">
         <p class="figure-title">{{ figure.title }}</p>
         <div class="actions">
-          <el-button type="primary" circle @click="handlePreview">
-            <el-icon><View /></el-icon>
+          <el-button circle type="primary" @click="handlePreview">
+            <el-icon>
+              <View/>
+            </el-icon>
           </el-button>
           <a :href="figure.url" download target="_blank">
-            <el-button type="success" circle>
-              <el-icon><Download /></el-icon>
+            <el-button circle type="success">
+              <el-icon>
+                <Download/>
+              </el-icon>
             </el-button>
           </a>
         </div>
       </div>
     </div>
     <el-image-viewer
-      v-if="showViewer"
-      :url-list="[figure.url]"
-      @close="showViewer = false"
-      :initial-index="0"
+        v-if="showViewer"
+        :initial-index="0"
+        :url-list="[figure.url]"
+        @close="showViewer = false"
     />
   </div>
 </template>
@@ -59,14 +63,17 @@ const handlePreview = () => {
   aspect-ratio: 16 / 10;
   background-color: #f5f7fa;
 }
+
 .figure-image {
   width: 100%;
   height: 100%;
   transition: transform 0.3s ease;
 }
+
 .figure-card:hover .figure-image {
   transform: scale(1.1);
 }
+
 .figure-overlay {
   position: absolute;
   top: 0;
@@ -82,23 +89,28 @@ const handlePreview = () => {
   padding: 15px;
   box-sizing: border-box;
 }
+
 .figure-card:hover .figure-overlay {
   opacity: 1;
 }
+
 .overlay-content {
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+
 .figure-title {
   margin: 0;
   font-weight: bold;
 }
+
 .actions {
   display: flex;
   gap: 10px;
 }
+
 .image-slot {
   display: flex;
   justify-content: center;

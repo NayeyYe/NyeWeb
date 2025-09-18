@@ -6,7 +6,7 @@
         <el-button @click="openUploadDialog">
           上传项目
         </el-button>
-        <el-button @click="refreshProjects" :icon="Refresh" circle />
+        <el-button :icon="Refresh" circle @click="refreshProjects"/>
       </div>
     </div>
 
@@ -15,13 +15,13 @@
       <el-row :gutter="20">
         <el-col :span="24">
           <FilterControlsCard
-            :filters="filterForm"
-            :sort-order="sortOrder"
-            @update:tags="filterForm.tags = $event"
-            @update:title="filterForm.title = $event"
-            @update:status="filterForm.status = $event"
-            @update:sortOrder="sortOrder = $event"
-            @reset="resetAllFilters"
+              :filters="filterForm"
+              :sort-order="sortOrder"
+              @reset="resetAllFilters"
+              @update:tags="filterForm.tags = $event"
+              @update:title="filterForm.title = $event"
+              @update:status="filterForm.status = $event"
+              @update:sortOrder="sortOrder = $event"
           />
         </el-col>
       </el-row>
@@ -30,25 +30,25 @@
     <!-- 项目列表 -->
     <div class="project-list">
       <ProjectListCard
-        :projects="sortedProjects"
-        @update-status="updateProjectStatus"
-        @quick-update-status="quickUpdateStatus"
-        @delete="deleteProject"
-        @edit="openEditDialog"
+          :projects="sortedProjects"
+          @delete="deleteProject"
+          @edit="openEditDialog"
+          @update-status="updateProjectStatus"
+          @quick-update-status="quickUpdateStatus"
       />
     </div>
 
     <!-- 上传项目对话框 -->
     <UploadProjectDialog
-      v-model="showUploadDialog"
-      @upload-success="refreshProjects"
+        v-model="showUploadDialog"
+        @upload-success="refreshProjects"
     />
 
     <!-- 编辑项目对话框 -->
     <EditProjectDialog
-      v-model="showEditDialog"
-      :project="editingProject"
-      @update-success="refreshProjects"
+        v-model="showEditDialog"
+        :project="editingProject"
+        @update-success="refreshProjects"
     />
   </div>
 </template>
@@ -107,7 +107,7 @@ const sortedProjects = computed(() => {
   arr.sort((a, b) => {
     const v1 = new Date(a.date || '1970-01-01')
     const v2 = new Date(b.date || '1970-01-01')
-    
+
     if (v1 < v2) return sortOrder.value === 'asc' ? -1 : 1
     if (v1 > v2) return sortOrder.value === 'asc' ? 1 : -1
     return 0
@@ -128,13 +128,13 @@ const openUploadDialog = () => {
 }
 
 const openEditDialog = (project) => {
-  editingProject.value = { ...project }
+  editingProject.value = {...project}
   showEditDialog.value = true
 }
 
 const deleteProject = async (project) => {
   try {
-    await ElMessageBox.confirm('确定要删除该项目吗？', '提示', { type: 'warning' })
+    await ElMessageBox.confirm('确定要删除该项目吗？', '提示', {type: 'warning'})
     await axios.delete(`/api/projects/${project.id}`)
     ElMessage.success('删除成功')
     refreshProjects()
@@ -153,13 +153,13 @@ const refreshProjects = async () => {
 // 更新项目状态
 const updateProjectStatus = async (project, newStatus) => {
   if (project.status === newStatus) return
-  
+
   try {
-    await axios.patch(`/api/projects/${project.id}/status`, { status: newStatus })
-    
+    await axios.patch(`/api/projects/${project.id}/status`, {status: newStatus})
+
     // 更新本地数据
     project.status = newStatus
-    
+
     const statusText = getStatusText(newStatus)
     ElMessage.success(`项目状态已更新为：${statusText}`)
   } catch (error) {
@@ -173,9 +173,9 @@ const updateProjectStatus = async (project, newStatus) => {
 // 快速更新状态（用于操作按钮）
 const quickUpdateStatus = async (project, newStatus) => {
   const actionText = newStatus === 'recycled' ? '回收' : '恢复'
-  
+
   try {
-    await ElMessageBox.confirm(`确定要${actionText}该项目吗？`, '提示', { type: 'warning' })
+    await ElMessageBox.confirm(`确定要${actionText}该项目吗？`, '提示', {type: 'warning'})
     await updateProjectStatus(project, newStatus)
   } catch (error) {
     if (error !== 'cancel') {
@@ -187,10 +187,14 @@ const quickUpdateStatus = async (project, newStatus) => {
 // 状态相关方法
 const getStatusText = (status) => {
   switch (status) {
-    case 'published': return '已发布'
-    case 'draft': return '草稿'
-    case 'recycled': return '已回收'
-    default: return '未知'
+    case 'published':
+      return '已发布'
+    case 'draft':
+      return '草稿'
+    case 'recycled':
+      return '已回收'
+    default:
+      return '未知'
   }
 }
 

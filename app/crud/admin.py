@@ -1,8 +1,8 @@
 import hashlib
 import os
-import sys
 import secrets
-from datetime import datetime, timedelta
+import sys
+from datetime import datetime
 
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -20,10 +20,12 @@ router = APIRouter()
 # 密码加密配置
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
+
 # 请求模型
 class AdminLoginRequest(BaseModel):
     username: str
     password: str
+
 
 # 响应模型
 class AdminLoginResponse(BaseModel):
@@ -31,23 +33,27 @@ class AdminLoginResponse(BaseModel):
     token: str
     username: str
 
+
 def hash_password(password: str) -> str:
     """使用SHA-256哈希密码"""
     return hashlib.sha256(password.encode()).hexdigest()
 
+
 def generate_token() -> str:
     """生成随机令牌"""
     return secrets.token_urlsafe(32)
+
 
 def verify_admin_password(db: Session, username: str, password: str) -> bool:
     """验证管理员密码 - 哈希对比"""
     admin = db.query(Admin).filter(Admin.username == username).first()
     if not admin:
         return False
-    
+
     # 对输入密码进行哈希并与数据库中的哈希对比
     input_password_hash = hash_password(password)
     return input_password_hash == admin.password_hash
+
 
 def create_admin(db: Session, username: str, password: str):
     """创建管理员账户 - 使用哈希存储密码"""
@@ -57,6 +63,7 @@ def create_admin(db: Session, username: str, password: str):
     db.commit()
     db.refresh(admin)
     return admin
+
 
 @router.post("/admin/login", response_model=AdminLoginResponse)
 async def admin_login(login_data: AdminLoginRequest, db: Session = Depends(get_db)):
@@ -89,6 +96,7 @@ async def admin_login(login_data: AdminLoginRequest, db: Session = Depends(get_d
             detail="登录过程中发生错误"
         )
 
+
 @router.post("/admin/logout")
 async def admin_logout(token: str, db: Session = Depends(get_db)):
     """管理员登出接口"""
@@ -105,6 +113,7 @@ async def admin_logout(token: str, db: Session = Depends(get_db)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="登出过程中发生错误"
         )
+
 
 @router.get("/admin/verify")
 async def verify_token(token: str, db: Session = Depends(get_db)):

@@ -6,9 +6,9 @@
       </div>
     </template>
     <div v-loading="loading">
-      <el-carousel :interval="4000" height="400px" v-if="shuffledImages.length > 0" indicator-position="none">
+      <el-carousel v-if="shuffledImages.length > 0" :interval="4000" height="400px" indicator-position="none">
         <el-carousel-item v-for="image in shuffledImages" :key="image.id">
-          <img :src="image.url" class="carousel-image" alt="Favorite Image" />
+          <img :src="image.url" alt="Favorite Image" class="carousel-image"/>
         </el-carousel-item>
       </el-carousel>
       <div v-else-if="!loading" class="empty-state">

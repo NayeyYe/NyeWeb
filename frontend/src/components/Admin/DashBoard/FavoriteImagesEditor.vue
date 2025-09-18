@@ -5,8 +5,8 @@
         <div class="header">
           <span>最喜欢的图片编辑</span>
           <div class="header-actions">
-            <el-button @click="refreshImages" :icon="Refresh" circle size="small" />
-            <el-button @click="saveImages" type="primary" size="small" :loading="saving">
+            <el-button :icon="Refresh" circle size="small" @click="refreshImages"/>
+            <el-button :loading="saving" size="small" type="primary" @click="saveImages">
               保存
             </el-button>
           </div>
@@ -15,9 +15,9 @@
 
       <div v-loading="loading" class="edit-content">
         <div
-          v-for="(image, index) in editImages"
-          :key="index"
-          class="image-edit-item"
+            v-for="(image, index) in editImages"
+            :key="index"
+            class="image-edit-item"
         >
           <div class="item-row">
             <!-- 图片序号 -->
@@ -28,33 +28,37 @@
             <!-- URL输入框和操作按钮 -->
             <div class="url-container">
               <el-input
-                v-model="image.url"
-                :placeholder="`请输入图片 ${index + 1} 的URL`"
-                clearable
-                size="default"
-                class="url-input"
+                  v-model="image.url"
+                  :placeholder="`请输入图片 ${index + 1} 的URL`"
+                  class="url-input"
+                  clearable
+                  size="default"
               >
                 <template #suffix>
                   <div class="action-buttons">
                     <el-button
-                      @click="testImageUrl(image)"
-                      :loading="image.testing"
-                      type="primary"
-                      size="small"
-                      text
-                      title="测试链接"
+                        :loading="image.testing"
+                        size="small"
+                        text
+                        title="测试链接"
+                        type="primary"
+                        @click="testImageUrl(image)"
                     >
-                      <el-icon><Check /></el-icon>
+                      <el-icon>
+                        <Check/>
+                      </el-icon>
                     </el-button>
                     <el-button
-                      @click="openUrlInNewTab(image.url)"
-                      :disabled="!image.url"
-                      type="success"
-                      size="small"
-                      text
-                      title="访问链接"
+                        :disabled="!image.url"
+                        size="small"
+                        text
+                        title="访问链接"
+                        type="success"
+                        @click="openUrlInNewTab(image.url)"
                     >
-                      <el-icon><Link /></el-icon>
+                      <el-icon>
+                        <Link/>
+                      </el-icon>
                     </el-button>
                   </div>
                 </template>
@@ -72,9 +76,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
-import { Refresh, Check, Link } from '@element-plus/icons-vue'
+import {onMounted, ref} from 'vue'
+import {ElMessage} from 'element-plus'
+import {Check, Link, Refresh} from '@element-plus/icons-vue'
 import axios from 'axios'
 
 const loading = ref(false)
@@ -182,7 +186,7 @@ const openUrlInNewTab = (url) => {
 const saveImages = async () => {
   // 验证所有图片URL
   const invalidImages = editImages.value.filter((img, index) =>
-    img.url && img.error
+      img.url && img.error
   )
 
   if (invalidImages.length > 0) {
@@ -200,21 +204,21 @@ const saveImages = async () => {
       if (image.id && image.url) {
         // 更新现有图片
         requests.push(
-          axios.put(`${API_BASE_URL}/favorite-images/${image.id}`, {
-            url: image.url
-          })
+            axios.put(`${API_BASE_URL}/favorite-images/${image.id}`, {
+              url: image.url
+            })
         )
       } else if (image.id && !image.url) {
         // 删除现有图片（URL为空）
         requests.push(
-          axios.delete(`${API_BASE_URL}/favorite-images/${image.id}`)
+            axios.delete(`${API_BASE_URL}/favorite-images/${image.id}`)
         )
       } else if (!image.id && image.url) {
         // 创建新图片
         requests.push(
-          axios.post(`${API_BASE_URL}/favorite-images`, {
-            url: image.url
-          })
+            axios.post(`${API_BASE_URL}/favorite-images`, {
+              url: image.url
+            })
         )
       }
     }

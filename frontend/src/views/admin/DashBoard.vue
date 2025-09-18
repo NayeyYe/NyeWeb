@@ -1,17 +1,17 @@
 <!-- filepath: /d:/Nayey/Code/Vue/nyeweb/frontend/src/views/HelloWorld.vue -->
 <template>
   <div class="dashboard-layout">
-    <AdminSidebar />
+    <AdminSidebar/>
     <div class="main-content">
-      <router-view v-if="$route.path !== '/admin/dashboard'" />
+      <router-view v-if="$route.path !== '/admin/dashboard'"/>
       <div v-else class="dashboard-container">
         <!-- 第一行：时间线编辑器和最喜欢图片编辑器 -->
         <div class="top-row">
           <div class="top-left">
-            <TimelineEditor />
+            <TimelineEditor/>
           </div>
           <div class="top-right">
-            <FavoriteImagesEditor />
+            <FavoriteImagesEditor/>
           </div>
         </div>
 
@@ -22,7 +22,7 @@
               <span>下方内容区域</span>
             </template>
             <div class="future-content">
-              <el-empty description="下方内容待添加" :image-size="100" />
+              <el-empty :image-size="100" description="下方内容待添加"/>
             </div>
           </el-card>
         </div>

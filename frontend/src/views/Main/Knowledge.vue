@@ -7,7 +7,7 @@
     <div v-loading="loading" class="main-content">
       <aside class="timeline-sidebar">
         <!-- 传递筛选后的文章给时间线组件 -->
-        <ArticleTimeline :articles="filteredArticles" @scroll-to-article="handleScrollToArticle" />
+        <ArticleTimeline :articles="filteredArticles" @scroll-to-article="handleScrollToArticle"/>
       </aside>
       <main class="articles-main">
         <div v-if="!loading && filteredArticles.length === 0" class="no-articles">
@@ -17,19 +17,19 @@
         </div>
         <div v-else class="articles-grid">
           <ArticleCard
-            v-for="article in displayedArticles"
-            :id="article.slug"
-            :key="article.slug"
-            :article="article"
+              v-for="article in displayedArticles"
+              :id="article.slug"
+              :key="article.slug"
+              :article="article"
           />
         </div>
         <div v-if="hasMoreArticles" class="load-more-container">
-          <el-button type="primary" plain @click="loadMore">查看更多</el-button>
+          <el-button plain type="primary" @click="loadMore">查看更多</el-button>
         </div>
       </main>
       <aside class="tags-sidebar">
-        <ArticleCategoryTree :articles="sortedArticles" @category-selected="handleCategorySelected" />
-        <ArticleTagFilter :tags="availableTags" :counts="availableTagCounts" @tag-selected="handleTagSelected" />
+        <ArticleCategoryTree :articles="sortedArticles" @category-selected="handleCategorySelected"/>
+        <ArticleTagFilter :counts="availableTagCounts" :tags="availableTags" @tag-selected="handleTagSelected"/>
       </aside>
     </div>
   </div>
@@ -110,7 +110,7 @@ const articlesByCategory = computed(() => {
     return sortedArticles.value
   }
   return sortedArticles.value.filter(article =>
-    article.category && article.category.startsWith(selectedCategory.value)
+      article.category && article.category.startsWith(selectedCategory.value)
   )
 })
 
@@ -146,7 +146,7 @@ const filteredArticles = computed(() => {
     return articlesByCategory.value
   }
   return articlesByCategory.value.filter(article =>
-    article.tags && article.tags.includes(selectedTag.value)
+      article.tags && article.tags.includes(selectedTag.value)
   )
 })
 
@@ -191,9 +191,9 @@ const clearFilters = () => {
 const handleScrollToArticle = (slug) => {
   const element = document.getElementById(slug)
   if (element) {
-    element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    element.scrollIntoView({behavior: 'smooth', block: 'start'})
   } else {
-    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
   }
 }
 

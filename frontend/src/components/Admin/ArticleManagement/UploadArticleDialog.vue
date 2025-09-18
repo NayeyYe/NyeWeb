@@ -1,26 +1,26 @@
 <template>
   <el-dialog
-    :model-value="modelValue"
-    @update:model-value="$emit('update:modelValue', $event)"
-    title="上传文章"
-    width="700px"
-    :before-close="handleClose"
-    :close-on-click-modal="false"
+      :before-close="handleClose"
+      :close-on-click-modal="false"
+      :model-value="modelValue"
+      title="上传文章"
+      width="700px"
+      @update:model-value="$emit('update:modelValue', $event)"
   >
-    <el-form :model="formData" :rules="formRules" label-width="100px" ref="formRef">
+    <el-form ref="formRef" :model="formData" :rules="formRules" label-width="100px">
       <!-- 文件上传 -->
       <el-form-item label="选择文件" prop="file" required>
         <el-upload
-          ref="uploadRef"
-          :auto-upload="false"
-          :show-file-list="true"
-          :on-change="handleFileChange"
-          :on-remove="handleFileRemove"
-          accept=".md,.markdown"
-          :limit="1"
-          class="upload-section"
+            ref="uploadRef"
+            :auto-upload="false"
+            :limit="1"
+            :on-change="handleFileChange"
+            :on-remove="handleFileRemove"
+            :show-file-list="true"
+            accept=".md,.markdown"
+            class="upload-section"
         >
-          <el-button type="primary" :icon="UploadIcon">选择Markdown文件</el-button>
+          <el-button :icon="UploadIcon" type="primary">选择Markdown文件</el-button>
           <template #tip>
             <div class="el-upload__tip">
               只能上传 .md 或 .markdown 文件
@@ -32,10 +32,10 @@
       <!-- 文章标题 -->
       <el-form-item label="文章标题" prop="title" required>
         <el-input
-          v-model="formData.title"
-          placeholder="请输入文章标题"
-          maxlength="255"
-          show-word-limit
+            v-model="formData.title"
+            maxlength="255"
+            placeholder="请输入文章标题"
+            show-word-limit
         />
       </el-form-item>
 
@@ -47,15 +47,19 @@
               <div class="category-header">
                 <span>选择分类文件夹</span>
                 <div class="category-actions">
-                  <el-button link @click="clearCategorySelection" v-if="formData.category" class="clear-btn">
+                  <el-button v-if="formData.category" class="clear-btn" link @click="clearCategorySelection">
                     清空选择
                   </el-button>
-                  <el-button link @click="refreshCategories" :loading="categoryLoading">
-                    <el-icon><RefreshIcon /></el-icon>
+                  <el-button :loading="categoryLoading" link @click="refreshCategories">
+                    <el-icon>
+                      <RefreshIcon/>
+                    </el-icon>
                     刷新
                   </el-button>
-                  <el-button @click="showCreateCategoryDialog" size="small" type="success">
-                    <el-icon><FolderAdd /></el-icon>
+                  <el-button size="small" type="success" @click="showCreateCategoryDialog">
+                    <el-icon>
+                      <FolderAdd/>
+                    </el-icon>
                     新建文件夹
                   </el-button>
                 </div>
@@ -63,39 +67,41 @@
             </template>
             <div v-loading="categoryLoading" class="category-tree-container">
               <el-tree
-                v-if="!categoryLoading && categoryTree.length > 0"
-                :data="categoryTree"
-                :props="treeProps"
-                @node-click="handleCategorySelect"
-                @node-contextmenu="handleCategoryContextMenu"
-                :highlight-current="true"
-                :expand-on-click-node="false"
-                node-key="path"
-                ref="categoryTreeRef"
-                class="category-tree"
-                :current-node-key="formData.category"
-                default-expand-all
+                  v-if="!categoryLoading && categoryTree.length > 0"
+                  ref="categoryTreeRef"
+                  :current-node-key="formData.category"
+                  :data="categoryTree"
+                  :expand-on-click-node="false"
+                  :highlight-current="true"
+                  :props="treeProps"
+                  class="category-tree"
+                  default-expand-all
+                  node-key="path"
+                  @node-click="handleCategorySelect"
+                  @node-contextmenu="handleCategoryContextMenu"
               >
                 <template #default="{ node, data }">
                   <div class="tree-node-content">
                     <span class="tree-node-label">{{ node.label }}</span>
                     <div class="tree-node-actions" @click.stop>
-                      <el-button 
-                        size="small" 
-                        type="text" 
-                        @click="createSubFolder(data)"
-                        class="create-sub-btn"
-                        title="在此文件夹下创建子文件夹"
+                      <el-button
+                          class="create-sub-btn"
+                          size="small"
+                          title="在此文件夹下创建子文件夹"
+                          type="text"
+                          @click="createSubFolder(data)"
                       >
-                        <el-icon><Plus /></el-icon>
+                        <el-icon>
+                          <Plus/>
+                        </el-icon>
                       </el-button>
                     </div>
                   </div>
                 </template>
               </el-tree>
               <div
-                v-else-if="!categoryLoading"
-                class="no-categories-tip"
+                  v-else-if="!categoryLoading"
+                  class="no-categories-tip"
               >
                 <el-text type="info">暂无分类文件夹，请先创建文件夹</el-text>
               </div>
@@ -104,7 +110,9 @@
         </div>
         <div class="form-tip">请选择已存在的分类文件夹，或右键/点击+号创建新文件夹</div>
         <div v-if="formData.category" class="selected-category">
-          <el-icon><Folder /></el-icon>
+          <el-icon>
+            <Folder/>
+          </el-icon>
           已选择: {{ formData.category }}
         </div>
       </el-form-item>
@@ -112,43 +120,43 @@
       <!-- 发布日期 -->
       <el-form-item label="发布日期" prop="date" required>
         <el-date-picker
-          v-model="formData.date"
-          type="date"
-          placeholder="选择发布日期"
-          format="YYYY-MM-DD"
-          value-format="YYYY-MM-DD"
-          style="width: 100%"
+            v-model="formData.date"
+            format="YYYY-MM-DD"
+            placeholder="选择发布日期"
+            style="width: 100%"
+            type="date"
+            value-format="YYYY-MM-DD"
         />
       </el-form-item>
 
       <!-- 文章摘要 -->
       <el-form-item label="文章摘要" prop="summary">
         <el-input
-          v-model="formData.summary"
-          type="textarea"
-          :rows="4"
-          placeholder="请输入文章摘要"
-          maxlength="500"
-          show-word-limit
+            v-model="formData.summary"
+            :rows="4"
+            maxlength="500"
+            placeholder="请输入文章摘要"
+            show-word-limit
+            type="textarea"
         />
       </el-form-item>
 
       <!-- 文章标签 -->
       <el-form-item label="文章标签">
         <el-select
-          v-model="formData.tags"
-          multiple
-          filterable
-          allow-create
-          placeholder="选择或创建标签"
-          style="width: 100%"
-          :multiple-limit="5"
+            v-model="formData.tags"
+            :multiple-limit="5"
+            allow-create
+            filterable
+            multiple
+            placeholder="选择或创建标签"
+            style="width: 100%"
         >
           <el-option
-            v-for="tag in existingTags"
-            :key="tag"
-            :label="tag"
-            :value="tag"
+              v-for="tag in existingTags"
+              :key="tag"
+              :label="tag"
+              :value="tag"
           />
         </el-select>
         <div class="form-tip">最多可选择5个标签</div>
@@ -158,11 +166,15 @@
       <el-form-item label="文章状态" prop="status" required>
         <el-radio-group v-model="formData.status">
           <el-radio value="draft">
-            <el-icon><Edit /></el-icon>
+            <el-icon>
+              <Edit/>
+            </el-icon>
             草稿
           </el-radio>
           <el-radio value="published">
-            <el-icon><Check /></el-icon>
+            <el-icon>
+              <Check/>
+            </el-icon>
             发布
           </el-radio>
         </el-radio-group>
@@ -173,8 +185,10 @@
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="handleClose">取消</el-button>
-        <el-button type="primary" @click="handleUpload" :loading="uploading">
-          <el-icon><Upload /></el-icon>
+        <el-button :loading="uploading" type="primary" @click="handleUpload">
+          <el-icon>
+            <Upload/>
+          </el-icon>
           上传文章
         </el-button>
       </div>
@@ -182,37 +196,41 @@
 
     <!-- 创建文件夹对话框 -->
     <el-dialog
-      v-model="showCreateFolder"
-      title="创建分类文件夹"
-      width="600px"
-      :close-on-click-modal="false"
-      :before-close="handleCreateDialogClose"
+        v-model="showCreateFolder"
+        :before-close="handleCreateDialogClose"
+        :close-on-click-modal="false"
+        title="创建分类文件夹"
+        width="600px"
     >
-      <el-form :model="newFolder" :rules="folderRules" label-width="100px" ref="folderFormRef">
+      <el-form ref="folderFormRef" :model="newFolder" :rules="folderRules" label-width="100px">
         <!-- 选择父文件夹提示 -->
         <div class="create-folder-tip">
           <el-text type="info">
-            {{ categoryTree.length > 0 ?
-              (newFolder.parentPath ?
-                `将在 ${newFolder.parentPath} 目录下创建新文件夹` :
-                '将在knowledge目录下创建新文件夹') :
-              '将在knowledge目录下创建新文件夹' }}
+            {{
+              categoryTree.length > 0 ?
+                  (newFolder.parentPath ?
+                      `将在 ${newFolder.parentPath} 目录下创建新文件夹` :
+                      '将在knowledge目录下创建新文件夹') :
+                  '将在knowledge目录下创建新文件夹'
+            }}
           </el-text>
         </div>
 
         <!-- 父文件夹选择器 - 只有在存在分类文件夹时才显示 -->
-        <el-form-item label="父文件夹" v-if="categoryTree.length > 0">
+        <el-form-item v-if="categoryTree.length > 0" label="父文件夹">
           <div class="parent-folder-section">
             <el-card class="parent-selector-card" shadow="never">
               <template #header>
                 <div class="parent-header">
                   <span>选择父文件夹</span>
                   <div class="parent-actions">
-                    <el-button link @click="clearParentSelection" v-if="newFolder.parentPath" class="clear-parent">
+                    <el-button v-if="newFolder.parentPath" class="clear-parent" link @click="clearParentSelection">
                       清空选择
                     </el-button>
-                    <el-button link @click="refreshCategories" :loading="categoryLoading">
-                      <el-icon><RefreshIcon /></el-icon>
+                    <el-button :loading="categoryLoading" link @click="refreshCategories">
+                      <el-icon>
+                        <RefreshIcon/>
+                      </el-icon>
                       刷新
                     </el-button>
                   </div>
@@ -220,17 +238,17 @@
               </template>
               <div v-loading="categoryLoading" class="parent-tree-container">
                 <el-tree
-                  v-if="!categoryLoading && categoryTree.length > 0"
-                  :data="categoryTree"
-                  :props="treeProps"
-                  @node-click="handleParentSelect"
-                  :highlight-current="true"
-                  :expand-on-click-node="false"
-                  node-key="path"
-                  ref="parentTreeRef"
-                  class="parent-tree"
-                  :current-node-key="newFolder.parentPath"
-                  default-expand-all
+                    v-if="!categoryLoading && categoryTree.length > 0"
+                    ref="parentTreeRef"
+                    :current-node-key="newFolder.parentPath"
+                    :data="categoryTree"
+                    :expand-on-click-node="false"
+                    :highlight-current="true"
+                    :props="treeProps"
+                    class="parent-tree"
+                    default-expand-all
+                    node-key="path"
+                    @node-click="handleParentSelect"
                 >
                   <template #default="{ node, data }">
                     <div class="tree-node-content">
@@ -246,7 +264,9 @@
             </el-card>
           </div>
           <div v-if="newFolder.parentPath" class="selected-parent">
-            <el-icon><Folder /></el-icon>
+            <el-icon>
+              <Folder/>
+            </el-icon>
             已选择父目录: {{ newFolder.parentPath }}
           </div>
         </el-form-item>
@@ -254,10 +274,10 @@
         <!-- 文件夹名称 -->
         <el-form-item label="文件夹名称" prop="name" required>
           <el-input
-            v-model="newFolder.name"
-            placeholder="请输入文件夹名称"
-            maxlength="50"
-            show-word-limit
+              v-model="newFolder.name"
+              maxlength="50"
+              placeholder="请输入文件夹名称"
+              show-word-limit
           />
           <div class="form-tip">只能包含中文、英文、数字、下划线和连字符</div>
         </el-form-item>
@@ -265,13 +285,13 @@
         <!-- 预览完整路径 -->
         <el-form-item label="完整路径">
           <div class="path-display">
-            <el-text type="primary" class="path-text">
+            <el-text class="path-text" type="primary">
               articles/knowledge/{{
                 categoryTree.length > 0 ?
-                  (newFolder.parentPath ?
-                    `${newFolder.parentPath}/${newFolder.name || '...'}` :
-                    `${newFolder.name || '...'}`) :
-                  `${newFolder.name || '...'}`
+                    (newFolder.parentPath ?
+                        `${newFolder.parentPath}/${newFolder.name || '...'}` :
+                        `${newFolder.name || '...'}`) :
+                    `${newFolder.name || '...'}`
               }}
             </el-text>
           </div>
@@ -281,8 +301,10 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="cancelCreateFolder">取消</el-button>
-          <el-button type="primary" @click="confirmCreateFolder" :loading="creatingFolder">
-            <el-icon><Check /></el-icon>
+          <el-button :loading="creatingFolder" type="primary" @click="confirmCreateFolder">
+            <el-icon>
+              <Check/>
+            </el-icon>
             创建文件夹
           </el-button>
         </div>
@@ -292,14 +314,13 @@
 </template>
 
 <script setup>
-import {computed, onMounted, reactive, ref, watch} from 'vue'
+import {computed, onMounted, reactive, ref} from 'vue'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import {
   Check,
   Edit,
   Folder,
   FolderAdd,
-  MagicStick,
   Plus,
   Refresh as RefreshIcon,
   Upload,
@@ -339,8 +360,8 @@ const newFolder = reactive({
 
 const folderRules = {
   name: [
-    { required: true, message: '请输入文件夹名称', trigger: 'blur' },
-    { min: 1, max: 50, message: '文件夹名称长度应在1-50个字符之间', trigger: 'blur' },
+    {required: true, message: '请输入文件夹名称', trigger: 'blur'},
+    {min: 1, max: 50, message: '文件夹名称长度应在1-50个字符之间', trigger: 'blur'},
     {
       pattern: /^[\w\u4e00-\u9fa5\-]+$/,
       message: '只能包含中文、英文、数字、下划线和连字符',
@@ -352,17 +373,17 @@ const folderRules = {
 // 表单验证规则
 const formRules = {
   title: [
-    { required: true, message: '请输入文章标题', trigger: 'blur' },
-    { min: 1, max: 255, message: '标题长度应在1-255个字符之间', trigger: 'blur' }
+    {required: true, message: '请输入文章标题', trigger: 'blur'},
+    {min: 1, max: 255, message: '标题长度应在1-255个字符之间', trigger: 'blur'}
   ],
   date: [
-    { required: true, message: '请选择发布日期', trigger: 'change' }
+    {required: true, message: '请选择发布日期', trigger: 'change'}
   ],
   status: [
-    { required: true, message: '请选择文章状态', trigger: 'change' }
+    {required: true, message: '请选择文章状态', trigger: 'change'}
   ],
   file: [
-    { required: true, message: '请选择要上传的文件', trigger: 'change' }
+    {required: true, message: '请选择要上传的文件', trigger: 'change'}
   ]
 }
 
@@ -386,16 +407,16 @@ const treeProps = {
 // 计算预览路径
 const previewFolderPath = computed(() => {
   let path = 'articles/knowledge'
-  
+
   if (newFolder.parentPath) {
     path += `/${newFolder.parentPath}`
   }
-  
+
   if (newFolder.name) {
     const safeName = newFolder.name.trim()
     path += `/${safeName}`
   }
-  
+
   return path
 })
 
@@ -449,7 +470,7 @@ const fetchCategories = async () => {
     })
 
     console.log('分类数据响应:', response.data)
-    
+
     if (response.data?.categories && Array.isArray(response.data.categories)) {
       // 使用与ArticleManagement相同的方式构建分类树
       categoryTree.value = buildCategoryTreeFromData(response.data.categories)
@@ -466,7 +487,7 @@ const fetchCategories = async () => {
       data: error.response?.data,
       url: error.config?.url
     })
-    
+
     if (error.code === 'NETWORK_ERROR' || error.message === 'Network Error') {
       console.error('网络连接错误，请检查服务器状态')
       ElMessage.error('无法连接到服务器，请检查网络连接和服务器状态')
@@ -494,7 +515,7 @@ const refreshCategories = async () => {
 // 从数据库数据构建分类树（与ArticleManagement保持一致）
 const buildCategoryTreeFromData = (categories) => {
   console.log('输入分类数据:', categories)
-  
+
   if (!categories || categories.length === 0) {
     return []
   }
@@ -598,13 +619,13 @@ const handleCreateDialogClose = () => {
   // 检查是否有未保存的内容
   if (newFolder.name) {
     ElMessageBox.confirm(
-      '确定要关闭吗？未保存的内容将丢失。',
-      '提示',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }
+        '确定要关闭吗？未保存的内容将丢失。',
+        '提示',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
     ).then(() => {
       cancelCreateFolder()
     }).catch(() => {
@@ -629,19 +650,19 @@ const cancelCreateFolder = () => {
 
 const confirmCreateFolder = async () => {
   if (!folderFormRef.value) return
-  
+
   try {
     await folderFormRef.value.validate()
-    
+
     creatingFolder.value = true
-    
+
     // 根据是否存在分类文件夹决定路径构建方式
     let fullPath
     if (categoryTree.value.length > 0) {
       // 有分类文件夹时，使用父文件夹选择器的结果
       fullPath = newFolder.parentPath ?
-        `${newFolder.parentPath}/${newFolder.name.trim()}` :
-        newFolder.name.trim()
+          `${newFolder.parentPath}/${newFolder.name.trim()}` :
+          newFolder.name.trim()
     } else {
       // 没有分类文件夹时，直接在knowledge下创建
       fullPath = newFolder.name.trim()
@@ -652,9 +673,9 @@ const confirmCreateFolder = async () => {
       path: fullPath,
       parent: (categoryTree.value.length > 0) ? (newFolder.parentPath || null) : null
     }
-    
+
     console.log('创建文件夹数据:', createData)
-    
+
     const response = await axios.post('/api/articles/categories', createData, {
       timeout: 15000,
       headers: {
@@ -662,26 +683,26 @@ const confirmCreateFolder = async () => {
         'Content-Type': 'application/json'
       }
     })
-    
+
     console.log('创建文件夹响应:', response.data)
     ElMessage.success(`文件夹 "${newFolder.name}" 创建成功`)
-    
+
     // 刷新分类树
     await refreshCategories()
-    
+
     // 自动选择新创建的文件夹
     formData.category = fullPath
     if (categoryTreeRef.value) {
       categoryTreeRef.value.setCurrentKey(fullPath)
     }
-    
+
     // 关闭对话框
     showCreateFolder.value = false
     cancelCreateFolder()
-    
+
   } catch (error) {
     console.error('创建文件夹失败:', error)
-    
+
     if (error.code === 'NETWORK_ERROR' || error.message === 'Network Error') {
       ElMessage.error('网络连接失败，请检查服务器状态')
     } else if (error.response?.status === 409) {
@@ -702,7 +723,7 @@ const fetchTags = async () => {
     console.log('开始获取文章标签数据...')
     const res = await axios.get('/api/tags')
     console.log('标签数据响应:', res.data)
-    
+
     if (res.data?.tags && Array.isArray(res.data.tags)) {
       existingTags.value = res.data.tags
       console.log('成功获取标签:', existingTags.value)
@@ -720,30 +741,30 @@ const fetchTags = async () => {
 // 主要操作
 const handleUpload = async () => {
   if (!formRef.value) return
-  
+
   try {
     await formRef.value.validate()
-    
+
     if (!formData.file) {
       ElMessage.warning('请选择要上传的文件')
       return
     }
-    
+
     if (!formData.category) {
       ElMessage.warning('请选择分类文件夹')
       return
     }
 
     uploading.value = true
-    
+
     // 自动生成slug从文件名
     const fileName = formData.file.name.replace(/\.(md|markdown)$/i, '')
     const slug = fileName
-      .toLowerCase()
-      .replace(/[^\w\u4e00-\u9fa5]/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '')
-    
+        .toLowerCase()
+        .replace(/[^\w\u4e00-\u9fa5]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
+
     const uploadData = {
       title: formData.title,
       slug: slug,
@@ -754,7 +775,7 @@ const handleUpload = async () => {
       status: formData.status,
       content: formData.content
     }
-    
+
     console.log('上传文章数据:', uploadData)
 
     const response = await axios.post('/api/articles', uploadData, {
@@ -795,18 +816,18 @@ const handleUpload = async () => {
 const handleClose = () => {
   // 检查是否有未保存的内容
   const hasUnsavedContent = formData.title || formData.content || formData.file ||
-                           formData.summary || formData.tags.length > 0 ||
-                           formData.category
+      formData.summary || formData.tags.length > 0 ||
+      formData.category
 
   if (hasUnsavedContent) {
     ElMessageBox.confirm(
-      '确定要关闭吗？未保存的内容将丢失。',
-      '提示',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }
+        '确定要关闭吗？未保存的内容将丢失。',
+        '提示',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
     ).then(() => {
       resetForm()
       emit('update:modelValue', false)
@@ -830,11 +851,11 @@ const resetForm = () => {
     file: null,
     content: ''
   })
-  
+
   if (uploadRef.value) {
     uploadRef.value.clearFiles()
   }
-  
+
   if (formRef.value) {
     formRef.value.resetFields()
   }

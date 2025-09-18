@@ -1,40 +1,40 @@
 <template>
   <el-dialog
-    :model-value="modelValue"
-    @update:model-value="$emit('update:modelValue', $event)"
-    title="上传图书"
-    width="600px"
-    :before-close="handleClose"
-    :close-on-click-modal="false"
+      :before-close="handleClose"
+      :close-on-click-modal="false"
+      :model-value="modelValue"
+      title="上传图书"
+      width="600px"
+      @update:model-value="$emit('update:modelValue', $event)"
   >
-    <el-form :model="formData" :rules="formRules" label-width="100px" ref="formRef">
+    <el-form ref="formRef" :model="formData" :rules="formRules" label-width="100px">
       <!-- 图书标题 -->
       <el-form-item label="图书标题" prop="title" required>
         <el-input
-          v-model="formData.title"
-          placeholder="请输入图书标题"
-          maxlength="255"
-          show-word-limit
+            v-model="formData.title"
+            maxlength="255"
+            placeholder="请输入图书标题"
+            show-word-limit
         />
       </el-form-item>
 
       <!-- 图书描述 -->
       <el-form-item label="图书描述" prop="description">
         <el-input
-          v-model="formData.description"
-          type="textarea"
-          :rows="4"
-          placeholder="请输入图书描述"
-          maxlength="1000"
-          show-word-limit
+            v-model="formData.description"
+            :rows="4"
+            maxlength="1000"
+            placeholder="请输入图书描述"
+            show-word-limit
+            type="textarea"
         />
       </el-form-item>
 
       <!-- 网盘URL -->
       <el-form-item label="网盘链接" prop="filename" required>
         <el-input
-          v-model="formData.filename"
-          placeholder="请输入网盘下载链接，如：https://pan.baidu.com/xxx 或 https://drive.google.com/xxx"
+            v-model="formData.filename"
+            placeholder="请输入网盘下载链接，如：https://pan.baidu.com/xxx 或 https://drive.google.com/xxx"
         />
         <div class="form-tip">请输入完整的网盘分享链接，用户点击下载时将跳转到此链接</div>
       </el-form-item>
@@ -42,8 +42,8 @@
       <!-- 图书封面 -->
       <el-form-item label="图书封面" prop="cover">
         <el-input
-          v-model="formData.cover"
-          placeholder="请输入图床链接URL，如：https://s21.ax1x.com/xxx.png"
+            v-model="formData.cover"
+            placeholder="请输入图床链接URL，如：https://s21.ax1x.com/xxx.png"
         />
         <div class="form-tip">请输入完整的图床链接URL，支持JPG、PNG等格式</div>
       </el-form-item>
@@ -51,19 +51,19 @@
       <!-- 图书标签 -->
       <el-form-item label="图书标签">
         <el-select
-          v-model="formData.tags"
-          multiple
-          filterable
-          allow-create
-          placeholder="选择或创建标签"
-          style="width: 100%"
-          :multiple-limit="5"
+            v-model="formData.tags"
+            :multiple-limit="5"
+            allow-create
+            filterable
+            multiple
+            placeholder="选择或创建标签"
+            style="width: 100%"
         >
           <el-option
-            v-for="tag in existingTags"
-            :key="tag"
-            :label="tag"
-            :value="tag"
+              v-for="tag in existingTags"
+              :key="tag"
+              :label="tag"
+              :value="tag"
           />
         </el-select>
         <div class="form-tip">最多可选择5个标签</div>
@@ -73,11 +73,15 @@
       <el-form-item label="图书状态" prop="status" required>
         <el-radio-group v-model="formData.status">
           <el-radio value="draft">
-            <el-icon><Edit /></el-icon>
+            <el-icon>
+              <Edit/>
+            </el-icon>
             草稿
           </el-radio>
           <el-radio value="published">
-            <el-icon><Check /></el-icon>
+            <el-icon>
+              <Check/>
+            </el-icon>
             发布
           </el-radio>
         </el-radio-group>
@@ -88,8 +92,10 @@
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="handleClose">取消</el-button>
-        <el-button type="primary" @click="handleUpload" :loading="uploading">
-          <el-icon><Upload /></el-icon>
+        <el-button :loading="uploading" type="primary" @click="handleUpload">
+          <el-icon>
+            <Upload/>
+          </el-icon>
           创建图书
         </el-button>
       </div>
@@ -98,13 +104,9 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { 
-  Upload, 
-  Edit, 
-  Check
-} from '@element-plus/icons-vue'
+import {onMounted, reactive, ref} from 'vue'
+import {ElMessage, ElMessageBox} from 'element-plus'
+import {Check, Edit, Upload} from '@element-plus/icons-vue'
 import axios from 'axios'
 
 // Props和Emits
@@ -127,26 +129,26 @@ const formData = reactive({
 // 表单验证规则
 const formRules = {
   title: [
-    { required: true, message: '请输入图书标题', trigger: 'blur' },
-    { min: 1, max: 255, message: '标题长度应在1-255个字符之间', trigger: 'blur' }
+    {required: true, message: '请输入图书标题', trigger: 'blur'},
+    {min: 1, max: 255, message: '标题长度应在1-255个字符之间', trigger: 'blur'}
   ],
   cover: [
-    { required: true, message: '请输入封面URL', trigger: 'blur' },
-    { 
-      pattern: /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i, 
-      message: '请输入有效的图片URL（支持jpg、png、gif、webp格式）', 
-      trigger: 'blur' 
+    {required: true, message: '请输入封面URL', trigger: 'blur'},
+    {
+      pattern: /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i,
+      message: '请输入有效的图片URL（支持jpg、png、gif、webp格式）',
+      trigger: 'blur'
     }
   ],
   status: [
-    { required: true, message: '请选择图书状态', trigger: 'change' }
+    {required: true, message: '请选择图书状态', trigger: 'change'}
   ],
   filename: [
-    { required: true, message: '请输入网盘链接', trigger: 'blur' },
-    { 
-      pattern: /^https?:\/\/.+/, 
-      message: '请输入有效的网盘链接（以http://或https://开头）', 
-      trigger: 'blur' 
+    {required: true, message: '请输入网盘链接', trigger: 'blur'},
+    {
+      pattern: /^https?:\/\/.+/,
+      message: '请输入有效的网盘链接（以http://或https://开头）',
+      trigger: 'blur'
     }
   ]
 }
@@ -164,7 +166,7 @@ const fetchTags = async () => {
     console.log('开始获取图书标签数据...')
     const response = await axios.get('/api/book-tags')
     console.log('标签数据响应:', response.data)
-    
+
     if (response.data?.tags && Array.isArray(response.data.tags)) {
       existingTags.value = response.data.tags
       console.log('成功获取标签:', existingTags.value)
@@ -181,12 +183,12 @@ const fetchTags = async () => {
 // 主要操作
 const handleUpload = async () => {
   if (!formRef.value) return
-  
+
   try {
     await formRef.value.validate()
-    
+
     uploading.value = true
-    
+
     const bookData = {
       title: formData.title,
       description: formData.description,
@@ -195,9 +197,9 @@ const handleUpload = async () => {
       status: formData.status,
       filename: formData.filename  // 现在存储的是网盘URL
     }
-    
+
     console.log('创建图书记录:', bookData)
-    
+
     const bookResponse = await axios.post('/api/admin/books', bookData, {
       timeout: 30000,
       headers: {
@@ -205,16 +207,16 @@ const handleUpload = async () => {
         'Content-Type': 'application/json'
       }
     })
-    
+
     console.log('图书创建响应:', bookResponse.data)
     ElMessage.success('图书创建成功')
-    
+
     resetForm()
     emit('upload-success')
     emit('update:modelValue', false)
   } catch (error) {
     console.error('创建失败:', error)
-    
+
     if (error.code === 'NETWORK_ERROR' || error.message === 'Network Error') {
       ElMessage.error('网络连接失败，请检查服务器状态')
     } else if (error.response?.status === 400) {
@@ -231,17 +233,17 @@ const handleUpload = async () => {
 
 const handleClose = () => {
   const hasUnsavedContent = formData.title || formData.description || formData.filename ||
-                           formData.tags.length > 0
+      formData.tags.length > 0
 
   if (hasUnsavedContent) {
     ElMessageBox.confirm(
-      '确定要关闭吗？未保存的内容将丢失。',
-      '提示',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }
+        '确定要关闭吗？未保存的内容将丢失。',
+        '提示',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
     ).then(() => {
       resetForm()
       emit('update:modelValue', false)
@@ -263,7 +265,7 @@ const resetForm = () => {
     status: 'draft',
     filename: ''
   })
-  
+
   if (formRef.value) {
     formRef.value.resetFields()
   }

@@ -1,8 +1,8 @@
 import sys
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
 sys.path.append("..")
 import database
@@ -15,11 +15,14 @@ logger = logging.getLogger("favorite_images_api")
 
 router = APIRouter()
 
+
 class FavoriteImageCreate(BaseModel):
     url: str
 
+
 class FavoriteImageUpdate(BaseModel):
     url: str
+
 
 @router.get("/favorite-images")
 def get_favorite_images(db: Session = Depends(database.get_db)):
@@ -51,6 +54,7 @@ def get_favorite_images(db: Session = Depends(database.get_db)):
         # 返回空数据而不是抛出异常
         return []
 
+
 @router.get("/favorite-images/{image_id}")
 def get_favorite_image_by_id(image_id: int, db: Session = Depends(database.get_db)):
     """根据ID获取单张收藏图片详情"""
@@ -74,11 +78,12 @@ def get_favorite_image_by_id(image_id: int, db: Session = Depends(database.get_d
         logger.error(f"获取收藏图片详情时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取收藏图片详情时发生错误: {str(e)}")
 
+
 @router.put("/favorite-images/{image_id}")
 def update_favorite_image(
-    image_id: int,
-    image_data: FavoriteImageUpdate,
-    db: Session = Depends(database.get_db)
+        image_id: int,
+        image_data: FavoriteImageUpdate,
+        db: Session = Depends(database.get_db)
 ):
     """更新收藏图片URL"""
     logger.info(f"收到更新收藏图片的请求，ID: {image_id}, URL: {image_data.url}")
@@ -105,10 +110,11 @@ def update_favorite_image(
         db.rollback()
         raise HTTPException(status_code=500, detail=f"更新收藏图片时发生错误: {str(e)}")
 
+
 @router.post("/favorite-images")
 def create_favorite_image(
-    image_data: FavoriteImageCreate,
-    db: Session = Depends(database.get_db)
+        image_data: FavoriteImageCreate,
+        db: Session = Depends(database.get_db)
 ):
     """创建新的收藏图片"""
     logger.info(f"收到创建收藏图片的请求，URL: {image_data.url}")
@@ -136,6 +142,7 @@ def create_favorite_image(
         logger.error(f"创建收藏图片时发生错误: {str(e)}")
         db.rollback()
         raise HTTPException(status_code=500, detail=f"创建收藏图片时发生错误: {str(e)}")
+
 
 @router.delete("/favorite-images/{image_id}")
 def delete_favorite_image(image_id: int, db: Session = Depends(database.get_db)):

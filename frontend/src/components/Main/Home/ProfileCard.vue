@@ -1,24 +1,28 @@
 <template>
   <el-card class="profile-card">
     <div class="card-content">
-      <el-avatar :size="100" src="/avatar.jpg" />
+      <el-avatar :size="100" src="/avatar.jpg"/>
       <h2 class="name">卟瓿钚</h2>
       <p class="title">一名普通大学生</p>
       <div class="social-links">
-        <a href="https://github.com/NayeyYe" target="_blank" class="social-link" title="GitHub">
-          <img :src="githubIcon" alt="GitHub" class="social-icon" />
+        <a class="social-link" href="https://github.com/NayeyYe" target="_blank" title="GitHub">
+          <img :src="githubIcon" alt="GitHub" class="social-icon"/>
         </a>
-        <a href="https://blog.csdn.net/2302_77222155?type=blog" target="_blank" class="social-link" title="CSDN">
-          <img :src="csdnIcon" alt="CSDN" class="social-icon" />
+        <a class="social-link" href="https://blog.csdn.net/2302_77222155?type=blog" target="_blank" title="CSDN">
+          <img :src="csdnIcon" alt="CSDN" class="social-icon"/>
         </a>
-        <a href="https://x.com/NayeyYeX" target="_blank" class="social-link" title="Twitter">
-          <img :src="twitterIcon" alt="Twitter" class="social-icon" />
+        <a class="social-link" href="https://x.com/NayeyYeX" target="_blank" title="Twitter">
+          <img :src="twitterIcon" alt="Twitter" class="social-icon"/>
         </a>
       </div>
-      <el-divider />
+      <el-divider/>
       <div class="contact-info">
-        <p><span class="icon">在读院校:</span> <el-link href="https://www.whu.edu.cn/" target="_blank">武汉大学</el-link></p>
-        <p><span class="icon">Email:</span> <el-link href="mailto:Nayey.Ye@outlook.com">NayeyYe@163.com</el-link></p>
+        <p><span class="icon">在读院校:</span>
+          <el-link href="https://www.whu.edu.cn/" target="_blank">武汉大学</el-link>
+        </p>
+        <p><span class="icon">Email:</span>
+          <el-link href="mailto:Nayey.Ye@outlook.com">NayeyYe@163.com</el-link>
+        </p>
         <p><span class="icon">Tel:</span> <span>+86-13597646338</span></p>
       </div>
     </div>
@@ -37,7 +41,7 @@ import twitterIcon from '/twitter.svg'
   width: 350px;
   box-sizing: border-box; /* 确保宽度包含内边距和边框 */
   border-radius: 15px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
   padding: 20px;
   background-color: #fff;

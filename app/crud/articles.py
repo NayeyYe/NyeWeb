@@ -19,6 +19,7 @@ logger = logging.getLogger("articles_api")
 
 router = APIRouter()
 
+
 # ===== REQUEST MODELS =====
 class CreateArticleRequest(BaseModel):
     title: str
@@ -30,10 +31,12 @@ class CreateArticleRequest(BaseModel):
     content: str
     date: Optional[str] = None
 
+
 class CreateCategoryRequest(BaseModel):
     name: str
     path: Optional[str] = None
     parent: Optional[str] = None
+
 
 class UpdateArticleRequest(BaseModel):
     title: Optional[str] = None
@@ -43,6 +46,7 @@ class UpdateArticleRequest(BaseModel):
     status: Optional[str] = None
     content: Optional[str] = None
     date: Optional[str] = None
+
 
 # ===== CATEGORY MANAGEMENT APIs =====
 @router.get("/articles/categories")
@@ -79,6 +83,7 @@ def get_article_categories():
             "categories": [],
             "total": 0
         }
+
 
 @router.post("/articles/categories")
 def create_category(request: CreateCategoryRequest, db: Session = Depends(database.get_db)):
@@ -131,6 +136,7 @@ def create_category(request: CreateCategoryRequest, db: Session = Depends(databa
         logger.error(f"创建分类文件夹时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"创建分类文件夹时发生错误: {str(e)}")
 
+
 # ===== ARTICLE QUERY APIs =====
 @router.get("/articles")
 def get_articles(db: Session = Depends(database.get_db)):
@@ -163,6 +169,7 @@ def get_articles(db: Session = Depends(database.get_db)):
         logger.error(f"获取文章数据时��生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取文章数据时发生错误: {str(e)}")
 
+
 @router.get("/admin/articles")
 def get_all_articles_admin(db: Session = Depends(database.get_db)):
     """管理员获取所有文章（包含所有状态），按日期倒序排列"""
@@ -180,7 +187,7 @@ def get_all_articles_admin(db: Session = Depends(database.get_db)):
 
             # 状态映射
             status_map = {0: 'draft', 1: 'published', 2: 'recycled'}
-            
+
             article_dict = {
                 "id": article.id,
                 "title": article.title,
@@ -197,6 +204,7 @@ def get_all_articles_admin(db: Session = Depends(database.get_db)):
     except Exception as e:
         logger.error(f"获取文章数据时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取文章数据时发生错误: {str(e)}")
+
 
 @router.get("/articles/{category:path}/{article_slug}")
 def get_article_by_category_and_slug(category: str, article_slug: str, db: Session = Depends(database.get_db)):
@@ -235,6 +243,7 @@ def get_article_by_category_and_slug(category: str, article_slug: str, db: Sessi
         logger.error(f"获取文章详情时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取文章详情时发生错误: {str(e)}")
 
+
 @router.get("/articles/{article_slug}")
 def get_article_by_slug(article_slug: str, db: Session = Depends(database.get_db)):
     """根据slug获取单篇文章详情"""
@@ -267,6 +276,7 @@ def get_article_by_slug(article_slug: str, db: Session = Depends(database.get_db
         logger.error(f"获取文章详情时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取文章详情时发生错误: {str(e)}")
 
+
 # ===== ARTICLE MANAGEMENT APIs =====
 @router.post("/articles")
 def create_article(article_data: CreateArticleRequest, db: Session = Depends(database.get_db)):
@@ -278,14 +288,14 @@ def create_article(article_data: CreateArticleRequest, db: Session = Depends(dat
             slug = generate_safe_slug(article_data.title)
         else:
             slug = generate_safe_slug(article_data.slug)
-        
+
         # 确保slug唯一性
         base_slug = slug
         counter = 1
         while db.query(Article).filter(Article.slug == slug).first():
             slug = f"{base_slug}-{counter}"
             counter += 1
-        
+
         # 解析日期
         article_date = datetime.now().date()
         if article_data.date:
@@ -293,11 +303,11 @@ def create_article(article_data: CreateArticleRequest, db: Session = Depends(dat
                 article_date = datetime.strptime(article_data.date, '%Y-%m-%d').date()
             except ValueError:
                 logger.warning(f"日期格式错误，使用当前日期: {article_data.date}")
-        
+
         # 状态映射
         status_map = {'draft': 0, 'published': 1, 'recycled': 2}
         status = status_map.get(article_data.status, 0)
-        
+
         # 创建文章记录
         new_article = Article(
             title=article_data.title,
@@ -307,41 +317,41 @@ def create_article(article_data: CreateArticleRequest, db: Session = Depends(dat
             date=article_date,
             status=status
         )
-        
+
         db.add(new_article)
         db.commit()
         db.refresh(new_article)
-        
+
         # 处理标签
         for tag_name in article_data.tags or []:
             if not tag_name.strip():
                 continue
-                
+
             tag = db.query(Tag).filter(Tag.name == tag_name.strip()).first()
             if not tag:
                 tag = Tag(name=tag_name.strip())
                 db.add(tag)
                 db.flush()
-            
+
             # 创建文章-标签关联
             article_tag = ArticleTag(article_id=new_article.id, tag_id=tag.id)
             db.add(article_tag)
-        
+
         db.commit()
-        
+
         # 创建markdown文件，确保分类文件夹存在
         try:
             save_article_file(new_article, article_data.content, article_data.category)
         except Exception as e:
             logger.warning(f"保存文章文件失败: {str(e)}")
-        
+
         logger.info(f"成功创建文章: {new_article.title}")
         return {
-            "message": "文章上传成功", 
+            "message": "文章上传成功",
             "id": new_article.id,
             "slug": new_article.slug
         }
-        
+
     except HTTPException:
         db.rollback()
         raise
@@ -349,6 +359,7 @@ def create_article(article_data: CreateArticleRequest, db: Session = Depends(dat
         db.rollback()
         logger.error(f"创建文章时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"创建文章时发生错误: {str(e)}")
+
 
 @router.put("/articles/{article_id}")
 def update_article(article_id: int, article_data: UpdateArticleRequest, db: Session = Depends(database.get_db)):
@@ -359,7 +370,7 @@ def update_article(article_id: int, article_data: UpdateArticleRequest, db: Sess
         article = db.query(Article).filter(Article.id == article_id).first()
         if not article:
             raise HTTPException(status_code=404, detail="文章未找到")
-        
+
         # 更新文章信息
         if article_data.title is not None:
             article.title = article_data.title
@@ -376,43 +387,43 @@ def update_article(article_id: int, article_data: UpdateArticleRequest, db: Sess
             status_map = {'draft': 0, 'published': 1, 'recycled': 2}
             if article_data.status in status_map:
                 article.status = status_map[article_data.status]
-        
+
         # 处理标签更新
         if article_data.tags is not None:
             # 删除现有标签关联
             db.query(ArticleTag).filter(ArticleTag.article_id == article_id).delete()
-            
+
             # 添加新标签
             for tag_name in article_data.tags:
                 if not tag_name.strip():
                     continue
-                    
+
                 tag = db.query(Tag).filter(Tag.name == tag_name.strip()).first()
                 if not tag:
                     tag = Tag(name=tag_name.strip())
                     db.add(tag)
                     db.flush()
-                
+
                 # 创建文章-标签关联
                 article_tag = ArticleTag(article_id=article.id, tag_id=tag.id)
                 db.add(article_tag)
-        
+
         # 更新文件内容
         if article_data.content is not None:
             try:
                 save_article_file(article, article_data.content, article.category)
             except Exception as e:
                 logger.warning(f"更新文章文件失败: {str(e)}")
-        
+
         db.commit()
-        
+
         logger.info(f"成功编辑文章信息: {article.title}")
         return {
             "message": "文章信息编辑成功",
             "id": article.id,
             "title": article.title
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -420,10 +431,12 @@ def update_article(article_id: int, article_data: UpdateArticleRequest, db: Sess
         logger.error(f"编辑文章信息时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"编辑文章信息时发生错误: {str(e)}")
 
+
 @router.post("/articles/{article_id}/edit")
 def update_article_post(article_id: int, article_data: UpdateArticleRequest, db: Session = Depends(database.get_db)):
     """编辑文章信息（POST方法，用于兼容性）"""
     return update_article(article_id, article_data, db)
+
 
 @router.patch("/articles/{article_id}/status")
 def update_article_status(article_id: int, status_data: dict, db: Session = Depends(database.get_db)):
@@ -457,6 +470,7 @@ def update_article_status(article_id: int, status_data: dict, db: Session = Depe
         logger.error(f"修改文章状态时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"修改文章状态时发生错误: {str(e)}")
 
+
 @router.delete("/articles/{article_id}")
 def delete_article(article_id: int, db: Session = Depends(database.get_db)):
     """删除文章，同时删除dist和public中的文件"""
@@ -466,10 +480,10 @@ def delete_article(article_id: int, db: Session = Depends(database.get_db)):
         article = db.query(Article).filter(Article.id == article_id).first()
         if not article:
             raise HTTPException(status_code=404, detail="文章未找到")
-        
+
         # 删除文章-标签关联
         db.query(ArticleTag).filter(ArticleTag.article_id == article_id).delete()
-        
+
         # 删除markdown文件（dist和public）
         for base_path in ["../frontend/dist/articles/knowledge", "../frontend/public/articles/knowledge"]:
             try:
@@ -488,16 +502,17 @@ def delete_article(article_id: int, db: Session = Depends(database.get_db)):
         # 删除文章记录
         db.delete(article)
         db.commit()
-        
+
         logger.info(f"成功删除文章: {article.title}")
         return {"message": "文章删除成功"}
-        
+
     except HTTPException:
         raise
     except Exception as e:
         db.rollback()
         logger.error(f"删除文章时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"删除文章时发生错误: {str(e)}")
+
 
 @router.get("/tags")
 def get_all_tags(db: Session = Depends(database.get_db)):
@@ -528,6 +543,7 @@ def get_all_tags(db: Session = Depends(database.get_db)):
             "tags": [],
             "counts": {}
         }
+
 
 # ===== HELPER FUNCTIONS =====
 def scan_physical_categories():
@@ -566,9 +582,9 @@ def scan_physical_categories():
 
                 # 统计markdown文件数量（排除README.md和其他特殊文件）
                 md_files = [f for f in files
-                          if f.endswith('.md')
-                          and f not in ['README.md', '.gitkeep', 'index.md']
-                          and not f.startswith('.')]
+                            if f.endswith('.md')
+                            and f not in ['README.md', '.gitkeep', 'index.md']
+                            and not f.startswith('.')]
                 md_count = len(md_files)
 
                 logger.info(f"发现分类文件夹: {category_path}, markdown文件: {md_files}")
@@ -592,18 +608,19 @@ def scan_physical_categories():
 
     return categories
 
+
 def create_physical_category_folder(category_path: str):
     """创建物理分类文件夹，��时在dist和public目录创建"""
     try:
         # 构建完整的文件系统路径，同时在两个目录创建
         base_paths = [
-            "../frontend/dist/articles/knowledge", 
+            "../frontend/dist/articles/knowledge",
             "../frontend/public/articles/knowledge"
         ]
-        
+
         for base_path in base_paths:
             full_path = os.path.join(base_path, category_path.replace('/', os.sep))
-            
+
             # 创建目录
             os.makedirs(full_path, exist_ok=True)
 
@@ -612,6 +629,7 @@ def create_physical_category_folder(category_path: str):
     except Exception as e:
         logger.error(f"创建物理文件夹失败: {str(e)}")
         raise
+
 
 def generate_safe_slug(text: str) -> str:
     """生成安全的slug"""
@@ -629,6 +647,7 @@ def generate_safe_slug(text: str) -> str:
     slug = slug.strip('-')
 
     return slug or "untitled"
+
 
 def save_article_file(article: Article, content: str, category: str = None):
     """保存文章文件���磁盘，确保分类文件夹存在（dist和public）"""
@@ -660,6 +679,7 @@ def save_article_file(article: Article, content: str, category: str = None):
     except Exception as e:
         logger.error(f"保存文章文件失败: {str(e)}")
         raise
+
 
 def extract_simple_summary(content: str) -> str:
     """简单的摘要提取降级方案"""

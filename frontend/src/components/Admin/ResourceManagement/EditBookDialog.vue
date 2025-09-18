@@ -1,40 +1,40 @@
 <template>
   <el-dialog
-    :model-value="modelValue"
-    @update:model-value="$emit('update:modelValue', $event)"
-    title="编辑图书信息"
-    width="600px"
-    :before-close="handleClose"
-    :close-on-click-modal="false"
+      :before-close="handleClose"
+      :close-on-click-modal="false"
+      :model-value="modelValue"
+      title="编辑图书信息"
+      width="600px"
+      @update:model-value="$emit('update:modelValue', $event)"
   >
-    <el-form :model="formData" :rules="formRules" label-width="100px" ref="formRef">
+    <el-form ref="formRef" :model="formData" :rules="formRules" label-width="100px">
       <!-- 图书标题 -->
       <el-form-item label="图书标题" prop="title" required>
         <el-input
-          v-model="formData.title"
-          placeholder="请输入图书标题"
-          maxlength="255"
-          show-word-limit
+            v-model="formData.title"
+            maxlength="255"
+            placeholder="请输入图书标题"
+            show-word-limit
         />
       </el-form-item>
 
       <!-- 图书描述 -->
       <el-form-item label="图书描述" prop="description">
         <el-input
-          v-model="formData.description"
-          type="textarea"
-          :rows="4"
-          placeholder="请输入图书描述"
-          maxlength="1000"
-          show-word-limit
+            v-model="formData.description"
+            :rows="4"
+            maxlength="1000"
+            placeholder="请输入图书描述"
+            show-word-limit
+            type="textarea"
         />
       </el-form-item>
 
       <!-- 图书封面 -->
       <el-form-item label="图书封面" prop="cover">
         <el-input
-          v-model="formData.cover"
-          placeholder="请输入图床链接URL"
+            v-model="formData.cover"
+            placeholder="请输入图床链接URL"
         />
         <div class="form-tip">请输入完整的图床链接URL，如：https://s21.ax1x.com/xxx.png</div>
       </el-form-item>
@@ -42,19 +42,19 @@
       <!-- 图书标签 -->
       <el-form-item label="图书标签">
         <el-select
-          v-model="formData.tags"
-          multiple
-          filterable
-          allow-create
-          placeholder="选择或创建标签"
-          style="width: 100%"
-          :multiple-limit="5"
+            v-model="formData.tags"
+            :multiple-limit="5"
+            allow-create
+            filterable
+            multiple
+            placeholder="选择或创建标签"
+            style="width: 100%"
         >
           <el-option
-            v-for="tag in existingTags"
-            :key="tag"
-            :label="tag"
-            :value="tag"
+              v-for="tag in existingTags"
+              :key="tag"
+              :label="tag"
+              :value="tag"
           />
         </el-select>
         <div class="form-tip">最多可选择5个标签</div>
@@ -64,11 +64,15 @@
       <el-form-item label="图书状态" prop="status" required>
         <el-radio-group v-model="formData.status">
           <el-radio value="draft">
-            <el-icon><Edit /></el-icon>
+            <el-icon>
+              <Edit/>
+            </el-icon>
             草稿
           </el-radio>
           <el-radio value="published">
-            <el-icon><Check /></el-icon>
+            <el-icon>
+              <Check/>
+            </el-icon>
             发布
           </el-radio>
         </el-radio-group>
@@ -77,9 +81,9 @@
       <!-- 文件信息（只读） -->
       <el-form-item label="文件信息">
         <el-input
-          :value="book?.filename || '暂无文件'"
-          readonly
-          placeholder="PDF文件名"
+            :value="book?.filename || '暂无文件'"
+            placeholder="PDF文件名"
+            readonly
         />
         <div class="form-tip">文件信息只读，如需更换文件请重新上传</div>
       </el-form-item>
@@ -89,8 +93,10 @@
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="handleClose">取消</el-button>
-        <el-button type="primary" @click="handleSave" :loading="saving">
-          <el-icon><Check /></el-icon>
+        <el-button :loading="saving" type="primary" @click="handleSave">
+          <el-icon>
+            <Check/>
+          </el-icon>
           保存修改
         </el-button>
       </div>
@@ -99,12 +105,9 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref, watch } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { 
-  Edit, 
-  Check
-} from '@element-plus/icons-vue'
+import {onMounted, reactive, ref, watch} from 'vue'
+import {ElMessage, ElMessageBox} from 'element-plus'
+import {Check, Edit} from '@element-plus/icons-vue'
 import axios from 'axios'
 
 // Props和Emits
@@ -127,19 +130,19 @@ const formData = reactive({
 // 表单验证规则
 const formRules = {
   title: [
-    { required: true, message: '请输入图书标题', trigger: 'blur' },
-    { min: 1, max: 255, message: '标题长度应在1-255个字符之间', trigger: 'blur' }
+    {required: true, message: '请输入图书标题', trigger: 'blur'},
+    {min: 1, max: 255, message: '标题长度应在1-255个字符之间', trigger: 'blur'}
   ],
   cover: [
-    { required: true, message: '请输入封面URL', trigger: 'blur' },
-    { 
-      pattern: /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i, 
-      message: '请输入有效的图片URL（支持jpg、png、gif、webp格式）', 
-      trigger: 'blur' 
+    {required: true, message: '请输入封面URL', trigger: 'blur'},
+    {
+      pattern: /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i,
+      message: '请输入有效的图片URL（支持jpg、png、gif、webp格式）',
+      trigger: 'blur'
     }
   ],
   status: [
-    { required: true, message: '请选择图书状态', trigger: 'change' }
+    {required: true, message: '请选择图书状态', trigger: 'change'}
   ]
 }
 
@@ -157,7 +160,7 @@ const fetchTags = async () => {
     console.log('开始获取图书标签数据...')
     const response = await axios.get('/api/book-tags')
     console.log('标签数据响应:', response.data)
-    
+
     if (response.data?.tags && Array.isArray(response.data.tags)) {
       existingTags.value = response.data.tags
       console.log('成功获取标签:', existingTags.value)
@@ -182,7 +185,7 @@ const initFormData = () => {
       tags: props.book.tags || [],
       status: props.book.status || 'draft'
     })
-    
+
     // 保存原始数据用于变化检测
     originalData.value = {
       title: props.book.title || '',
@@ -203,24 +206,24 @@ const hasChanges = () => {
     tags: [...formData.tags],
     status: formData.status
   }
-  
+
   return JSON.stringify(current) !== JSON.stringify(originalData.value)
 }
 
 // 保存修改
 const handleSave = async () => {
   if (!formRef.value) return
-  
+
   try {
     await formRef.value.validate()
-    
+
     if (!hasChanges()) {
       ElMessage.info('没有检测到任何修改')
       return
     }
-    
+
     saving.value = true
-    
+
     const updateData = {
       title: formData.title,
       description: formData.description,
@@ -228,9 +231,9 @@ const handleSave = async () => {
       tags: formData.tags,
       status: formData.status
     }
-    
+
     console.log('保存图书修改:', updateData)
-    
+
     const response = await axios.put(`/api/admin/books/${props.book.id}`, updateData, {
       timeout: 30000,
       headers: {
@@ -238,15 +241,15 @@ const handleSave = async () => {
         'Content-Type': 'application/json'
       }
     })
-    
+
     console.log('编辑响应:', response.data)
     ElMessage.success('图书信息保存成功')
-    
+
     emit('save-success')
     emit('update:modelValue', false)
   } catch (error) {
     console.error('保存失败:', error)
-    
+
     if (error.code === 'NETWORK_ERROR' || error.message === 'Network Error') {
       ElMessage.error('网络连接失败，请检查服务器状态')
     } else if (error.response?.status === 400) {
@@ -264,13 +267,13 @@ const handleSave = async () => {
 const handleClose = () => {
   if (hasChanges()) {
     ElMessageBox.confirm(
-      '确定要关闭吗？未保存的修改将丢失。',
-      '提示',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }
+        '确定要关闭吗？未保存的修改将丢失。',
+        '提示',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
     ).then(() => {
       emit('update:modelValue', false)
     }).catch(() => {
@@ -286,7 +289,7 @@ watch(() => props.book, (newBook) => {
   if (newBook && props.modelValue) {
     initFormData()
   }
-}, { deep: true, immediate: true })
+}, {deep: true, immediate: true})
 
 // 监听对话框打开
 watch(() => props.modelValue, (isOpen) => {

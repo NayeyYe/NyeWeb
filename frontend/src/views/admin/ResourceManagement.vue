@@ -7,7 +7,7 @@
         <div class="action-bar">
           <div class="action-buttons">
             <el-button type="primary" @click="showUploadBookDialog = true">上传图书</el-button>
-            <el-button @click="refreshBooks" :icon="Refresh" circle />
+            <el-button :icon="Refresh" circle @click="refreshBooks"/>
           </div>
         </div>
 
@@ -19,7 +19,7 @@
                 <template #header>
                   <div class="filter-header">
                     <span>筛选条件</span>
-                    <el-button link @click="resetBookFilters" class="reset-link-btn">重置</el-button>
+                    <el-button class="reset-link-btn" link @click="resetBookFilters">重置</el-button>
                   </div>
                 </template>
                 <div class="filter-controls">
@@ -28,20 +28,20 @@
                     <div class="filter-item">
                       <label>标签筛选：</label>
                       <el-select
-                        v-model="bookFilterForm.tags"
-                        multiple
-                        filterable
-                        allow-create
-                        placeholder="选择或输入标签（最多3个）"
-                        style="width: 350px"
-                        size="default"
-                        :multiple-limit="3"
+                          v-model="bookFilterForm.tags"
+                          :multiple-limit="3"
+                          allow-create
+                          filterable
+                          multiple
+                          placeholder="选择或输入标签（最多3个）"
+                          size="default"
+                          style="width: 350px"
                       >
                         <el-option
-                          v-for="tag in allBookTags"
-                          :key="tag"
-                          :label="tag"
-                          :value="tag"
+                            v-for="tag in allBookTags"
+                            :key="tag"
+                            :label="tag"
+                            :value="tag"
                         />
                       </el-select>
                     </div>
@@ -51,19 +51,19 @@
                     <div class="filter-item">
                       <label>标题搜索：</label>
                       <el-input
-                        v-model="bookFilterForm.title"
-                        placeholder="输入书籍标题关键字"
-                        style="width: 250px"
-                        clearable
+                          v-model="bookFilterForm.title"
+                          clearable
+                          placeholder="输入书籍标题关键字"
+                          style="width: 250px"
                       />
                     </div>
                     <div class="filter-item">
                       <label>状态筛选：</label>
-                      <el-select v-model="bookFilterForm.status" style="width: 140px" placeholder="选择状态">
-                        <el-option label="全部" value="" />
-                        <el-option label="已发布" value="published" />
-                        <el-option label="草稿" value="draft" />
-                        <el-option label="已回收" value="recycled" />
+                      <el-select v-model="bookFilterForm.status" placeholder="选择状态" style="width: 140px">
+                        <el-option label="全部" value=""/>
+                        <el-option label="已发布" value="published"/>
+                        <el-option label="草稿" value="draft"/>
+                        <el-option label="已回收" value="recycled"/>
                       </el-select>
                     </div>
                   </div>
@@ -83,36 +83,36 @@
               </div>
             </template>
             <el-table
-              :data="filteredBooks"
-              stripe
-              class="resource-table"
-              empty-text="暂无图书数据"
-              :header-cell-style="{ background: '#fafafa', color: '#333', fontWeight: '600' }"
+                :data="filteredBooks"
+                :header-cell-style="{ background: '#fafafa', color: '#333', fontWeight: '600' }"
+                class="resource-table"
+                empty-text="暂无图书数据"
+                stripe
             >
-              <el-table-column prop="title" label="图书标题" min-width="200" show-overflow-tooltip>
+              <el-table-column label="图书标题" min-width="200" prop="title" show-overflow-tooltip>
                 <template #default="scope">
                   <div class="resource-title">{{ scope.row.title }}</div>
                 </template>
               </el-table-column>
-              <el-table-column prop="filename" label="文件名" min-width="150" show-overflow-tooltip>
+              <el-table-column label="文件名" min-width="150" prop="filename" show-overflow-tooltip>
                 <template #default="scope">
                   <div class="resource-filename">{{ scope.row.filename || '暂无文件' }}</div>
                 </template>
               </el-table-column>
-              <el-table-column prop="description" label="图书描述" min-width="200" show-overflow-tooltip>
+              <el-table-column label="图书描述" min-width="200" prop="description" show-overflow-tooltip>
                 <template #default="scope">
                   <div class="resource-description">{{ scope.row.description || '暂无描述' }}</div>
                 </template>
               </el-table-column>
-              <el-table-column prop="tags" label="标签" min-width="150" show-overflow-tooltip>
+              <el-table-column label="标签" min-width="150" prop="tags" show-overflow-tooltip>
                 <template #default="scope">
                   <div v-if="scope.row.tags && scope.row.tags.length > 0" class="resource-tags">
                     <el-tag
-                      v-for="tag in scope.row.tags.slice(0, 3)"
-                      :key="tag"
-                      size="small"
-                      type="info"
-                      class="tag-item"
+                        v-for="tag in scope.row.tags.slice(0, 3)"
+                        :key="tag"
+                        class="tag-item"
+                        size="small"
+                        type="info"
                     >
                       {{ tag }}
                     </el-tag>
@@ -121,37 +121,37 @@
                   <span v-else class="no-tags">暂无标签</span>
                 </template>
               </el-table-column>
-              <el-table-column prop="status" label="状态" min-width="120" align="center">
+              <el-table-column align="center" label="状态" min-width="120" prop="status">
                 <template #default="scope">
                   <el-select
-                    :model-value="scope.row.status"
-                    @change="(value) => updateBookStatus(scope.row, value)"
-                    size="small"
-                    style="width: 100px"
+                      :model-value="scope.row.status"
+                      size="small"
+                      style="width: 100px"
+                      @change="(value) => updateBookStatus(scope.row, value)"
                   >
-                    <el-option label="草稿" value="draft" />
-                    <el-option label="已发布" value="published" />
-                    <el-option label="已回收" value="recycled" />
+                    <el-option label="草稿" value="draft"/>
+                    <el-option label="已发布" value="published"/>
+                    <el-option label="已回收" value="recycled"/>
                   </el-select>
                 </template>
               </el-table-column>
-              <el-table-column label="操作" min-width="160" align="center">
+              <el-table-column align="center" label="操作" min-width="160">
                 <template #default="scope">
                   <div class="action-buttons-table">
                     <el-button size="small" type="primary" @click="handleEditBook(scope.row)">编辑</el-button>
-                    <el-button 
-                      v-if="scope.row.status !== 'recycled'"
-                      size="small" 
-                      type="warning" 
-                      @click="quickUpdateBookStatus(scope.row, 'recycled')"
+                    <el-button
+                        v-if="scope.row.status !== 'recycled'"
+                        size="small"
+                        type="warning"
+                        @click="quickUpdateBookStatus(scope.row, 'recycled')"
                     >
                       回收
                     </el-button>
-                    <el-button 
-                      v-if="scope.row.status === 'recycled'"
-                      size="small" 
-                      type="success" 
-                      @click="quickUpdateBookStatus(scope.row, 'published')"
+                    <el-button
+                        v-if="scope.row.status === 'recycled'"
+                        size="small"
+                        type="success"
+                        @click="quickUpdateBookStatus(scope.row, 'published')"
                     >
                       恢复
                     </el-button>
@@ -169,7 +169,7 @@
         <div class="action-bar">
           <div class="action-buttons">
             <el-button type="primary" @click="showUploadFigureDialog = true">上传图片</el-button>
-            <el-button @click="refreshFigures" :icon="Refresh" circle />
+            <el-button :icon="Refresh" circle @click="refreshFigures"/>
           </div>
         </div>
 
@@ -181,7 +181,7 @@
                 <template #header>
                   <div class="filter-header">
                     <span>筛选条件</span>
-                    <el-button link @click="resetFigureFilters" class="reset-link-btn">重置</el-button>
+                    <el-button class="reset-link-btn" link @click="resetFigureFilters">重置</el-button>
                   </div>
                 </template>
                 <div class="filter-controls">
@@ -190,20 +190,20 @@
                     <div class="filter-item">
                       <label>标签筛选：</label>
                       <el-select
-                        v-model="figureFilterForm.tags"
-                        multiple
-                        filterable
-                        allow-create
-                        placeholder="选择或输入标签（最多3个）"
-                        style="width: 350px"
-                        size="default"
-                        :multiple-limit="3"
+                          v-model="figureFilterForm.tags"
+                          :multiple-limit="3"
+                          allow-create
+                          filterable
+                          multiple
+                          placeholder="选择或输入标签（最多3个）"
+                          size="default"
+                          style="width: 350px"
                       >
                         <el-option
-                          v-for="tag in allFigureTags"
-                          :key="tag"
-                          :label="tag"
-                          :value="tag"
+                            v-for="tag in allFigureTags"
+                            :key="tag"
+                            :label="tag"
+                            :value="tag"
                         />
                       </el-select>
                     </div>
@@ -213,19 +213,19 @@
                     <div class="filter-item">
                       <label>标题搜索：</label>
                       <el-input
-                        v-model="figureFilterForm.title"
-                        placeholder="输入图片标题关键字"
-                        style="width: 250px"
-                        clearable
+                          v-model="figureFilterForm.title"
+                          clearable
+                          placeholder="输入图片标题关键字"
+                          style="width: 250px"
                       />
                     </div>
                     <div class="filter-item">
                       <label>状态筛选：</label>
-                      <el-select v-model="figureFilterForm.status" style="width: 140px" placeholder="选择状态">
-                        <el-option label="全部" value="" />
-                        <el-option label="已发布" value="published" />
-                        <el-option label="草稿" value="draft" />
-                        <el-option label="已回收" value="recycled" />
+                      <el-select v-model="figureFilterForm.status" placeholder="选择状态" style="width: 140px">
+                        <el-option label="全部" value=""/>
+                        <el-option label="已发布" value="published"/>
+                        <el-option label="草稿" value="draft"/>
+                        <el-option label="已回收" value="recycled"/>
                       </el-select>
                     </div>
                   </div>
@@ -245,36 +245,36 @@
               </div>
             </template>
             <el-table
-              :data="filteredFigures"
-              stripe
-              class="resource-table"
-              empty-text="暂无图片数据"
-              :header-cell-style="{ background: '#fafafa', color: '#333', fontWeight: '600' }"
+                :data="filteredFigures"
+                :header-cell-style="{ background: '#fafafa', color: '#333', fontWeight: '600' }"
+                class="resource-table"
+                empty-text="暂无图片数据"
+                stripe
             >
-              <el-table-column prop="title" label="图片标题" min-width="200" show-overflow-tooltip>
+              <el-table-column label="图片标题" min-width="200" prop="title" show-overflow-tooltip>
                 <template #default="scope">
                   <div class="resource-title">{{ scope.row.title }}</div>
                 </template>
               </el-table-column>
-              <el-table-column prop="url" label="图床链接" min-width="200" show-overflow-tooltip>
+              <el-table-column label="图床链接" min-width="200" prop="url" show-overflow-tooltip>
                 <template #default="scope">
                   <div class="resource-filename">{{ scope.row.url || '暂无链接' }}</div>
                 </template>
               </el-table-column>
-              <el-table-column prop="description" label="图片描述" min-width="200" show-overflow-tooltip>
+              <el-table-column label="图片描述" min-width="200" prop="description" show-overflow-tooltip>
                 <template #default="scope">
                   <div class="resource-description">{{ scope.row.description || '暂无描述' }}</div>
                 </template>
               </el-table-column>
-              <el-table-column prop="tags" label="标签" min-width="150" show-overflow-tooltip>
+              <el-table-column label="标签" min-width="150" prop="tags" show-overflow-tooltip>
                 <template #default="scope">
                   <div v-if="scope.row.tags && scope.row.tags.length > 0" class="resource-tags">
                     <el-tag
-                      v-for="tag in scope.row.tags.slice(0, 3)"
-                      :key="tag"
-                      size="small"
-                      type="info"
-                      class="tag-item"
+                        v-for="tag in scope.row.tags.slice(0, 3)"
+                        :key="tag"
+                        class="tag-item"
+                        size="small"
+                        type="info"
                     >
                       {{ tag }}
                     </el-tag>
@@ -283,37 +283,37 @@
                   <span v-else class="no-tags">暂无标签</span>
                 </template>
               </el-table-column>
-              <el-table-column prop="status" label="状态" min-width="120" align="center">
+              <el-table-column align="center" label="状态" min-width="120" prop="status">
                 <template #default="scope">
                   <el-select
-                    :model-value="scope.row.status"
-                    @change="(value) => updateFigureStatus(scope.row, value)"
-                    size="small"
-                    style="width: 100px"
+                      :model-value="scope.row.status"
+                      size="small"
+                      style="width: 100px"
+                      @change="(value) => updateFigureStatus(scope.row, value)"
                   >
-                    <el-option label="草稿" value="draft" />
-                    <el-option label="已发布" value="published" />
-                    <el-option label="已回收" value="recycled" />
+                    <el-option label="草稿" value="draft"/>
+                    <el-option label="已发布" value="published"/>
+                    <el-option label="已回收" value="recycled"/>
                   </el-select>
                 </template>
               </el-table-column>
-              <el-table-column label="操作" min-width="160" align="center">
+              <el-table-column align="center" label="操作" min-width="160">
                 <template #default="scope">
                   <div class="action-buttons-table">
                     <el-button size="small" type="primary" @click="handleEditFigure(scope.row)">编辑</el-button>
-                    <el-button 
-                      v-if="scope.row.status !== 'recycled'"
-                      size="small" 
-                      type="warning" 
-                      @click="quickUpdateFigureStatus(scope.row, 'recycled')"
+                    <el-button
+                        v-if="scope.row.status !== 'recycled'"
+                        size="small"
+                        type="warning"
+                        @click="quickUpdateFigureStatus(scope.row, 'recycled')"
                     >
                       回收
                     </el-button>
-                    <el-button 
-                      v-if="scope.row.status === 'recycled'"
-                      size="small" 
-                      type="success" 
-                      @click="quickUpdateFigureStatus(scope.row, 'published')"
+                    <el-button
+                        v-if="scope.row.status === 'recycled'"
+                        size="small"
+                        type="success"
+                        @click="quickUpdateFigureStatus(scope.row, 'published')"
                     >
                       恢复
                     </el-button>
@@ -329,28 +329,28 @@
 
     <!-- 图书上传对话框 -->
     <UploadBookDialog
-      v-model="showUploadBookDialog"
-      @upload-success="handleBookUploadSuccess"
+        v-model="showUploadBookDialog"
+        @upload-success="handleBookUploadSuccess"
     />
 
     <!-- 图书编辑对话框 -->
     <EditBookDialog
-      v-model="showEditBookDialog"
-      :book="currentEditBook"
-      @save-success="handleBookEditSuccess"
+        v-model="showEditBookDialog"
+        :book="currentEditBook"
+        @save-success="handleBookEditSuccess"
     />
 
     <!-- 图片上传对话框 -->
     <UploadFigureDialog
-      v-model="showUploadFigureDialog"
-      @upload-success="handleFigureUploadSuccess"
+        v-model="showUploadFigureDialog"
+        @upload-success="handleFigureUploadSuccess"
     />
 
     <!-- 图片编辑对话框 -->
     <EditFigureDialog
-      v-model="showEditFigureDialog"
-      :figure="currentEditFigure"
-      @save-success="handleFigureEditSuccess"
+        v-model="showEditFigureDialog"
+        :figure="currentEditFigure"
+        @save-success="handleFigureEditSuccess"
     />
   </div>
 </template>
@@ -495,7 +495,7 @@ const handleBookEditSuccess = () => {
 
 const deleteBook = async (book) => {
   try {
-    await ElMessageBox.confirm('确定要删除该图书吗？', '提示', { type: 'warning' })
+    await ElMessageBox.confirm('确定要删除该图书吗？', '提示', {type: 'warning'})
     await axios.delete(`/api/books/${book.id}`)
     ElMessage.success('图书删除成功')
     refreshBooks()
@@ -533,7 +533,7 @@ const handleFigureEditSuccess = () => {
 
 const deleteFigure = async (figure) => {
   try {
-    await ElMessageBox.confirm('确定要删除该图片吗？', '提示', { type: 'warning' })
+    await ElMessageBox.confirm('确定要删除该图片吗？', '提示', {type: 'warning'})
     await axios.delete(`/api/figures/${figure.id}`)
     ElMessage.success('图片删除成功')
     refreshFigures()
@@ -553,13 +553,13 @@ const refreshFigures = async () => {
 // 更新图书状态
 const updateBookStatus = async (book, newStatus) => {
   if (book.status === newStatus) return
-  
+
   try {
-    await axios.patch(`/api/books/${book.id}/status`, { status: newStatus })
-    
+    await axios.patch(`/api/books/${book.id}/status`, {status: newStatus})
+
     // 更新本地数据
     book.status = newStatus
-    
+
     const statusText = getStatusText(newStatus)
     ElMessage.success(`图书状态已更新为：${statusText}`)
   } catch (error) {
@@ -572,9 +572,9 @@ const updateBookStatus = async (book, newStatus) => {
 // 快速更新图书状态（用于操作按钮）
 const quickUpdateBookStatus = async (book, newStatus) => {
   const actionText = newStatus === 'recycled' ? '回收' : '恢复'
-  
+
   try {
-    await ElMessageBox.confirm(`确定要${actionText}该图书吗？`, '提示', { type: 'warning' })
+    await ElMessageBox.confirm(`确定要${actionText}该图书吗？`, '提示', {type: 'warning'})
     await updateBookStatus(book, newStatus)
   } catch (error) {
     if (error !== 'cancel') {
@@ -586,13 +586,13 @@ const quickUpdateBookStatus = async (book, newStatus) => {
 // 更新图片状态
 const updateFigureStatus = async (figure, newStatus) => {
   if (figure.status === newStatus) return
-  
+
   try {
-    await axios.patch(`/api/figures/${figure.id}/status`, { status: newStatus })
-    
+    await axios.patch(`/api/figures/${figure.id}/status`, {status: newStatus})
+
     // 更新本地数据
     figure.status = newStatus
-    
+
     const statusText = getStatusText(newStatus)
     ElMessage.success(`图片状态已更新为：${statusText}`)
   } catch (error) {
@@ -605,9 +605,9 @@ const updateFigureStatus = async (figure, newStatus) => {
 // 快速更新图片状态（用于操作按钮）
 const quickUpdateFigureStatus = async (figure, newStatus) => {
   const actionText = newStatus === 'recycled' ? '回收' : '恢复'
-  
+
   try {
-    await ElMessageBox.confirm(`确定要${actionText}该图片吗？`, '提示', { type: 'warning' })
+    await ElMessageBox.confirm(`确定要${actionText}该图片吗？`, '提示', {type: 'warning'})
     await updateFigureStatus(figure, newStatus)
   } catch (error) {
     if (error !== 'cancel') {
@@ -619,10 +619,14 @@ const quickUpdateFigureStatus = async (figure, newStatus) => {
 // 状态相关方法
 const getStatusText = (status) => {
   switch (status) {
-    case 'published': return '已发布'
-    case 'draft': return '草稿'
-    case 'recycled': return '已回收'
-    default: return '未知'
+    case 'published':
+      return '已发布'
+    case 'draft':
+      return '草稿'
+    case 'recycled':
+      return '已回收'
+    default:
+      return '未知'
   }
 }
 
@@ -643,7 +647,7 @@ onMounted(() => {
   background: white;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .action-bar {

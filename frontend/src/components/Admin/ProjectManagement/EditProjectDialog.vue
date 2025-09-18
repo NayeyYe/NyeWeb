@@ -1,26 +1,26 @@
 <template>
   <el-dialog
-    :model-value="modelValue"
-    @update:model-value="$emit('update:modelValue', $event)"
-    title="编辑项目"
-    width="700px"
-    :before-close="handleClose"
-    :close-on-click-modal="false"
+      :before-close="handleClose"
+      :close-on-click-modal="false"
+      :model-value="modelValue"
+      title="编辑项目"
+      width="700px"
+      @update:model-value="$emit('update:modelValue', $event)"
   >
-    <el-form :model="formData" :rules="formRules" label-width="100px" ref="formRef">
+    <el-form ref="formRef" :model="formData" :rules="formRules" label-width="100px">
       <!-- 重新上传文件 -->
       <el-form-item label="重新上传" prop="file">
         <el-upload
-          ref="uploadRef"
-          :auto-upload="false"
-          :show-file-list="true"
-          :on-change="handleFileChange"
-          :on-remove="handleFileRemove"
-          accept=".md,.markdown"
-          :limit="1"
-          class="upload-section"
+            ref="uploadRef"
+            :auto-upload="false"
+            :limit="1"
+            :on-change="handleFileChange"
+            :on-remove="handleFileRemove"
+            :show-file-list="true"
+            accept=".md,.markdown"
+            class="upload-section"
         >
-          <el-button type="primary" :icon="UploadIcon">重新选择Markdown文件</el-button>
+          <el-button :icon="UploadIcon" type="primary">重新选择Markdown文件</el-button>
           <template #tip>
             <div class="el-upload__tip">
               留空则保持原文件内容不变
@@ -32,53 +32,53 @@
       <!-- 项目标题 -->
       <el-form-item label="项目标题" prop="title" required>
         <el-input
-          v-model="formData.title"
-          placeholder="请输入项目标题"
-          maxlength="255"
-          show-word-limit
+            v-model="formData.title"
+            maxlength="255"
+            placeholder="请输入项目标题"
+            show-word-limit
         />
       </el-form-item>
 
       <!-- 发布日期 -->
       <el-form-item label="发布日期" prop="date" required>
         <el-date-picker
-          v-model="formData.date"
-          type="date"
-          placeholder="选择发布日期"
-          format="YYYY-MM-DD"
-          value-format="YYYY-MM-DD"
-          style="width: 100%"
+            v-model="formData.date"
+            format="YYYY-MM-DD"
+            placeholder="选择发布日期"
+            style="width: 100%"
+            type="date"
+            value-format="YYYY-MM-DD"
         />
       </el-form-item>
 
       <!-- 项目描述 -->
       <el-form-item label="项目描述" prop="summary">
         <el-input
-          v-model="formData.summary"
-          type="textarea"
-          :rows="4"
-          placeholder="请输入项目描述"
-          maxlength="500"
-          show-word-limit
+            v-model="formData.summary"
+            :rows="4"
+            maxlength="500"
+            placeholder="请输入项目描述"
+            show-word-limit
+            type="textarea"
         />
       </el-form-item>
 
       <!-- 项目标签 -->
       <el-form-item label="项目标签">
         <el-select
-          v-model="formData.tags"
-          multiple
-          filterable
-          allow-create
-          placeholder="选择或创建标签"
-          style="width: 100%"
-          :multiple-limit="5"
+            v-model="formData.tags"
+            :multiple-limit="5"
+            allow-create
+            filterable
+            multiple
+            placeholder="选择或创建标签"
+            style="width: 100%"
         >
           <el-option
-            v-for="tag in existingTags"
-            :key="tag"
-            :label="tag"
-            :value="tag"
+              v-for="tag in existingTags"
+              :key="tag"
+              :label="tag"
+              :value="tag"
           />
         </el-select>
         <div class="form-tip">最多可选择5个标签</div>
@@ -88,11 +88,15 @@
       <el-form-item label="项目状态" prop="status" required>
         <el-radio-group v-model="formData.status">
           <el-radio value="draft">
-            <el-icon><Edit /></el-icon>
+            <el-icon>
+              <Edit/>
+            </el-icon>
             草稿
           </el-radio>
           <el-radio value="published">
-            <el-icon><Check /></el-icon>
+            <el-icon>
+              <Check/>
+            </el-icon>
             发布
           </el-radio>
         </el-radio-group>
@@ -102,8 +106,10 @@
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="handleClose">取消</el-button>
-        <el-button type="primary" @click="handleUpdate" :loading="updating">
-          <el-icon><Check /></el-icon>
+        <el-button :loading="updating" type="primary" @click="handleUpdate">
+          <el-icon>
+            <Check/>
+          </el-icon>
           更新项目
         </el-button>
       </div>
@@ -112,9 +118,9 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref, watch } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Check, Edit, Upload as UploadIcon } from '@element-plus/icons-vue'
+import {onMounted, reactive, ref, watch} from 'vue'
+import {ElMessage, ElMessageBox} from 'element-plus'
+import {Check, Edit, Upload as UploadIcon} from '@element-plus/icons-vue'
 import axios from 'axios'
 
 const props = defineProps({
@@ -136,14 +142,14 @@ const formData = reactive({
 
 const formRules = {
   title: [
-    { required: true, message: '请输入项目标题', trigger: 'blur' },
-    { min: 1, max: 255, message: '标题长度应在1-255个字符之间', trigger: 'blur' }
+    {required: true, message: '请输入项目标题', trigger: 'blur'},
+    {min: 1, max: 255, message: '标题长度应在1-255个字符之间', trigger: 'blur'}
   ],
   date: [
-    { required: true, message: '请选择发布日期', trigger: 'change' }
+    {required: true, message: '请选择发布日期', trigger: 'change'}
   ],
   status: [
-    { required: true, message: '请选择项目状态', trigger: 'change' }
+    {required: true, message: '请选择项目状态', trigger: 'change'}
   ]
 }
 
@@ -158,7 +164,7 @@ watch(() => props.project, (newProject) => {
   if (newProject && props.modelValue) {
     initializeForm(newProject)
   }
-}, { immediate: true })
+}, {immediate: true})
 
 const initializeForm = (project) => {
   Object.assign(formData, {
@@ -176,7 +182,7 @@ const initializeForm = (project) => {
 // 监听表单数据变化
 watch(() => [formData.title, formData.date, formData.summary, formData.tags, formData.status], () => {
   hasChanges.value = true
-}, { deep: true })
+}, {deep: true})
 
 const fetchTags = async () => {
   try {
@@ -196,7 +202,7 @@ const handleFileChange = (file) => {
   if (file && file.raw) {
     formData.file = file.raw
     hasChanges.value = true
-    
+
     const reader = new FileReader()
     reader.onload = (e) => {
       formData.content = e.target.result
@@ -304,17 +310,18 @@ const handleUpdateError = (error) => {
 const handleClose = () => {
   if (hasChanges.value) {
     ElMessageBox.confirm(
-      '确定要关闭吗？未保存的修改将丢失。',
-      '提示',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }
+        '确定要关闭吗？未保存的修改将丢失。',
+        '提示',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
     ).then(() => {
       resetForm()
       emit('update:modelValue', false)
-    }).catch(() => {})
+    }).catch(() => {
+    })
   } else {
     resetForm()
     emit('update:modelValue', false)

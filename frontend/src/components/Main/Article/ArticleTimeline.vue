@@ -3,10 +3,10 @@
     <template #header>
       <div class="card-header">
         <span>文章归档</span>
-        <el-button link type="primary" @click="clearFilter" v-if="selectedDate">清空</el-button>
-        <el-icon class="collapse-icon" @click="isCollapsed = !isCollapsed" :title="isCollapsed ? '展开' : '收起'">
-          <arrow-up-bold v-if="!isCollapsed" />
-          <arrow-down-bold v-else />
+        <el-button v-if="selectedDate" link type="primary" @click="clearFilter">清空</el-button>
+        <el-icon :title="isCollapsed ? '展开' : '收起'" class="collapse-icon" @click="isCollapsed = !isCollapsed">
+          <arrow-up-bold v-if="!isCollapsed"/>
+          <arrow-down-bold v-else/>
         </el-icon>
       </div>
     </template>
@@ -15,10 +15,10 @@
         <!-- 修改：使用传入的articles而不是数据库数据，这样可以响应筛选 -->
         <el-timeline v-show="!isCollapsed && !loading && sortedArticles.length > 0">
           <el-timeline-item
-            v-for="article in sortedArticles"
-            :key="article.slug"
-            :timestamp="article.date"
-            placement="top"
+              v-for="article in sortedArticles"
+              :key="article.slug"
+              :timestamp="article.date"
+              placement="top"
           >
             <a class="timeline-link" @click.prevent="onArticleClick(article.slug)">
               {{ article.title }}
@@ -26,7 +26,7 @@
           </el-timeline-item>
         </el-timeline>
       </el-collapse-transition>
-      <el-empty v-if="!loading && sortedArticles.length === 0" description="暂无文章数据" :image-size="60">
+      <el-empty v-if="!loading && sortedArticles.length === 0" :image-size="60" description="暂无文章数据">
       </el-empty>
     </div>
   </el-card>
@@ -96,7 +96,7 @@ watch(() => props.articles, (newArticles) => {
     // 如果还没有从数据库获取到数据，且有新的文章数据，则尝试重新获取
     fetchArticles()
   }
-}, { immediate: true })
+}, {immediate: true})
 
 onMounted(() => {
   fetchArticles()

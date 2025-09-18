@@ -9,9 +9,9 @@
       <ul>
         <li v-for="item in outline" :key="item.id" :class="`toc-level-${item.level}`">
           <a
-            :href="`#${item.id}`"
-            :class="{ 'is-active': item.id === activeId }"
-            @click.prevent="scrollTo(item.id)"
+              :class="{ 'is-active': item.id === activeId }"
+              :href="`#${item.id}`"
+              @click.prevent="scrollTo(item.id)"
           >{{ item.text }}</a>
         </li>
       </ul>
@@ -34,7 +34,7 @@ defineProps({
 const scrollTo = (id) => {
   const element = document.getElementById(id);
   if (element) {
-    element.scrollIntoView({ behavior: 'smooth' });
+    element.scrollIntoView({behavior: 'smooth'});
   }
 };
 </script>
@@ -89,9 +89,23 @@ a.is-active {
 }
 
 /* Indent based on heading level */
-.toc-level-2 { padding-left: 1em; }
-.toc-level-3 { padding-left: 2em; }
-.toc-level-4 { padding-left: 3em; }
-.toc-level-5 { padding-left: 4em; }
-.toc-level-6 { padding-left: 5em; }
+.toc-level-2 {
+  padding-left: 1em;
+}
+
+.toc-level-3 {
+  padding-left: 2em;
+}
+
+.toc-level-4 {
+  padding-left: 3em;
+}
+
+.toc-level-5 {
+  padding-left: 4em;
+}
+
+.toc-level-6 {
+  padding-left: 5em;
+}
 </style>

@@ -1,8 +1,8 @@
 import sys
-from pydantic import BaseModel
 from typing import Optional, List
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 sys.path.append("..")
@@ -16,6 +16,7 @@ logger = logging.getLogger("figures_api")
 
 router = APIRouter()
 
+
 # 添加请求模型
 class CreateFigureRequest(BaseModel):
     title: str
@@ -24,12 +25,14 @@ class CreateFigureRequest(BaseModel):
     tags: Optional[List[str]] = []
     status: Optional[str] = 'draft'
 
+
 class UpdateFigureRequest(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     url: Optional[str] = None
     tags: Optional[List[str]] = None
     status: Optional[str] = None
+
 
 @router.get("/figures")
 def get_figures(db: Session = Depends(database.get_db)):
@@ -69,6 +72,7 @@ def get_figures(db: Session = Depends(database.get_db)):
         # 返回空数据而不是抛出异常，避免前端报错
         return []
 
+
 @router.get("/figures/{figure_id}")
 def get_figure_by_id(figure_id: int, db: Session = Depends(database.get_db)):
     """根据ID获取单个图表详情"""
@@ -99,6 +103,7 @@ def get_figure_by_id(figure_id: int, db: Session = Depends(database.get_db)):
         logger.error(f"获取图表详情时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取图表详情时发生错误: {str(e)}")
 
+
 @router.get("/figure-tags")
 def get_all_figure_tags(db: Session = Depends(database.get_db)):
     """获取所有图表标签及其图表数量"""
@@ -125,6 +130,7 @@ def get_all_figure_tags(db: Session = Depends(database.get_db)):
         logger.error(f"获取图表标签时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取图表标签时发生错误: {str(e)}")
 
+
 # 新增管理员获取全部图片的接口
 @router.get("/admin/figures")
 def get_all_figures_admin(db: Session = Depends(database.get_db)):
@@ -144,7 +150,7 @@ def get_all_figures_admin(db: Session = Depends(database.get_db)):
 
                 # 状态映射
                 status_map = {0: 'draft', 1: 'published', 2: 'recycled'}
-                
+
                 figure_dict = {
                     "id": figure.id,
                     "title": figure.title or "",
@@ -167,6 +173,7 @@ def get_all_figures_admin(db: Session = Depends(database.get_db)):
         # 返回空数据而不是抛出异常
         return []
 
+
 # 新增修改图片状态的接口
 @router.patch("/figures/{figure_id}/status")
 def update_figure_status(figure_id: int, status_data: dict, db: Session = Depends(database.get_db)):
@@ -177,28 +184,29 @@ def update_figure_status(figure_id: int, status_data: dict, db: Session = Depend
         figure = db.query(Figure).filter(Figure.id == figure_id).first()
         if not figure:
             raise HTTPException(status_code=404, detail="图片未找到")
-        
+
         # 状态映射
         status_map = {'draft': 0, 'published': 1, 'recycled': 2}
         new_status = status_data.get('status')
-        
+
         if new_status not in status_map:
             raise HTTPException(status_code=400, detail="无效的状态值")
-        
+
         # 更新状态
         old_status = figure.status
         figure.status = status_map[new_status]
         db.commit()
-        
+
         logger.info(f"成功修改图片状态: {figure.title}, {old_status} -> {figure.status}")
         return {"message": "图片状态修改成功", "status": new_status}
-        
+
     except HTTPException:
         raise
     except Exception as e:
         db.rollback()
         logger.error(f"修改图片状态时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"修改图片状态时发生错误: {str(e)}")
+
 
 # 新增删除图片的接口
 @router.delete("/figures/{figure_id}")
@@ -210,23 +218,24 @@ def delete_figure(figure_id: int, db: Session = Depends(database.get_db)):
         figure = db.query(Figure).filter(Figure.id == figure_id).first()
         if not figure:
             raise HTTPException(status_code=404, detail="图片未找到")
-        
+
         # 删除图片-标签关联
         db.query(FigureTag).filter(FigureTag.figure_id == figure_id).delete()
-        
+
         # 删除图片记录
         db.delete(figure)
         db.commit()
-        
+
         logger.info(f"成功删除图片: {figure.title}")
         return {"message": "图片删除成功"}
-        
+
     except HTTPException:
         raise
     except Exception as e:
         db.rollback()
         logger.error(f"删除图片时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"删除图片时发生错误: {str(e)}")
+
 
 @router.post("/admin/figures")
 def create_figure(figure_data: CreateFigureRequest, db: Session = Depends(database.get_db)):
@@ -236,14 +245,14 @@ def create_figure(figure_data: CreateFigureRequest, db: Session = Depends(databa
         # 状态映射
         status_map = {'draft': 0, 'published': 1, 'recycled': 2}
         status = status_map.get(figure_data.status, 0)
-        
+
         # 验证URL格式
         import re
         url_pattern = r'^https?://.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$'
         if not re.match(url_pattern, figure_data.url, re.IGNORECASE):
             logger.warning(f"图片URL格式不正确: {figure_data.url}")
             raise HTTPException(status_code=400, detail="请输入有效的图片URL（支持jpg、png、gif、webp格式）")
-        
+
         # 创建图片记录
         new_figure = Figure(
             title=figure_data.title,
@@ -251,35 +260,35 @@ def create_figure(figure_data: CreateFigureRequest, db: Session = Depends(databa
             url=figure_data.url,
             status=status
         )
-        
+
         db.add(new_figure)
         db.commit()
         db.refresh(new_figure)
-        
+
         # 处理标签
         for tag_name in figure_data.tags or []:
             if not tag_name.strip():
                 continue
-                
+
             tag = db.query(Tag).filter(Tag.name == tag_name.strip()).first()
             if not tag:
                 tag = Tag(name=tag_name.strip())
                 db.add(tag)
                 db.flush()
-            
+
             # 创建图片-标签关联
             figure_tag = FigureTag(figure_id=new_figure.id, tag_id=tag.id)
             db.add(figure_tag)
-        
+
         db.commit()
-        
+
         logger.info(f"成功创建图片: {new_figure.title}")
         return {
-            "message": "图片上传成功", 
+            "message": "图片上传成功",
             "id": new_figure.id,
             "url": new_figure.url
         }
-        
+
     except HTTPException:
         db.rollback()
         raise
@@ -287,6 +296,7 @@ def create_figure(figure_data: CreateFigureRequest, db: Session = Depends(databa
         db.rollback()
         logger.error(f"创建图片时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"创建图片时发生错误: {str(e)}")
+
 
 @router.put("/admin/figures/{figure_id}")
 def update_figure(figure_id: int, figure_data: UpdateFigureRequest, db: Session = Depends(database.get_db)):
@@ -297,7 +307,7 @@ def update_figure(figure_id: int, figure_data: UpdateFigureRequest, db: Session 
         figure = db.query(Figure).filter(Figure.id == figure_id).first()
         if not figure:
             raise HTTPException(status_code=404, detail="图片未找到")
-        
+
         # 更新图片信息
         if figure_data.title is not None:
             figure.title = figure_data.title
@@ -310,46 +320,45 @@ def update_figure(figure_id: int, figure_data: UpdateFigureRequest, db: Session 
             if not re.match(url_pattern, figure_data.url, re.IGNORECASE):
                 logger.warning(f"图片URL格式不正确: {figure_data.url}")
                 raise HTTPException(status_code=400, detail="请输入有效的图片URL（支持jpg、png、gif、webp格式）")
-            
+
             figure.url = figure_data.url
         if figure_data.status is not None:
             status_map = {'draft': 0, 'published': 1, 'recycled': 2}
             if figure_data.status in status_map:
                 figure.status = status_map[figure_data.status]
-        
+
         # 处理标签更新
         if figure_data.tags is not None:
             # 删除现有标签关联
             db.query(FigureTag).filter(FigureTag.figure_id == figure_id).delete()
-            
+
             # 添加新标签
             for tag_name in figure_data.tags:
                 if not tag_name.strip():
                     continue
-                    
+
                 tag = db.query(Tag).filter(Tag.name == tag_name.strip()).first()
                 if not tag:
                     tag = Tag(name=tag_name.strip())
                     db.add(tag)
                     db.flush()
-                
+
                 # 创建图片-标签关联
                 figure_tag = FigureTag(figure_id=figure.id, tag_id=tag.id)
                 db.add(figure_tag)
-        
+
         db.commit()
-        
+
         logger.info(f"成功编辑图片信息: {figure.title}")
         return {
             "message": "图片信息编辑成功",
             "id": figure.id,
             "title": figure.title
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:
         db.rollback()
         logger.error(f"编辑图片信息时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"编辑图片信息时发生错误: {str(e)}")
-

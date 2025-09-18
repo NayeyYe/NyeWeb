@@ -25,6 +25,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # 创建Base类
 Base = declarative_base()
 
+
 # 时间线模型
 class Timeline(Base):
     __tablename__ = "timeline"
@@ -32,6 +33,7 @@ class Timeline(Base):
     id = Column(Integer, primary_key=True, index=True)
     timestamp = Column(DateTime, nullable=False)
     content = Column(Text, nullable=False)
+
 
 # 文章模型
 class Article(Base):
@@ -45,6 +47,7 @@ class Article(Base):
     summary = Column(Text)
     status = Column(TINYINT, nullable=False, default=1)  # 0=未发布, 1=已发布, 2=已回收
 
+
 # 标签模型
 class Tag(Base):
     __tablename__ = "tags"
@@ -52,12 +55,14 @@ class Tag(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False, unique=True)
 
+
 # 文章标签关联模型
 class ArticleTag(Base):
     __tablename__ = "article_tags"
 
     article_id = Column(Integer, ForeignKey('articles.id'), primary_key=True)
     tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
+
 
 # 项目模型
 class Project(Base):
@@ -70,12 +75,14 @@ class Project(Base):
     summary = Column(Text)
     status = Column(TINYINT, nullable=False, default=1)  # 0=未发布, 1=已发布, 2=已回收
 
+
 # 项目标签关联模型
 class ProjectTag(Base):
     __tablename__ = "project_tags"
 
     project_id = Column(Integer, ForeignKey('projects.id'), primary_key=True)
     tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
+
 
 # 书籍模型
 class Book(Base):
@@ -88,12 +95,14 @@ class Book(Base):
     filename = Column(String(255))  # PDF文件名
     status = Column(TINYINT, nullable=False, default=1)  # 0=未发布, 1=已发布, 2=已回收
 
+
 # 书籍标签关联模型
 class BookTag(Base):
     __tablename__ = "book_tags"
 
     book_id = Column(Integer, ForeignKey('books.id'), primary_key=True)
     tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
+
 
 # 图表模型
 class Figure(Base):
@@ -105,6 +114,7 @@ class Figure(Base):
     url = Column(String(2083))  # 改为url字段，与数据库表结构一致
     status = Column(Integer, default=0)  # 0:草稿, 1:发布, 2:回收站
 
+
 # 图表标签关联模型
 class FigureTag(Base):
     __tablename__ = "figure_tags"
@@ -112,12 +122,14 @@ class FigureTag(Base):
     figure_id = Column(Integer, ForeignKey('figures.id'), primary_key=True)
     tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
 
+
 # 收藏图片模型
 class FavoriteImage(Base):
     __tablename__ = "favorite_images"
 
     id = Column(Integer, primary_key=True, index=True)
     url = Column(String(2083), nullable=False)  # 改为url字段，与数据库表结构一致
+
 
 # 工具模型
 class Tool(Base):
@@ -128,6 +140,7 @@ class Tool(Base):
     description = Column(Text)
     url = Column(String(2083))  # URL字段
     status = Column(TINYINT, nullable=False, default=1)  # 0=未发布, 1=已发布, 2=已回收
+
 
 # 工具标签关联模型
 class ToolTag(Base):

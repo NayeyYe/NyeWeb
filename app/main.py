@@ -28,7 +28,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 app.include_router(timeline.router, prefix="/api", tags=["timeline"])
 app.include_router(articles.router, prefix="/api", tags=["articles"])
 app.include_router(projects.router, prefix="/api", tags=["projects"])
@@ -44,6 +43,7 @@ app.include_router(admin.router, prefix="/api", tags=["admin"])
 def health_check():
     """健康检查端点"""
     return {"status": "ok", "message": "API服务正常运行"}
+
 
 # 定义 Vue 项目构建后的输出目录路径
 dist_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend", "dist"))
@@ -145,6 +145,7 @@ async def serve_vue_app(path: str):
         return FileResponse(index_html_path)
     else:
         raise HTTPException(status_code=404, detail="File not found")
+
 
 if __name__ == "__main__":
     uvicorn.run(app, port=8080)

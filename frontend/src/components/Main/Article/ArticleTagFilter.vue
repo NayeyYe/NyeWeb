@@ -3,24 +3,24 @@
     <template #header>
       <div class="card-header">
         <span>标签分类</span>
-        <el-button link type="primary" @click="clearFilter" v-if="activeTag">清空</el-button>
+        <el-button v-if="activeTag" link type="primary" @click="clearFilter">清空</el-button>
       </div>
     </template>
     <div v-loading="loading">
       <div v-if="!loading && displayTags.length > 0" class="tag-list">
         <el-tag
-          v-for="tag in displayTags"
-          :key="tag"
-          :class="{ 'is-active': activeTag === tag }"
-          class="tag-item"
-          effect="light"
-          @click="selectTag(tag)"
-          :style="getTagStyle(displayTagCounts[tag] || 0)"
+            v-for="tag in displayTags"
+            :key="tag"
+            :class="{ 'is-active': activeTag === tag }"
+            :style="getTagStyle(displayTagCounts[tag] || 0)"
+            class="tag-item"
+            effect="light"
+            @click="selectTag(tag)"
         >
           {{ tag }} ({{ displayTagCounts[tag] || 0 }})
         </el-tag>
       </div>
-      <el-empty v-else-if="!loading && displayTags.length === 0" description="暂无标签数据" :image-size="60">
+      <el-empty v-else-if="!loading && displayTags.length === 0" :image-size="60" description="暂无标签数据">
       </el-empty>
     </div>
   </el-card>
@@ -103,7 +103,7 @@ const fontMetrics = computed(() => {
   const countsToUse = displayTagCounts.value
   const countsArray = Object.values(countsToUse)
   if (countsArray.length === 0) {
-    return { min: 1, max: 1 }
+    return {min: 1, max: 1}
   }
   return {
     min: Math.min(...countsArray),
@@ -113,7 +113,7 @@ const fontMetrics = computed(() => {
 
 // 根据文章数量获取标签样式
 const getTagStyle = (count) => {
-  const { min, max } = fontMetrics.value
+  const {min, max} = fontMetrics.value
   const basePadding = 1
   const maxPadding = 2.5
 
@@ -135,7 +135,7 @@ watch(() => [props.tags, props.counts], ([newTags, newCounts]) => {
   if (newTags && newTags.length > 0 && tagsFromDB.value.length === 0) {
     fetchTags()
   }
-}, { immediate: true })
+}, {immediate: true})
 
 onMounted(() => {
   fetchTags()

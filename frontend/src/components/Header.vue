@@ -17,12 +17,12 @@ const isAdminLogin = computed(() => {
 
 <template>
   <!--  这是我的网站的顶栏  -->
-  <el-header class="fixed-header" v-if="!isAdminPage || isAdminLogin">
+  <el-header v-if="!isAdminPage || isAdminLogin" class="fixed-header">
     <!-- 管理员登录页面的简化Header -->
     <div v-if="isAdminLogin" class="admin-header">
       <!-- 左侧Logo -->
       <div class="admin-logo-section">
-        <router-link to="/" class="admin-logo-link" title="转跳到首页">
+        <router-link class="admin-logo-link" title="转跳到首页" to="/">
           <span class="admin-logo-text">NyeWeb</span>
         </router-link>
       </div>
@@ -37,11 +37,11 @@ const isAdminLogin = computed(() => {
     </div>
 
     <!-- 普通页面的完整Header -->
-    <el-row v-else justify="space-between" align="middle" style="height: 100%; width: 100%;">
+    <el-row v-else align="middle" justify="space-between" style="height: 100%; width: 100%;">
       <!-- 左侧 Logo/Icon -->
       <el-col :span="4">
         <div class="logo-section">
-          <router-link to="/" class="logo-link">
+          <router-link class="logo-link" to="/">
             <span class="logo-text">NyeWeb</span>
           </router-link>
         </div>
@@ -50,7 +50,7 @@ const isAdminLogin = computed(() => {
       <!-- 中间导航选项 -->
       <el-col :span="16">
         <div class="nav-center">
-          <el-menu mode="horizontal" class="nav-menu" :ellipsis="false" router>
+          <el-menu :ellipsis="false" class="nav-menu" mode="horizontal" router>
             <el-menu-item index="/">首页</el-menu-item>
             <el-menu-item index="/projects">项目</el-menu-item>
             <el-menu-item index="/knowledge">知识</el-menu-item>
@@ -63,12 +63,12 @@ const isAdminLogin = computed(() => {
       <!-- 右侧头像和关于我 -->
       <el-col :span="4">
         <div class="user-section">
-          <router-link to="/about" class="user-info-link">
+          <router-link class="user-info-link" to="/about">
             <span class="about-me">关于我</span>
           </router-link>
-          <router-link to="/admin/login" class="avatar-link">
-            <el-avatar size="small" class="user-avatar">
-              <img src="/avatar.jpg" alt="用户头像" />
+          <router-link class="avatar-link" to="/admin/login">
+            <el-avatar class="user-avatar" size="small">
+              <img alt="用户头像" src="/avatar.jpg"/>
             </el-avatar>
           </router-link>
         </div>

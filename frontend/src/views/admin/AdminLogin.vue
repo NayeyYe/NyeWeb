@@ -8,38 +8,38 @@
       </div>
 
       <el-form
-        :model="loginForm"
-        class="login-form"
-        @submit.prevent="handleLogin"
+          :model="loginForm"
+          class="login-form"
+          @submit.prevent="handleLogin"
       >
         <el-form-item>
           <el-input
-            v-model="loginForm.username"
-            placeholder="用户名"
-            prefix-icon="User"
-            size="large"
+              v-model="loginForm.username"
+              placeholder="用户名"
+              prefix-icon="User"
+              size="large"
           />
         </el-form-item>
 
         <el-form-item>
           <el-input
-            v-model="loginForm.password"
-            type="password"
-            placeholder="密码"
-            prefix-icon="Lock"
-            size="large"
-            show-password
-            @keyup.enter="handleLogin"
+              v-model="loginForm.password"
+              placeholder="密码"
+              prefix-icon="Lock"
+              show-password
+              size="large"
+              type="password"
+              @keyup.enter="handleLogin"
           />
         </el-form-item>
 
         <el-form-item>
           <el-button
-            type="primary"
-            size="large"
-            class="login-button"
-            :loading="loading"
-            @click="handleLogin"
+              :loading="loading"
+              class="login-button"
+              size="large"
+              type="primary"
+              @click="handleLogin"
           >
             登录
           </el-button>
@@ -50,9 +50,9 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import {reactive, ref} from 'vue'
+import {useRouter} from 'vue-router'
+import {ElMessage} from 'element-plus'
 import axios from 'axios'
 
 const router = useRouter()

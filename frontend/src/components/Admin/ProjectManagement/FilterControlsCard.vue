@@ -3,7 +3,7 @@
     <template #header>
       <div class="filter-header">
         <span>筛选条件</span>
-        <el-button link @click="resetAllFilters" class="reset-link-btn">重置</el-button>
+        <el-button class="reset-link-btn" link @click="resetAllFilters">重置</el-button>
       </div>
     </template>
     <div class="filter-controls">
@@ -12,21 +12,21 @@
         <div class="filter-item">
           <label>标签筛选：</label>
           <el-select
-            :model-value="filters.tags"
-            @update:model-value="$emit('update:tags', $event)"
-            multiple
-            filterable
-            allow-create
-            placeholder="选择或输入标签（最多3个）"
-            style="width: 350px"
-            size="default"
-            :multiple-limit="3"
+              :model-value="filters.tags"
+              :multiple-limit="3"
+              allow-create
+              filterable
+              multiple
+              placeholder="选择或输入标签（最多3个）"
+              size="default"
+              style="width: 350px"
+              @update:model-value="$emit('update:tags', $event)"
           >
             <el-option
-              v-for="tag in allTags"
-              :key="tag"
-              :label="tag"
-              :value="tag"
+                v-for="tag in allTags"
+                :key="tag"
+                :label="tag"
+                :value="tag"
             />
           </el-select>
         </div>
@@ -36,11 +36,11 @@
         <div class="filter-item">
           <label>标题搜索：</label>
           <el-input
-            :model-value="filters.title"
-            @update:model-value="$emit('update:title', $event)"
-            placeholder="输入标题关键字"
-            style="width: 250px"
-            clearable
+              :model-value="filters.title"
+              clearable
+              placeholder="输入标题关键字"
+              style="width: 250px"
+              @update:model-value="$emit('update:title', $event)"
           />
         </div>
       </div>
@@ -48,15 +48,15 @@
         <div class="filter-item">
           <label>状态筛选：</label>
           <el-select
-            :model-value="filters.status"
-            @update:model-value="$emit('update:status', $event)"
-            style="width: 140px"
-            placeholder="选择状态"
+              :model-value="filters.status"
+              placeholder="选择状态"
+              style="width: 140px"
+              @update:model-value="$emit('update:status', $event)"
           >
-            <el-option label="全部" value="" />
-            <el-option label="已发布" value="published" />
-            <el-option label="草稿" value="draft" />
-            <el-option label="已回收" value="recycled" />
+            <el-option label="全部" value=""/>
+            <el-option label="已发布" value="published"/>
+            <el-option label="草稿" value="draft"/>
+            <el-option label="已回收" value="recycled"/>
           </el-select>
         </div>
       </div>
@@ -65,14 +65,14 @@
           <label>时间排序：</label>
           <el-button-group>
             <el-button
-              :type="sortOrder === 'asc' ? 'primary' : ''"
-              @click="$emit('update:sortOrder', 'asc')"
+                :type="sortOrder === 'asc' ? 'primary' : ''"
+                @click="$emit('update:sortOrder', 'asc')"
             >
               升序
             </el-button>
             <el-button
-              :type="sortOrder === 'desc' ? 'primary' : ''"
-              @click="$emit('update:sortOrder', 'desc')"
+                :type="sortOrder === 'desc' ? 'primary' : ''"
+                @click="$emit('update:sortOrder', 'desc')"
             >
               降序
             </el-button>

@@ -12,12 +12,12 @@
       <div class="card-footer">
         <div class="article-tags">
           <el-tag
-            v-for="tag in article.tags"
-            :key="tag"
-            type="info"
-            size="small"
-            effect="plain"
-            round
+              v-for="tag in article.tags"
+              :key="tag"
+              effect="plain"
+              round
+              size="small"
+              type="info"
           >
             {{ tag }}
           </el-tag>

@@ -1,8 +1,8 @@
 <template>
   <div class="home-container">
     <div class="left-column">
-      <ProfileCard class="profile-card-container" />
-      <ImageCarousel class="image-carousel-container" />
+      <ProfileCard class="profile-card-container"/>
+      <ImageCarousel class="image-carousel-container"/>
     </div>
     <el-card class="intro-card">
       <!-- 英雄区域 -->
@@ -12,36 +12,37 @@
         <p>欢迎来到我的个人空间。在这里，你可以了解我的项目、技术栈和个人思考。</p>
       </div>
 
-      <el-divider />
+      <el-divider/>
 
       <!-- 关于我 -->
       <div class="about-section">
         <h2>关于我</h2>
-        <p>我专注于 [你擅长的领域]，致力于构建高质量、用户友好的 Web 应用。我对 [你感兴趣的技术或方向] 充满热情，并乐于探索新的技术和解决方案。</p>
+        <p>我专注于 [你擅长的领域]，致力于构建高质量、用户友好的 Web 应用。我对 [你感兴趣的技术或方向]
+          充满热情，并乐于探索新的技术和解决方案。</p>
       </div>
 
-      <el-divider />
+      <el-divider/>
 
       <!-- 技术栈 -->
       <div class="skills-section">
         <h2>技术栈</h2>
-        <el-tag type="primary" class="skill-tag">Vue.js</el-tag>
-        <el-tag type="success" class="skill-tag">JavaScript</el-tag>
-        <el-tag type="info" class="skill-tag">HTML5 & CSS3</el-tag>
-        <el-tag type="warning" class="skill-tag">Node.js</el-tag>
-        <el-tag type="danger" class="skill-tag">Element Plus</el-tag>
+        <el-tag class="skill-tag" type="primary">Vue.js</el-tag>
+        <el-tag class="skill-tag" type="success">JavaScript</el-tag>
+        <el-tag class="skill-tag" type="info">HTML5 & CSS3</el-tag>
+        <el-tag class="skill-tag" type="warning">Node.js</el-tag>
+        <el-tag class="skill-tag" type="danger">Element Plus</el-tag>
         <!-- 在这里添加更多技术标签 -->
       </div>
 
-      <el-divider />
+      <el-divider/>
 
       <!-- 联系方式 -->
       <div class="contact-section">
         <h2>联系我</h2>
         <p>你可以在以下平台找到我：</p>
-        <el-button type="primary" plain>GitHub</el-button>
-        <el-button type="success" plain>LinkedIn</el-button>
-        <el-button type="info" plain>Email</el-button>
+        <el-button plain type="primary">GitHub</el-button>
+        <el-button plain type="success">LinkedIn</el-button>
+        <el-button plain type="info">Email</el-button>
       </div>
     </el-card>
   </div>

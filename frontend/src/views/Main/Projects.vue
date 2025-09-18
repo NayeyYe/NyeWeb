@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import {computed, onMounted, ref} from 'vue'
 import axios from 'axios'
 import ProjectCard from '@/components/Main/Project/ProjectCard.vue'
@@ -71,7 +71,7 @@ const filteredProjects = computed(() => {
     return sortedProjects.value
   }
   return sortedProjects.value.filter(project =>
-    project.tags && project.tags.includes(selectedTag.value)
+      project.tags && project.tags.includes(selectedTag.value)
   )
 })
 
@@ -119,9 +119,9 @@ const clearFilters = () => {
 const handleScrollToProject = (slug) => {
   const element = document.getElementById(slug)
   if (element) {
-    element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    element.scrollIntoView({behavior: 'smooth', block: 'start'})
   } else {
-    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
   }
 }
 
@@ -138,7 +138,7 @@ onMounted(async () => {
     </div>
     <div v-loading="loading" class="main-content">
       <aside class="timeline-sidebar">
-        <ProjectTimeline :projects="filteredProjects" @scroll-to-project="handleScrollToProject" />
+        <ProjectTimeline :projects="filteredProjects" @scroll-to-project="handleScrollToProject"/>
       </aside>
       <main class="projects-main">
         <div v-if="!loading && filteredProjects.length === 0" class="no-projects">
@@ -148,18 +148,18 @@ onMounted(async () => {
         </div>
         <div v-else class="projects-grid">
           <ProjectCard
-            v-for="project in displayedProjects"
-            :id="project.slug"
-            :key="project.slug"
-            :project="project"
+              v-for="project in displayedProjects"
+              :id="project.slug"
+              :key="project.slug"
+              :project="project"
           />
         </div>
         <div v-if="hasMoreProjects" class="load-more-container">
-          <el-button type="primary" plain @click="loadMore">查看更多</el-button>
+          <el-button plain type="primary" @click="loadMore">查看更多</el-button>
         </div>
       </main>
       <aside class="tags-sidebar">
-        <ProjectTagFilter :tags="allTags" :counts="tagCounts" @tag-selected="handleTagSelected" />
+        <ProjectTagFilter :counts="tagCounts" :tags="allTags" @tag-selected="handleTagSelected"/>
       </aside>
     </div>
   </div>

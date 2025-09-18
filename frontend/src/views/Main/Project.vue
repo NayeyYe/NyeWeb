@@ -8,7 +8,7 @@
     <div v-else class="content-wrapper">
       <aside class="outline-sidebar">
         <div class="outline-fixed-container">
-          <Outline v-if="headings.length" :outline="headings" :active-id="activeHeadingId" />
+          <Outline v-if="headings.length" :active-id="activeHeadingId" :outline="headings"/>
         </div>
       </aside>
       <main class="main-content">
@@ -42,7 +42,7 @@ import 'github-markdown-css/github-markdown.css'
 import 'katex/dist/katex.min.css'
 
 // 初始化 Mermaid
-mermaid.initialize({ startOnLoad: false, theme: 'default' })
+mermaid.initialize({startOnLoad: false, theme: 'default'})
 
 const route = useRoute()
 const projectContent = ref('')
@@ -64,26 +64,27 @@ const md = markdownit({
     if (lang && hljs.getLanguage(lang)) {
       try {
         return '<pre class="hljs"><code>' +
-               hljs.highlight(str, { language: lang, ignoreIllegals: true }).value +
-               '</code></pre>';
-      } catch (__) {}
+            hljs.highlight(str, {language: lang, ignoreIllegals: true}).value +
+            '</code></pre>';
+      } catch (__) {
+      }
     }
     return '<pre class="hljs"><code>' + md.utils.escapeHtml(str) + '</code></pre>';
   }
 }).use(mdKatex)
-  .use(mdAnchor, {
-    permalink: true, // 强制为所有层级应用permalink，从而确保生成ID
-    level: [1, 2, 3, 4, 5, 6],
-    slugify: s => slugify(s, { lower: true, strict: true }),
-    permalinkSymbol: '¶', // 你可以自定义这个符号，或者设为空字符串''来隐藏它
-    permalinkBefore: true,
-    permalinkClass: 'header-anchor'
-  })
-  .use(mdTable, {
-    multiline: true,
-    rowspan: true,
-    headerless: true
-  })
+    .use(mdAnchor, {
+      permalink: true, // 强制为所有层级应用permalink，从而确保生成ID
+      level: [1, 2, 3, 4, 5, 6],
+      slugify: s => slugify(s, {lower: true, strict: true}),
+      permalinkSymbol: '¶', // 你可以自定义这个符号，或者设为空字符串''来隐藏它
+      permalinkBefore: true,
+      permalinkClass: 'header-anchor'
+    })
+    .use(mdTable, {
+      multiline: true,
+      rowspan: true,
+      headerless: true
+    })
 
 // 自定义代码块渲染，支持 Mermaid
 const defaultFenceRenderer = md.renderer.rules.fence;
@@ -331,9 +332,18 @@ onUnmounted(() => {
   margin-bottom: 1.4rem;
   font-weight: 600;
 }
-:deep(h1) { font-size: 2em; }
-:deep(h2) { font-size: 1.6em; }
-:deep(h3) { font-size: 1.3em; }
+
+:deep(h1) {
+  font-size: 2em;
+}
+
+:deep(h2) {
+  font-size: 1.6em;
+}
+
+:deep(h3) {
+  font-size: 1.3em;
+}
 
 /* 代码块容器 */
 :deep(.code-block-wrapper) {
@@ -367,9 +377,17 @@ onUnmounted(() => {
   border-radius: 50%;
 }
 
-:deep(.dot.red) { background-color: #ff5f56; }
-:deep(.dot.yellow) { background-color: #ffbd2e; }
-:deep(.dot.green) { background-color: #27c93f; }
+:deep(.dot.red) {
+  background-color: #ff5f56;
+}
+
+:deep(.dot.yellow) {
+  background-color: #ffbd2e;
+}
+
+:deep(.dot.green) {
+  background-color: #27c93f;
+}
 
 :deep(.language-name) {
   flex-grow: 1;

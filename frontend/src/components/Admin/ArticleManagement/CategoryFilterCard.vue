@@ -4,27 +4,29 @@
       <div class="filter-header">
         <span>文章分类</span>
         <div class="header-actions">
-          <el-button link @click="clearCategoryFilter" v-if="modelValue" class="reset-link-btn">清空</el-button>
-          <el-button link @click="handleRefresh" :loading="categoryLoading" class="refresh-btn">
-            <el-icon><Refresh /></el-icon>
+          <el-button v-if="modelValue" class="reset-link-btn" link @click="clearCategoryFilter">清空</el-button>
+          <el-button :loading="categoryLoading" class="refresh-btn" link @click="handleRefresh">
+            <el-icon>
+              <Refresh/>
+            </el-icon>
           </el-button>
         </div>
       </div>
     </template>
     <div v-loading="categoryLoading" class="category-content">
       <el-tree
-        v-if="!categoryLoading && categoryTree.length > 0"
-        :data="categoryTree"
-        :props="treeProps"
-        @node-click="handleCategoryClick"
-        :highlight-current="true"
-        :expand-on-click-node="false"
-        node-key="path"
-        ref="categoryTreeRef"
-        class="category-tree"
-        :current-node-key="modelValue"
+          v-if="!categoryLoading && categoryTree.length > 0"
+          ref="categoryTreeRef"
+          :current-node-key="modelValue"
+          :data="categoryTree"
+          :expand-on-click-node="false"
+          :highlight-current="true"
+          :props="treeProps"
+          class="category-tree"
+          node-key="path"
+          @node-click="handleCategoryClick"
       />
-      <el-empty v-else-if="!categoryLoading && categoryTree.length === 0" description="暂无分类" :image-size="40" />
+      <el-empty v-else-if="!categoryLoading && categoryTree.length === 0" :image-size="40" description="暂无分类"/>
     </div>
   </el-card>
 </template>
@@ -81,10 +83,10 @@ const buildCategoryTreeFromData = (categories) => {
 
   // 过滤掉错误的分类数据
   const validCategories = categories.filter(cat =>
-    cat.path &&
-    cat.path !== "请先创建分类文件夹" &&
-    cat.path !== "error" &&
-    !cat.path.includes("请先创建")
+      cat.path &&
+      cat.path !== "请先创建分类文件夹" &&
+      cat.path !== "error" &&
+      !cat.path.includes("请先创建")
   )
 
   if (validCategories.length === 0) {

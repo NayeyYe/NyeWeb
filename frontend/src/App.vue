@@ -4,9 +4,9 @@ import Header from '@/components/Header.vue'
 
 <template>
   <el-container>
-    <Header />
+    <Header/>
     <el-main>
-      <router-view />
+      <router-view/>
     </el-main>
   </el-container>
 </template>

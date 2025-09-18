@@ -6,33 +6,43 @@
     </div>
 
     <el-menu
-      :default-active="activeMenu"
-      class="sidebar-menu"
-      router
-      unique-opened
+        :default-active="activeMenu"
+        class="sidebar-menu"
+        router
+        unique-opened
     >
-      <el-menu-item index="/admin/dashboard" class="menu-item">
-        <el-icon><House /></el-icon>
+      <el-menu-item class="menu-item" index="/admin/dashboard">
+        <el-icon>
+          <House/>
+        </el-icon>
         <span>控制台</span>
       </el-menu-item>
 
-      <el-menu-item index="/admin/projects" class="menu-item">
-        <el-icon><Folder /></el-icon>
+      <el-menu-item class="menu-item" index="/admin/projects">
+        <el-icon>
+          <Folder/>
+        </el-icon>
         <span>项目管理</span>
       </el-menu-item>
 
-      <el-menu-item index="/admin/articles" class="menu-item">
-        <el-icon><Document /></el-icon>
+      <el-menu-item class="menu-item" index="/admin/articles">
+        <el-icon>
+          <Document/>
+        </el-icon>
         <span>文章管理</span>
       </el-menu-item>
 
-      <el-menu-item index="/admin/tools" class="menu-item">
-        <el-icon><Tools /></el-icon>
+      <el-menu-item class="menu-item" index="/admin/tools">
+        <el-icon>
+          <Tools/>
+        </el-icon>
         <span>工具管理</span>
       </el-menu-item>
 
-      <el-menu-item index="/admin/resources" class="menu-item">
-        <el-icon><Box /></el-icon>
+      <el-menu-item class="menu-item" index="/admin/resources">
+        <el-icon>
+          <Box/>
+        </el-icon>
         <span>资源管理</span>
       </el-menu-item>
 
@@ -40,13 +50,17 @@
 
     <div class="sidebar-footer">
       <el-menu class="footer-menu">
-        <el-menu-item @click="goHome" class="footer-menu-item">
-          <el-icon><HomeFilled /></el-icon>
+        <el-menu-item class="footer-menu-item" @click="goHome">
+          <el-icon>
+            <HomeFilled/>
+          </el-icon>
           <span>返回首页</span>
         </el-menu-item>
 
-        <el-menu-item @click="logout" class="footer-menu-item logout-item">
-          <el-icon><SwitchButton /></el-icon>
+        <el-menu-item class="footer-menu-item logout-item" @click="logout">
+          <el-icon>
+            <SwitchButton/>
+          </el-icon>
           <span>退出登录</span>
         </el-menu-item>
       </el-menu>

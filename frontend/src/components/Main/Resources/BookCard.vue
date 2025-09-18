@@ -1,16 +1,16 @@
 <template>
   <el-card :body-style="{ padding: '0px' }" class="book-card" shadow="hover">
     <div class="book-cover">
-      <el-image :src="book.cover" fit="cover" class="cover-image" />
+      <el-image :src="book.cover" class="cover-image" fit="cover"/>
     </div>
     <div class="book-info">
       <h3 class="book-title">{{ book.title }}</h3>
       <p class="book-description">{{ book.description }}</p>
       <div class="bottom-section">
         <div class="book-tags">
-          <el-tag v-for="tag in book.tags" :key="tag" type="info" size="small">{{ tag }}</el-tag>
+          <el-tag v-for="tag in book.tags" :key="tag" size="small" type="info">{{ tag }}</el-tag>
         </div>
-        <el-button type="primary" round @click="downloadPdf">下载</el-button>
+        <el-button round type="primary" @click="downloadPdf">下载</el-button>
       </div>
     </div>
   </el-card>
@@ -54,35 +54,42 @@ const downloadPdf = () => {
   flex-direction: column;
   height: 100%;
 }
+
 .book-cover {
   width: 100%;
   height: 180px;
 }
+
 .cover-image {
   width: 100%;
   height: 100%;
 }
+
 .book-info {
   padding: 20px;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
 }
+
 .book-title {
   font-size: 1.2em;
   margin: 0 0 10px 0;
 }
+
 .book-description {
   font-size: 0.9em;
   color: #606266;
   flex-grow: 1;
   margin-bottom: 15px;
 }
+
 .bottom-section {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
 }
+
 .book-tags {
   display: flex;
   flex-wrap: wrap;

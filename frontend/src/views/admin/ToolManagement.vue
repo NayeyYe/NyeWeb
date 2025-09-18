@@ -4,7 +4,7 @@
     <div class="action-bar">
       <div class="action-buttons">
         <el-button type="primary" @click="showCreateDialog = true">新建工具</el-button>
-        <el-button @click="refreshTools" :icon="Refresh" circle />
+        <el-button :icon="Refresh" circle @click="refreshTools"/>
       </div>
     </div>
 
@@ -16,7 +16,7 @@
             <template #header>
               <div class="filter-header">
                 <span>筛选条件</span>
-                <el-button link @click="resetAllFilters" class="reset-link-btn">重置</el-button>
+                <el-button class="reset-link-btn" link @click="resetAllFilters">重置</el-button>
               </div>
             </template>
             <div class="filter-controls">
@@ -25,20 +25,20 @@
                 <div class="filter-item">
                   <label>标签筛选：</label>
                   <el-select
-                    v-model="filterForm.tags"
-                    multiple
-                    filterable
-                    allow-create
-                    placeholder="选择或输入标签（最多3个）"
-                    style="width: 350px"
-                    size="default"
-                    :multiple-limit="3"
+                      v-model="filterForm.tags"
+                      :multiple-limit="3"
+                      allow-create
+                      filterable
+                      multiple
+                      placeholder="选择或输入标签（最多3个）"
+                      size="default"
+                      style="width: 350px"
                   >
                     <el-option
-                      v-for="tag in allTags"
-                      :key="tag"
-                      :label="tag"
-                      :value="tag"
+                        v-for="tag in allTags"
+                        :key="tag"
+                        :label="tag"
+                        :value="tag"
                     />
                   </el-select>
                 </div>
@@ -48,19 +48,19 @@
                 <div class="filter-item">
                   <label>标题搜索：</label>
                   <el-input
-                    v-model="filterForm.title"
-                    placeholder="输入标题关键字"
-                    style="width: 250px"
-                    clearable
+                      v-model="filterForm.title"
+                      clearable
+                      placeholder="输入标题关键字"
+                      style="width: 250px"
                   />
                 </div>
                 <div class="filter-item">
                   <label>状态筛选：</label>
-                  <el-select v-model="filterForm.status" style="width: 140px" placeholder="选择状态">
-                    <el-option label="全部" value="" />
-                    <el-option label="已发布" value="published" />
-                    <el-option label="草稿" value="draft" />
-                    <el-option label="已回收" value="recycled" />
+                  <el-select v-model="filterForm.status" placeholder="选择状态" style="width: 140px">
+                    <el-option label="全部" value=""/>
+                    <el-option label="已发布" value="published"/>
+                    <el-option label="草稿" value="draft"/>
+                    <el-option label="已回收" value="recycled"/>
                   </el-select>
                 </div>
               </div>
@@ -80,33 +80,33 @@
           </div>
         </template>
         <el-table
-          :data="filteredTools"
-          stripe
-          class="tool-table"
-          empty-text="暂无工具数据"
-          :header-cell-style="{ background: '#fafafa', color: '#333', fontWeight: '600' }"
+            :data="filteredTools"
+            :header-cell-style="{ background: '#fafafa', color: '#333', fontWeight: '600' }"
+            class="tool-table"
+            empty-text="暂无工具数据"
+            stripe
         >
-          <el-table-column prop="title" label="工具标题" min-width="200" show-overflow-tooltip>
+          <el-table-column label="工具标题" min-width="200" prop="title" show-overflow-tooltip>
             <template #default="scope">
               <div class="tool-title">{{ scope.row.title }}</div>
             </template>
           </el-table-column>
-          <el-table-column prop="url" label="工具链接" min-width="250" show-overflow-tooltip>
+          <el-table-column label="工具链接" min-width="250" prop="url" show-overflow-tooltip>
             <template #default="scope">
-              <el-link :href="scope.row.url" target="_blank" type="primary" class="tool-url">
+              <el-link :href="scope.row.url" class="tool-url" target="_blank" type="primary">
                 {{ scope.row.url }}
               </el-link>
             </template>
           </el-table-column>
-          <el-table-column prop="tags" label="标签" min-width="150" show-overflow-tooltip>
+          <el-table-column label="标签" min-width="150" prop="tags" show-overflow-tooltip>
             <template #default="scope">
               <div v-if="scope.row.tags && scope.row.tags.length > 0" class="tool-tags">
                 <el-tag
-                  v-for="tag in scope.row.tags.slice(0, 3)"
-                  :key="tag"
-                  size="small"
-                  type="info"
-                  class="tag-item"
+                    v-for="tag in scope.row.tags.slice(0, 3)"
+                    :key="tag"
+                    class="tag-item"
+                    size="small"
+                    type="info"
                 >
                   {{ tag }}
                 </el-tag>
@@ -115,37 +115,37 @@
               <span v-else class="no-tags">暂无标签</span>
             </template>
           </el-table-column>
-          <el-table-column prop="status" label="状态" min-width="120" align="center">
+          <el-table-column align="center" label="状态" min-width="120" prop="status">
             <template #default="scope">
               <el-select
-                :model-value="scope.row.status"
-                @change="(value) => updateToolStatus(scope.row, value)"
-                size="small"
-                style="width: 100px"
+                  :model-value="scope.row.status"
+                  size="small"
+                  style="width: 100px"
+                  @change="(value) => updateToolStatus(scope.row, value)"
               >
-                <el-option label="草稿" value="draft" />
-                <el-option label="已发布" value="published" />
-                <el-option label="已回收" value="recycled" />
+                <el-option label="草稿" value="draft"/>
+                <el-option label="已发布" value="published"/>
+                <el-option label="已回收" value="recycled"/>
               </el-select>
             </template>
           </el-table-column>
-          <el-table-column label="操作" min-width="160" align="center">
+          <el-table-column align="center" label="操作" min-width="160">
             <template #default="scope">
               <div class="action-buttons-table">
                 <el-button size="small" type="primary" @click="handleEditTool(scope.row)">编辑</el-button>
-                <el-button 
-                  v-if="scope.row.status !== 'recycled'"
-                  size="small" 
-                  type="warning" 
-                  @click="quickUpdateStatus(scope.row, 'recycled')"
+                <el-button
+                    v-if="scope.row.status !== 'recycled'"
+                    size="small"
+                    type="warning"
+                    @click="quickUpdateStatus(scope.row, 'recycled')"
                 >
                   回收
                 </el-button>
-                <el-button 
-                  v-if="scope.row.status === 'recycled'"
-                  size="small" 
-                  type="success" 
-                  @click="quickUpdateStatus(scope.row, 'published')"
+                <el-button
+                    v-if="scope.row.status === 'recycled'"
+                    size="small"
+                    type="success"
+                    @click="quickUpdateStatus(scope.row, 'published')"
                 >
                   恢复
                 </el-button>
@@ -159,58 +159,58 @@
 
     <!-- 新建工具对话框 -->
     <el-dialog
-      v-model="showCreateDialog"
-      title="新建工具"
-      width="600px"
-      :before-close="handleCloseCreateDialog"
+        v-model="showCreateDialog"
+        :before-close="handleCloseCreateDialog"
+        title="新建工具"
+        width="600px"
     >
       <el-form
-        ref="createFormRef"
-        :model="createForm"
-        :rules="createRules"
-        label-width="100px"
+          ref="createFormRef"
+          :model="createForm"
+          :rules="createRules"
+          label-width="100px"
       >
         <el-form-item label="工具标题" prop="title">
           <el-input
-            v-model="createForm.title"
-            placeholder="请输入工具标题"
-            clearable
+              v-model="createForm.title"
+              clearable
+              placeholder="请输入工具标题"
           />
         </el-form-item>
         <el-form-item label="工具链接" prop="url">
           <el-input
-            v-model="createForm.url"
-            placeholder="请输入完整的URL地址，如：https://example.com"
-            clearable
+              v-model="createForm.url"
+              clearable
+              placeholder="请输入完整的URL地址，如：https://example.com"
           />
         </el-form-item>
         <el-form-item label="工具描述">
           <el-input
-            v-model="createForm.description"
-            type="textarea"
-            :rows="3"
-            placeholder="请输入工具描述（可选）"
-            maxlength="500"
-            show-word-limit
-            clearable
+              v-model="createForm.description"
+              :rows="3"
+              clearable
+              maxlength="500"
+              placeholder="请输入工具描述（可选）"
+              show-word-limit
+              type="textarea"
           />
         </el-form-item>
         <el-form-item label="工具标签">
           <div class="tag-input-container">
             <el-select
-              v-model="createForm.tags"
-              multiple
-              filterable
-              allow-create
-              placeholder="选择或创建标签"
-              style="width: 100%"
-              :reserve-keyword="false"
+                v-model="createForm.tags"
+                :reserve-keyword="false"
+                allow-create
+                filterable
+                multiple
+                placeholder="选择或创建标签"
+                style="width: 100%"
             >
               <el-option
-                v-for="tag in allTags"
-                :key="tag"
-                :label="tag"
-                :value="tag"
+                  v-for="tag in allTags"
+                  :key="tag"
+                  :label="tag"
+                  :value="tag"
               />
             </el-select>
             <div class="tag-tips">
@@ -224,7 +224,7 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="handleCloseCreateDialog">取消</el-button>
-          <el-button type="primary" @click="handleCreateTool" :loading="creating">
+          <el-button :loading="creating" type="primary" @click="handleCreateTool">
             创建工具
           </el-button>
         </span>
@@ -233,58 +233,58 @@
 
     <!-- 编辑工具对话框 -->
     <el-dialog
-      v-model="showEditDialog"
-      title="编辑工具"
-      width="600px"
-      :before-close="handleCloseEditDialog"
+        v-model="showEditDialog"
+        :before-close="handleCloseEditDialog"
+        title="编辑工具"
+        width="600px"
     >
       <el-form
-        ref="editFormRef"
-        :model="editForm"
-        :rules="editRules"
-        label-width="100px"
+          ref="editFormRef"
+          :model="editForm"
+          :rules="editRules"
+          label-width="100px"
       >
         <el-form-item label="工具标题" prop="title">
           <el-input
-            v-model="editForm.title"
-            placeholder="请输入工具标题"
-            clearable
+              v-model="editForm.title"
+              clearable
+              placeholder="请输入工具标题"
           />
         </el-form-item>
         <el-form-item label="工具链接" prop="url">
           <el-input
-            v-model="editForm.url"
-            placeholder="请输入完整的URL地址，如：https://example.com"
-            clearable
+              v-model="editForm.url"
+              clearable
+              placeholder="请输入完整的URL地址，如：https://example.com"
           />
         </el-form-item>
         <el-form-item label="工具描述">
           <el-input
-            v-model="editForm.description"
-            type="textarea"
-            :rows="3"
-            placeholder="请输入工具描述（可选）"
-            maxlength="500"
-            show-word-limit
-            clearable
+              v-model="editForm.description"
+              :rows="3"
+              clearable
+              maxlength="500"
+              placeholder="请输入工具描述（可选）"
+              show-word-limit
+              type="textarea"
           />
         </el-form-item>
         <el-form-item label="工具标签">
           <div class="tag-input-container">
             <el-select
-              v-model="editForm.tags"
-              multiple
-              filterable
-              allow-create
-              placeholder="选择或创建标签"
-              style="width: 100%"
-              :reserve-keyword="false"
+                v-model="editForm.tags"
+                :reserve-keyword="false"
+                allow-create
+                filterable
+                multiple
+                placeholder="选择或创建标签"
+                style="width: 100%"
             >
               <el-option
-                v-for="tag in allTags"
-                :key="tag"
-                :label="tag"
-                :value="tag"
+                  v-for="tag in allTags"
+                  :key="tag"
+                  :label="tag"
+                  :value="tag"
               />
             </el-select>
             <div class="tag-tips">
@@ -305,7 +305,7 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="handleCloseEditDialog">取消</el-button>
-          <el-button type="primary" @click="handleUpdateTool" :loading="updating">
+          <el-button :loading="updating" type="primary" @click="handleUpdateTool">
             保存修改
           </el-button>
         </span>
@@ -353,12 +353,12 @@ const editForm = reactive({
 
 const createRules = {
   title: [
-    { required: true, message: '请输入工具标题', trigger: 'blur' },
-    { min: 1, max: 255, message: '标题长度应在1-255个字符之间', trigger: 'blur' }
+    {required: true, message: '请输入工具标题', trigger: 'blur'},
+    {min: 1, max: 255, message: '标题长度应在1-255个字符之间', trigger: 'blur'}
   ],
   url: [
-    { required: true, message: '请输入工具链接', trigger: 'blur' },
-    { 
+    {required: true, message: '请输入工具链接', trigger: 'blur'},
+    {
       pattern: /^https?:\/\/.+/,
       message: '请输入有效的URL地址（必须以http://或https://开头）',
       trigger: 'blur'
@@ -368,12 +368,12 @@ const createRules = {
 
 const editRules = {
   title: [
-    { required: true, message: '请输入工具标题', trigger: 'blur' },
-    { min: 1, max: 255, message: '标题长度应在1-255个字符之间', trigger: 'blur' }
+    {required: true, message: '请输入工具标题', trigger: 'blur'},
+    {min: 1, max: 255, message: '标题长度应在1-255个字符之间', trigger: 'blur'}
   ],
   url: [
-    { required: true, message: '请输入工具链接', trigger: 'blur' },
-    { 
+    {required: true, message: '请输入工具链接', trigger: 'blur'},
+    {
       pattern: /^https?:\/\/.+/,
       message: '请输入有效的URL地址（必须以http://或https://开头）',
       trigger: 'blur'
@@ -387,7 +387,7 @@ const fetchTools = async () => {
     const res = await axios.get('/api/admin/tools', {
       timeout: 8000
     })
-    
+
     if (res.data && Array.isArray(res.data)) {
       tools.value = res.data.map(tool => ({
         ...tool,
@@ -399,7 +399,7 @@ const fetchTools = async () => {
     }
   } catch (error) {
     console.error('获取工具列表失败:', error)
-    
+
     if (error.response?.status === 401) {
       ElMessage.error('登录已过期，请重新登录')
     } else if (error.code === 'ECONNABORTED') {
@@ -451,18 +451,18 @@ const handleEditTool = (tool) => {
     ElMessage.error('无效的工具数据')
     return
   }
-  
-  currentEditTool.value = { ...tool } // 创建副本避免直接修改原数据
-  
+
+  currentEditTool.value = {...tool} // 创建副本避免直接修改原数据
+
   // 填充编辑表单，确保数据类型正确
   editForm.title = tool.title || ''
   editForm.url = tool.url || ''
   editForm.description = tool.description || ''
   editForm.tags = Array.isArray(tool.tags) ? [...tool.tags] : []
   editForm.status = tool.status || 'draft'
-  
+
   showEditDialog.value = true
-  
+
   // 确保表单验证状态正确
   nextTick(() => {
     if (editFormRef.value) {
@@ -473,7 +473,7 @@ const handleEditTool = (tool) => {
 
 const deleteTool = async (tool) => {
   try {
-    await ElMessageBox.confirm('确定要删除该工具吗？', '提示', { type: 'warning' })
+    await ElMessageBox.confirm('确定要删除该工具吗？', '提示', {type: 'warning'})
     await axios.delete(`/api/tools/${tool.id}`)
     ElMessage.success('工具删除成功')
     refreshTools()
@@ -493,13 +493,13 @@ const refreshTools = async () => {
 // 更新工具状态
 const updateToolStatus = async (tool, newStatus) => {
   if (tool.status === newStatus) return
-  
+
   try {
-    await axios.patch(`/api/tools/${tool.id}/status`, { status: newStatus })
-    
+    await axios.patch(`/api/tools/${tool.id}/status`, {status: newStatus})
+
     // 更新本地数据
     tool.status = newStatus
-    
+
     const statusText = getStatusText(newStatus)
     ElMessage.success(`工具状态已更新为：${statusText}`)
   } catch (error) {
@@ -513,9 +513,9 @@ const updateToolStatus = async (tool, newStatus) => {
 // 快速更新状态（用于操作按钮）
 const quickUpdateStatus = async (tool, newStatus) => {
   const actionText = newStatus === 'recycled' ? '回收' : '恢复'
-  
+
   try {
-    await ElMessageBox.confirm(`确定要${actionText}该工具吗？`, '提示', { type: 'warning' })
+    await ElMessageBox.confirm(`确定要${actionText}该工具吗？`, '提示', {type: 'warning'})
     await updateToolStatus(tool, newStatus)
   } catch (error) {
     if (error !== 'cancel') {
@@ -527,13 +527,13 @@ const quickUpdateStatus = async (tool, newStatus) => {
 // 创建工具相关
 const handleCreateTool = async () => {
   if (!createFormRef.value) return
-  
+
   try {
     await createFormRef.value.validate()
     creating.value = true
-    
+
     await axios.post('/api/tools', createForm)
-    
+
     ElMessage.success('工具创建成功')
     showCreateDialog.value = false
     resetCreateForm()
@@ -570,7 +570,7 @@ const resetCreateForm = () => {
 // 编辑工具相关
 const handleUpdateTool = async () => {
   if (!editFormRef.value || !currentEditTool.value) return
-  
+
   try {
     // 表单验证
     const isValid = await editFormRef.value.validate().catch(() => false)
@@ -578,9 +578,9 @@ const handleUpdateTool = async () => {
       ElMessage.warning('请检查表单填写是否正确')
       return
     }
-    
+
     updating.value = true
-    
+
     // 准备更新数据，确保数据格式正确
     const updateData = {
       title: editForm.title?.trim() || '',
@@ -589,27 +589,27 @@ const handleUpdateTool = async () => {
       tags: Array.isArray(editForm.tags) ? editForm.tags.filter(tag => tag?.trim()) : [],
       status: editForm.status || 'draft'
     }
-    
+
     // 数据验证
     if (!updateData.title) {
       ElMessage.error('工具标题不能为空')
       return
     }
-    
+
     if (!updateData.url) {
       ElMessage.error('工具链接不能为空')
       return
     }
-    
+
     // URL格式验证
     const urlPattern = /^https?:\/\/.+/
     if (!urlPattern.test(updateData.url)) {
       ElMessage.error('请输入有效的URL地址')
       return
     }
-    
+
     console.log('发送更新请求:', updateData)
-    
+
     // 执行更新操作
     const response = await axios.put(`/api/tools/${currentEditTool.value.id}`, updateData, {
       timeout: 15000, // 15秒超时
@@ -617,9 +617,9 @@ const handleUpdateTool = async () => {
         'Content-Type': 'application/json',
       }
     })
-    
+
     console.log('更新响应:', response)
-    
+
     // 检查响应状态
     if (response.status === 200) {
       // 更新本地数据
@@ -630,39 +630,39 @@ const handleUpdateTool = async () => {
           ...tools.value[index],
           ...updateData
         }
-        
+
         // 确保数组字段的正确性
         updatedTool.tags = Array.isArray(updatedTool.tags) ? updatedTool.tags : []
-        
+
         // 更新本地数据
         tools.value[index] = updatedTool
         console.log('本地数据已更新:', updatedTool)
       }
-      
+
       ElMessage.success('工具更新成功')
       showEditDialog.value = false
       resetEditForm()
-      
+
       // 异步刷新标签列表以获取可能新创建的标签
       fetchTags().catch(error => {
         console.warn('刷新标签列表失败:', error)
       })
-      
+
     } else {
       throw new Error(`更新失败，状态码: ${response.status}`)
     }
-    
+
   } catch (error) {
     console.error('更新工具失败:', error)
-    
+
     // 详细的错误处理
     if (error.response) {
       const status = error.response.status
       const errorData = error.response.data
       const message = errorData?.detail || errorData?.message || '服务器错误'
-      
+
       console.log('错误响应:', error.response)
-      
+
       switch (status) {
         case 400:
           ElMessage.error(`请求参数错误: ${message}`)
@@ -704,13 +704,13 @@ const handleCloseEditDialog = () => {
   // 检查是否有未保存的更改
   if (hasUnsavedChanges()) {
     ElMessageBox.confirm(
-      '您有未保存的更改，确定要关闭吗？',
-      '提示',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }
+        '您有未保存的更改，确定要关闭吗？',
+        '提示',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
     ).then(() => {
       showEditDialog.value = false
       resetEditForm()
@@ -741,24 +741,28 @@ const resetEditForm = () => {
 // 检查是否有未保存的更改
 const hasUnsavedChanges = () => {
   if (!currentEditTool.value) return false
-  
+
   const current = currentEditTool.value
   return (
-    editForm.title !== (current.title || '') ||
-    editForm.url !== (current.url || '') ||
-    editForm.description !== (current.description || '') ||
-    editForm.status !== (current.status || 'draft') ||
-    JSON.stringify(editForm.tags || []) !== JSON.stringify(current.tags || [])
+      editForm.title !== (current.title || '') ||
+      editForm.url !== (current.url || '') ||
+      editForm.description !== (current.description || '') ||
+      editForm.status !== (current.status || 'draft') ||
+      JSON.stringify(editForm.tags || []) !== JSON.stringify(current.tags || [])
   )
 }
 
 // 状态相关方法
 const getStatusText = (status) => {
   switch (status) {
-    case 'published': return '已发布'
-    case 'draft': return '草稿'
-    case 'recycled': return '已回收'
-    default: return '未知'
+    case 'published':
+      return '已发布'
+    case 'draft':
+      return '草稿'
+    case 'recycled':
+      return '已回收'
+    default:
+      return '未知'
   }
 }
 
@@ -1022,6 +1026,6 @@ onMounted(() => {
   right: -1px;
   bottom: -1px;
   border-radius: inherit;
-  background-color: rgba(255,255,255,.35);
+  background-color: rgba(255, 255, 255, .35);
 }
 </style>

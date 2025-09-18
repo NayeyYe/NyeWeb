@@ -7,30 +7,30 @@
 
     <div class="filter-bar">
       <el-input
-        v-model="searchQuery"
-        placeholder="搜索工具..."
-        clearable
-        class="search-input"
-        size="large"
+          v-model="searchQuery"
+          class="search-input"
+          clearable
+          placeholder="搜索工具..."
+          size="large"
       />
       <div class="tags-container">
         <el-tag
-          :type="!selectedTag ? '' : 'info'"
-          @click="selectedTag = null"
-          class="tag-item"
-          effect="light"
-          size="large"
+            :type="!selectedTag ? '' : 'info'"
+            class="tag-item"
+            effect="light"
+            size="large"
+            @click="selectedTag = null"
         >
           全部
         </el-tag>
         <el-tag
-          v-for="tag in allTags"
-          :key="tag"
-          :type="selectedTag === tag ? '' : 'info'"
-          @click="selectedTag = tag"
-          class="tag-item"
-          effect="light"
-          size="large"
+            v-for="tag in allTags"
+            :key="tag"
+            :type="selectedTag === tag ? '' : 'info'"
+            class="tag-item"
+            effect="light"
+            size="large"
+            @click="selectedTag = tag"
         >
           {{ tag }}
         </el-tag>
@@ -40,14 +40,14 @@
     <div v-loading="loading">
       <el-row :gutter="20">
         <el-col
-          v-for="tool in filteredTools"
-          :key="tool.id"
-          :xs="24"
-          :sm="12"
-          :md="8"
-          class="tool-col"
+            v-for="tool in filteredTools"
+            :key="tool.id"
+            :md="8"
+            :sm="12"
+            :xs="24"
+            class="tool-col"
         >
-          <ToolCard :tool="tool" />
+          <ToolCard :tool="tool"/>
         </el-col>
       </el-row>
 
@@ -104,12 +104,12 @@ const allTags = computed(() => {
 const filteredTools = computed(() => {
   return toolsFromDB.value.filter(tool => {
     const searchMatch =
-      searchQuery.value.trim() === '' ||
-      tool.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      tool.description.toLowerCase().includes(searchQuery.value.toLowerCase());
+        searchQuery.value.trim() === '' ||
+        tool.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+        tool.description.toLowerCase().includes(searchQuery.value.toLowerCase());
 
     const tagMatch =
-      !selectedTag.value || (tool.tags && tool.tags.includes(selectedTag.value));
+        !selectedTag.value || (tool.tags && tool.tags.includes(selectedTag.value));
 
     return searchMatch && tagMatch;
   });

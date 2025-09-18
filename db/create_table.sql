@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS `articles`
     `category` VARCHAR(100),
     `date`     DATE,
     `summary`  TEXT,
-    `status`   TINYINT NOT NULL DEFAULT 1 COMMENT '0=未发布, 1=已发布, 2=已回收'
+    `status`   TINYINT      NOT NULL DEFAULT 1 COMMENT '0=未发布, 1=已发布, 2=已回收'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS `projects`
     `slug`    VARCHAR(255) NOT NULL UNIQUE,
     `date`    DATE,
     `summary` TEXT,
-    `status`  TINYINT NOT NULL DEFAULT 1 COMMENT '0=未发布, 1=已发布, 2=已回收'
+    `status`  TINYINT      NOT NULL DEFAULT 1 COMMENT '0=未发布, 1=已发布, 2=已回收'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS `books`
     `description` TEXT,
     `filename`    VARCHAR(255),
     `cover`       VARCHAR(255),
-    `status`  TINYINT NOT NULL DEFAULT 1 COMMENT '0=未发布, 1=已发布, 2=已回收'
+    `status`      TINYINT      NOT NULL DEFAULT 1 COMMENT '0=未发布, 1=已发布, 2=已回收'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
@@ -47,8 +47,8 @@ CREATE TABLE IF NOT EXISTS `figures`
     `id`          INT AUTO_INCREMENT PRIMARY KEY,
     `title`       VARCHAR(255) NOT NULL,
     `description` TEXT,
-    `url`         VARCHAR(2083),  -- 改为url字段，存储图床链接
-    `status`      TINYINT NOT NULL DEFAULT 1 COMMENT '0=未发布, 1=已发布, 2=已回收'
+    `url`         VARCHAR(2083), -- 改为url字段，存储图床链接
+    `status`      TINYINT      NOT NULL DEFAULT 1 COMMENT '0=未发布, 1=已发布, 2=已回收'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS `tools`
     `title`       VARCHAR(255) NOT NULL,
     `description` TEXT,
     `url`         VARCHAR(2083),
-    `status`      TINYINT NOT NULL DEFAULT 1 COMMENT '0=未发布, 1=已发布, 2=已回收'
+    `status`      TINYINT      NOT NULL DEFAULT 1 COMMENT '0=未发布, 1=已发布, 2=已回收'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
@@ -139,7 +139,7 @@ CREATE TABLE IF NOT EXISTS `timeline`
 CREATE TABLE IF NOT EXISTS `favorite_images`
 (
     `id`  INT AUTO_INCREMENT PRIMARY KEY,
-    `url` VARCHAR(2083) NOT NULL  -- 改为url字段，存储图床链接
+    `url` VARCHAR(2083) NOT NULL -- 改为url字段，存储图床链接
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 

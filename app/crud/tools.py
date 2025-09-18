@@ -14,6 +14,7 @@ logger = logging.getLogger("tools_api")
 
 router = APIRouter()
 
+
 @router.get("/tools")
 def get_tools(db: Session = Depends(database.get_db)):
     """获取所有工具"""
@@ -43,6 +44,7 @@ def get_tools(db: Session = Depends(database.get_db)):
     except Exception as e:
         logger.error(f"获取工具数据时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取工具数据时发生错误: {str(e)}")
+
 
 @router.get("/tools/{tool_id}")
 def get_tool_by_id(tool_id: int, db: Session = Depends(database.get_db)):
@@ -74,6 +76,7 @@ def get_tool_by_id(tool_id: int, db: Session = Depends(database.get_db)):
         logger.error(f"获取工具详情时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取工具详情时发生错误: {str(e)}")
 
+
 @router.get("/tool-tags")
 def get_all_tool_tags(db: Session = Depends(database.get_db)):
     """获取所有工具标签及其工具数量"""
@@ -100,6 +103,7 @@ def get_all_tool_tags(db: Session = Depends(database.get_db)):
         logger.error(f"获取工具标签时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取工具标签时发生错误: {str(e)}")
 
+
 # 新增管理员获取全部工具的接口
 @router.get("/admin/tools")
 def get_all_tools_admin(db: Session = Depends(database.get_db)):
@@ -118,7 +122,7 @@ def get_all_tools_admin(db: Session = Depends(database.get_db)):
 
             # 状态映射
             status_map = {0: 'draft', 1: 'published', 2: 'recycled'}
-            
+
             tool_dict = {
                 "id": tool.id,
                 "title": tool.title,
@@ -135,6 +139,7 @@ def get_all_tools_admin(db: Session = Depends(database.get_db)):
         logger.error(f"获取工具数据时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取工具数据时发生错误: {str(e)}")
 
+
 # 新增修改工具状态的接口
 @router.patch("/tools/{tool_id}/status")
 def update_tool_status(tool_id: int, status_data: dict, db: Session = Depends(database.get_db)):
@@ -145,28 +150,29 @@ def update_tool_status(tool_id: int, status_data: dict, db: Session = Depends(da
         tool = db.query(Tool).filter(Tool.id == tool_id).first()
         if not tool:
             raise HTTPException(status_code=404, detail="工具未找到")
-        
+
         # 状态映射
         status_map = {'draft': 0, 'published': 1, 'recycled': 2}
         new_status = status_data.get('status')
-        
+
         if new_status not in status_map:
             raise HTTPException(status_code=400, detail="无效的状态值")
-        
+
         # 更新状态
         old_status = tool.status
         tool.status = status_map[new_status]
         db.commit()
-        
+
         logger.info(f"成功修改工具状态: {tool.title}, {old_status} -> {tool.status}")
         return {"message": "工具状态修改成功", "status": new_status}
-        
+
     except HTTPException:
         raise
     except Exception as e:
         db.rollback()
         logger.error(f"修改工具状态时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"修改工具状态时发生错误: {str(e)}")
+
 
 # 新增创建工具的接口
 @router.post("/tools")
@@ -181,11 +187,11 @@ def create_tool(tool_data: dict, db: Session = Depends(database.get_db)):
             url=tool_data.get('url'),
             status=1  # 默认为已发布状态
         )
-        
+
         db.add(new_tool)
         db.commit()
         db.refresh(new_tool)
-        
+
         # 处理标签
         tags = tool_data.get('tags', [])
         for tag_name in tags:
@@ -195,20 +201,21 @@ def create_tool(tool_data: dict, db: Session = Depends(database.get_db)):
                 db.add(tag)
                 db.commit()
                 db.refresh(tag)
-            
+
             # 创建工具-标签关联
             tool_tag = ToolTag(tool_id=new_tool.id, tag_id=tag.id)
             db.add(tool_tag)
-        
+
         db.commit()
-        
+
         logger.info(f"成功创建工具: {new_tool.title}")
         return {"message": "工具创建成功", "id": new_tool.id}
-        
+
     except Exception as e:
         db.rollback()
         logger.error(f"创建工具时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"创建工具时发生错误: {str(e)}")
+
 
 # 新增删除工具的接口
 @router.delete("/tools/{tool_id}")
@@ -220,23 +227,24 @@ def delete_tool(tool_id: int, db: Session = Depends(database.get_db)):
         tool = db.query(Tool).filter(Tool.id == tool_id).first()
         if not tool:
             raise HTTPException(status_code=404, detail="工具未找到")
-        
+
         # 删除工具-标签关联
         db.query(ToolTag).filter(ToolTag.tool_id == tool_id).delete()
-        
+
         # 删除工具记录
         db.delete(tool)
         db.commit()
-        
+
         logger.info(f"成功删除工具: {tool.title}")
         return {"message": "工具删除成功"}
-        
+
     except HTTPException:
         raise
     except Exception as e:
         db.rollback()
         logger.error(f"删除工具时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"删除工具时发生错误: {str(e)}")
+
 
 # 新增更新工具的接口
 @router.put("/tools/{tool_id}")
@@ -249,56 +257,56 @@ def update_tool(tool_id: int, tool_data: dict, db: Session = Depends(database.ge
         if not tool:
             logger.warning(f"工具不存在: ID={tool_id}")
             raise HTTPException(status_code=404, detail="工具不存在或已被删除")
-        
+
         # 数据验证
         title = tool_data.get('title', '').strip()
         url = tool_data.get('url', '').strip()
         description = tool_data.get('description', '').strip()
         status = tool_data.get('status', 'draft')
         tags = tool_data.get('tags', [])
-        
+
         if not title:
             raise HTTPException(status_code=400, detail="工具标题不能为空")
-        
+
         if not url:
             raise HTTPException(status_code=400, detail="工具链接不能为空")
-            
+
         # URL格式验证
         if not (url.startswith('http://') or url.startswith('https://')):
             raise HTTPException(status_code=400, detail="请输入有效的URL地址")
-        
+
         # 检查标题是否重复（排除当前工具）
         existing_tool = db.query(Tool).filter(Tool.title == title, Tool.id != tool_id).first()
         if existing_tool:
             raise HTTPException(status_code=409, detail="工具标题已存在")
-            
+
         # 检查URL是否重复（排除当前工具）
         existing_url = db.query(Tool).filter(Tool.url == url, Tool.id != tool_id).first()
         if existing_url:
             raise HTTPException(status_code=409, detail="工具链接已存在")
-        
+
         # 状态映射
         status_map = {'draft': 0, 'published': 1, 'recycled': 2}
         if status not in status_map:
             status = 'draft'  # 默认值
-        
+
         # 更新工具基本信息
         old_title = tool.title
         tool.title = title
         tool.description = description
         tool.url = url
         tool.status = status_map[status]
-        
+
         # 更新标签关联
         # 先删除现有的标签关联
         db.query(ToolTag).filter(ToolTag.tool_id == tool_id).delete()
-        
+
         # 添加新的标签关联
         for tag_name in tags:
             tag_name = tag_name.strip()
             if not tag_name:
                 continue
-                
+
             # 查找或创建标签
             tag = db.query(Tag).filter(Tag.name == tag_name).first()
             if not tag:
@@ -306,19 +314,19 @@ def update_tool(tool_id: int, tool_data: dict, db: Session = Depends(database.ge
                 db.add(tag)
                 db.flush()  # 获取新创建标签的ID
                 logger.info(f"创建新标签: {tag_name}")
-            
+
             # 创建工具-标签关联
             tool_tag = ToolTag(tool_id=tool_id, tag_id=tag.id)
             db.add(tool_tag)
-        
+
         # 提交所有更改
         db.commit()
         db.refresh(tool)
-        
+
         # 返回更新后的工具信息
         updated_tool_tags = db.query(Tag).join(ToolTag).filter(ToolTag.tool_id == tool.id).all()
         updated_tags = [tag.name for tag in updated_tool_tags]
-        
+
         result = {
             "id": tool.id,
             "title": tool.title,
@@ -328,10 +336,10 @@ def update_tool(tool_id: int, tool_data: dict, db: Session = Depends(database.ge
             "status": status,
             "updated_at": tool.updated_at.isoformat() if hasattr(tool, 'updated_at') and tool.updated_at else None
         }
-        
+
         logger.info(f"成功更新工具: {old_title} -> {tool.title}")
         return result
-        
+
     except HTTPException:
         db.rollback()
         raise
@@ -339,4 +347,3 @@ def update_tool(tool_id: int, tool_data: dict, db: Session = Depends(database.ge
         db.rollback()
         logger.error(f"更新工具时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"服务器内部错误: {str(e)}")
-

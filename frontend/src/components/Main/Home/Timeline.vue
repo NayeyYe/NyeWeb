@@ -10,17 +10,17 @@
       <!-- 主要的时间线显示 -->
       <el-timeline v-if="!loading && timelineItems.length > 0">
         <el-timeline-item
-          v-for="item in timelineItems"
-          :key="'item-' + item.id"
-          :timestamp="formatTimestamp(item.timestamp)"
-          placement="top"
+            v-for="item in timelineItems"
+            :key="'item-' + item.id"
+            :timestamp="formatTimestamp(item.timestamp)"
+            placement="top"
         >
           <div class="timeline-item-content">
             <el-tooltip
-              :disabled="item.content.length <= 50"
-              effect="dark"
-              :content="item.content"
-              placement="top"
+                :content="item.content"
+                :disabled="item.content.length <= 50"
+                effect="dark"
+                placement="top"
             >
               <p class="timeline-content">
                 {{ item.content.length > 50 ? item.content.slice(0, 50) + '...' : item.content }}
