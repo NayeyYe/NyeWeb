@@ -5,9 +5,15 @@
       <h2 class="name">卟瓿钚</h2>
       <p class="title">一名普通大学生</p>
       <div class="social-links">
-        <a href="https://github.com/NayeyYe" target="_blank" class="social-link" title="GitHub">G</a>
-        <a href="https://blog.csdn.net/2302_77222155?type=blog" class="social-link" title="Email">C</a>
-        <a href="https://x.com/NayeyYeX" class="social-link" title="Twitter">T</a>
+        <a href="https://github.com/NayeyYe" target="_blank" class="social-link" title="GitHub">
+          <img :src="githubIcon" alt="GitHub" class="social-icon" />
+        </a>
+        <a href="https://blog.csdn.net/2302_77222155?type=blog" target="_blank" class="social-link" title="CSDN">
+          <img :src="csdnIcon" alt="CSDN" class="social-icon" />
+        </a>
+        <a href="https://x.com/NayeyYeX" target="_blank" class="social-link" title="Twitter">
+          <img :src="twitterIcon" alt="Twitter" class="social-icon" />
+        </a>
       </div>
       <el-divider />
       <div class="contact-info">
@@ -18,10 +24,12 @@
     </div>
   </el-card>
 </template>
-.
 
 <script setup>
-// 此组件无需脚本
+// 导入SVG图标
+import githubIcon from '/github.svg'
+import csdnIcon from '/csdn.svg'
+import twitterIcon from '/twitter.svg'
 </script>
 
 <style scoped>
@@ -77,6 +85,17 @@
   background-color: #409eff;
   color: #fff;
   transform: translateY(-2px);
+}
+
+.social-icon {
+  width: 20px;
+  height: 20px;
+  transition: all 0.3s ease;
+  filter: brightness(0) saturate(100%) invert(20%) sepia(6%) saturate(1007%) hue-rotate(194deg) brightness(94%) contrast(89%);
+}
+
+.social-link:hover .social-icon {
+  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(7500%) hue-rotate(109deg) brightness(105%) contrast(105%);
 }
 
 .el-divider {
