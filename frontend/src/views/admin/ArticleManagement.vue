@@ -13,16 +13,24 @@
     <!-- 筛选区域 -->
     <div class="filter-section">
       <el-row :gutter="20">
-        <el-col :span="24">
+                <!-- 分类筛选 -->
+        <el-col :span="12">
+          <CategoryFilterCard
+            v-model="filterForm.category"
+          />
+        </el-col>
+
+        <!-- 其他筛选条件 -->
+        <el-col :span="12">
           <FilterControlsCard
               :filters="filterForm"
               :sort-order="sortOrder"
               @reset="resetAllFilters"
               @update:tags="filterForm.tags = $event"
               @update:title="filterForm.title = $event"
-              @update:category="filterForm.category = $event"
               @update:status="filterForm.status = $event"
               @update:sortOrder="sortOrder = $event"
+              style="height: 300px;"
           />
         </el-col>
       </el-row>
@@ -62,6 +70,7 @@ import axios from 'axios'
 import UploadArticleDialog from '@/components/Admin/ArticleManagement/UploadArticleDialog.vue'
 import EditArticleDialog from '@/components/Admin/ArticleManagement/EditArticleDialog.vue'
 import FilterControlsCard from '@/components/Admin/ArticleManagement/FilterControlsCard.vue'
+import CategoryFilterCard from '@/components/Admin/ArticleManagement/CategoryFilterCard.vue'
 import ArticleListCard from '@/components/Admin/ArticleManagement/ArticleListCard.vue'
 
 const articles = ref([])
@@ -91,14 +100,17 @@ const fetchArticles = async () => {
 // 文章筛选
 const filteredArticles = computed(() => {
   let arr = articles.value
+    if (filterForm.category && filterForm.category !== '') {
+    arr = arr.filter(a =>
+      a.category &&
+      (a.category === filterForm.category || a.category.startsWith(filterForm.category + '/'))
+    )
+  }
   if (filterForm.tags && filterForm.tags.length) {
     arr = arr.filter(a => a.tags && filterForm.tags.every(tag => a.tags.includes(tag)))
   }
   if (filterForm.title) {
     arr = arr.filter(a => a.title && a.title.includes(filterForm.title))
-  }
-  if (filterForm.category) {
-    arr = arr.filter(a => a.category === filterForm.category)
   }
   if (filterForm.status) {
     arr = arr.filter(a => a.status === filterForm.status)
