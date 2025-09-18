@@ -29,6 +29,14 @@ class CreateProjectRequest(BaseModel):
     content: str
     date: Optional[str] = None
 
+class UpdateProjectRequest(BaseModel):
+    title: Optional[str] = None
+    summary: Optional[str] = None
+    tags: Optional[List[str]] = None
+    status: Optional[str] = None
+    content: Optional[str] = None
+    date: Optional[str] = None
+
 @router.get("/projects")
 def get_projects(db: Session = Depends(database.get_db)):
     """获取所有项目，按日期倒序排列"""
@@ -267,6 +275,79 @@ def create_project(project_data: CreateProjectRequest, db: Session = Depends(dat
         db.rollback()
         logger.error(f"创建项目时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"创建项目时发生错误: {str(e)}")
+
+@router.put("/projects/{project_id}")
+def update_project(project_id: int, project_data: UpdateProjectRequest, db: Session = Depends(database.get_db)):
+    """编辑项目信息"""
+    logger.info(f"收到编辑项目信息请求: ID={project_id}")
+    try:
+        # 查找项目
+        project = db.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            raise HTTPException(status_code=404, detail="项目未找到")
+        
+        # 更新项目信息
+        if project_data.title is not None:
+            project.title = project_data.title
+        if project_data.summary is not None:
+            project.summary = project_data.summary
+        if project_data.date is not None:
+            try:
+                project.date = datetime.strptime(project_data.date, '%Y-%m-%d').date()
+            except ValueError:
+                logger.warning(f"日期格式错误: {project_data.date}")
+        if project_data.status is not None:
+            status_map = {'draft': 0, 'published': 1, 'recycled': 2}
+            if project_data.status in status_map:
+                project.status = status_map[project_data.status]
+        
+        # 处理标签更新
+        if project_data.tags is not None:
+            # 删除现有标签关联
+            db.query(ProjectTag).filter(ProjectTag.project_id == project_id).delete()
+            
+            # 添加新标签
+            for tag_name in project_data.tags:
+                if not tag_name.strip():
+                    continue
+                    
+                tag = db.query(Tag).filter(Tag.name == tag_name.strip()).first()
+                if not tag:
+                    tag = Tag(name=tag_name.strip())
+                    db.add(tag)
+                    db.flush()
+                
+                # 创建项目-标签关联
+                project_tag = ProjectTag(project_id=project.id, tag_id=tag.id)
+                db.add(project_tag)
+        
+        # 更新文件内容
+        if project_data.content is not None:
+            try:
+                save_project_file(project, project_data.content)
+            except Exception as e:
+                logger.warning(f"更新项目文件失败: {str(e)}")
+        
+        db.commit()
+        
+        logger.info(f"成功编辑项目信息: {project.title}")
+        return {
+            "message": "项目信息编辑成功",
+            "id": project.id,
+            "title": project.title
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"编辑项目信息时发生错误: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"编辑项目信息时发生错误: {str(e)}")
+
+@router.post("/projects/{project_id}/edit")
+def update_project_post(project_id: int, project_data: UpdateProjectRequest, db: Session = Depends(database.get_db)):
+    """编辑项目信息（POST方法，用于兼容性）"""
+    return update_project(project_id, project_data, db)
 
 @router.delete("/projects/{project_id}")
 def delete_project(project_id: int, db: Session = Depends(database.get_db)):

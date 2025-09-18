@@ -13,20 +13,13 @@
     <!-- 筛选区域 -->
     <div class="filter-section">
       <el-row :gutter="20">
-        <!-- 分类筛选 -->
-        <el-col :span="6">
-          <CategoryFilterCard
-            v-model="filterForm.category"
-          />
-        </el-col>
-
-        <!-- 其他筛选条件 -->
-        <el-col :span="18">
+        <el-col :span="24">
           <FilterControlsCard
             :filters="filterForm"
             :sort-order="sortOrder"
             @update:tags="filterForm.tags = $event"
             @update:title="filterForm.title = $event"
+            @update:category="filterForm.category = $event"
             @update:status="filterForm.status = $event"
             @update:sortOrder="sortOrder = $event"
             @reset="resetAllFilters"
@@ -42,6 +35,7 @@
         @update-status="updateArticleStatus"
         @quick-update-status="quickUpdateStatus"
         @delete="deleteArticle"
+        @edit="openEditDialog"
       />
     </div>
 
@@ -49,6 +43,13 @@
     <UploadArticleDialog
       v-model="showUploadDialog"
       @upload-success="refreshArticles"
+    />
+
+    <!-- 编辑文章对话框 -->
+    <EditArticleDialog
+      v-model="showEditDialog"
+      :article="editingArticle"
+      @update-success="refreshArticles"
     />
   </div>
 </template>
@@ -59,20 +60,22 @@ import {ElMessage, ElMessageBox} from 'element-plus'
 import {Refresh} from '@element-plus/icons-vue'
 import axios from 'axios'
 import UploadArticleDialog from '@/components/Admin/ArticleManagement/UploadArticleDialog.vue'
-import CategoryFilterCard from '@/components/Admin/ArticleManagement/CategoryFilterCard.vue'
+import EditArticleDialog from '@/components/Admin/ArticleManagement/EditArticleDialog.vue'
 import FilterControlsCard from '@/components/Admin/ArticleManagement/FilterControlsCard.vue'
 import ArticleListCard from '@/components/Admin/ArticleManagement/ArticleListCard.vue'
 
 const articles = ref([])
-const showUploadDialog = ref(false)
 const filterForm = reactive({
-  category: '',
   tags: [],
   title: '',
+  category: '',
   status: ''
 })
 
 const sortOrder = ref('desc')
+const showUploadDialog = ref(false)
+const showEditDialog = ref(false)
+const editingArticle = ref(null)
 
 // 获取文章列表（管理员接口，包含所有状态）
 const fetchArticles = async () => {
@@ -88,17 +91,14 @@ const fetchArticles = async () => {
 // 文章筛选
 const filteredArticles = computed(() => {
   let arr = articles.value
-  if (filterForm.category && filterForm.category !== '') {
-    arr = arr.filter(a =>
-      a.category &&
-      (a.category === filterForm.category || a.category.startsWith(filterForm.category + '/'))
-    )
-  }
   if (filterForm.tags && filterForm.tags.length) {
     arr = arr.filter(a => a.tags && filterForm.tags.every(tag => a.tags.includes(tag)))
   }
   if (filterForm.title) {
     arr = arr.filter(a => a.title && a.title.includes(filterForm.title))
+  }
+  if (filterForm.category) {
+    arr = arr.filter(a => a.category === filterForm.category)
   }
   if (filterForm.status) {
     arr = arr.filter(a => a.status === filterForm.status)
@@ -110,8 +110,8 @@ const filteredArticles = computed(() => {
 const sortedArticles = computed(() => {
   const arr = [...filteredArticles.value]
   arr.sort((a, b) => {
-    const v1 = new Date(a.date)
-    const v2 = new Date(b.date)
+    const v1 = new Date(a.date || '1970-01-01')
+    const v2 = new Date(b.date || '1970-01-01')
     
     if (v1 < v2) return sortOrder.value === 'asc' ? -1 : 1
     if (v1 > v2) return sortOrder.value === 'asc' ? 1 : -1
@@ -122,9 +122,9 @@ const sortedArticles = computed(() => {
 
 // 筛选和排序操作
 const resetAllFilters = () => {
-  filterForm.category = ''
   filterForm.tags = []
   filterForm.title = ''
+  filterForm.category = ''
   filterForm.status = ''
 }
 
@@ -133,13 +133,23 @@ const openUploadDialog = () => {
   showUploadDialog.value = true
 }
 
+const openEditDialog = (article) => {
+  editingArticle.value = { ...article }
+  showEditDialog.value = true
+}
+
 const deleteArticle = async (article) => {
   try {
     await ElMessageBox.confirm('确定要删除该文章吗？', '提示', { type: 'warning' })
     await axios.delete(`/api/articles/${article.id}`)
     ElMessage.success('删除成功')
     refreshArticles()
-  } catch {}
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('删除文章失败:', error)
+      ElMessage.error('删除文章失败')
+    }
+  }
 }
 
 const refreshArticles = async () => {
@@ -168,7 +178,6 @@ const updateArticleStatus = async (article, newStatus) => {
 
 // 快速更新状态（用于操作按钮）
 const quickUpdateStatus = async (article, newStatus) => {
-  const statusText = getStatusText(newStatus)
   const actionText = newStatus === 'recycled' ? '回收' : '恢复'
   
   try {
@@ -189,14 +198,6 @@ const getStatusText = (status) => {
     case 'recycled': return '已回收'
     default: return '未知'
   }
-}
-
-// 刷新所有数据
-const refreshAllData = async () => {
-  await Promise.all([
-    fetchArticles(),
-    fetchTags()
-  ])
 }
 
 onMounted(() => {

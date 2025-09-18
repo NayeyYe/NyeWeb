@@ -9,7 +9,7 @@
         <template #header>
           <div class="card-header">
             <span>最近文章</span>
-            <router-link to="/knowledge" class="more-link">查看��部 &gt;</router-link>
+            <router-link to="/knowledge" class="more-link">查看全部 &gt;</router-link>
           </div>
         </template>
         <div v-loading="articlesLoading" class="card-list">

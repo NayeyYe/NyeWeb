@@ -34,6 +34,7 @@
         @update-status="updateProjectStatus"
         @quick-update-status="quickUpdateStatus"
         @delete="deleteProject"
+        @edit="openEditDialog"
       />
     </div>
 
@@ -41,6 +42,13 @@
     <UploadProjectDialog
       v-model="showUploadDialog"
       @upload-success="refreshProjects"
+    />
+
+    <!-- 编辑项目对话框 -->
+    <EditProjectDialog
+      v-model="showEditDialog"
+      :project="editingProject"
+      @update-success="refreshProjects"
     />
   </div>
 </template>
@@ -51,6 +59,7 @@ import {ElMessage, ElMessageBox} from 'element-plus'
 import {Refresh} from '@element-plus/icons-vue'
 import axios from 'axios'
 import UploadProjectDialog from '@/components/Admin/ProjectManagement/UploadProjectDialog.vue'
+import EditProjectDialog from '@/components/Admin/ProjectManagement/EditProjectDialog.vue'
 import FilterControlsCard from '@/components/Admin/ProjectManagement/FilterControlsCard.vue'
 import ProjectListCard from '@/components/Admin/ProjectManagement/ProjectListCard.vue'
 
@@ -63,6 +72,8 @@ const filterForm = reactive({
 
 const sortOrder = ref('desc')
 const showUploadDialog = ref(false)
+const showEditDialog = ref(false)
+const editingProject = ref(null)
 
 // 获取项目列表（管理员接口，包含所有状态）
 const fetchProjects = async () => {
@@ -114,6 +125,11 @@ const resetAllFilters = () => {
 // 项目操作
 const openUploadDialog = () => {
   showUploadDialog.value = true
+}
+
+const openEditDialog = (project) => {
+  editingProject.value = { ...project }
+  showEditDialog.value = true
 }
 
 const deleteProject = async (project) => {

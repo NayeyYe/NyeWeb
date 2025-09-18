@@ -35,6 +35,15 @@ class CreateCategoryRequest(BaseModel):
     path: Optional[str] = None
     parent: Optional[str] = None
 
+class UpdateArticleRequest(BaseModel):
+    title: Optional[str] = None
+    category: Optional[str] = None
+    summary: Optional[str] = None
+    tags: Optional[List[str]] = None
+    status: Optional[str] = None
+    content: Optional[str] = None
+    date: Optional[str] = None
+
 # ===== CATEGORY MANAGEMENT APIs =====
 @router.get("/articles/categories")
 def get_article_categories():
@@ -340,6 +349,81 @@ def create_article(article_data: CreateArticleRequest, db: Session = Depends(dat
         db.rollback()
         logger.error(f"创建文章时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"创建文章时发生错误: {str(e)}")
+
+@router.put("/articles/{article_id}")
+def update_article(article_id: int, article_data: UpdateArticleRequest, db: Session = Depends(database.get_db)):
+    """编辑文章信息"""
+    logger.info(f"收到编辑文章信息请求: ID={article_id}")
+    try:
+        # 查找文章
+        article = db.query(Article).filter(Article.id == article_id).first()
+        if not article:
+            raise HTTPException(status_code=404, detail="文章未找到")
+        
+        # 更新文章信息
+        if article_data.title is not None:
+            article.title = article_data.title
+        if article_data.category is not None:
+            article.category = article_data.category
+        if article_data.summary is not None:
+            article.summary = article_data.summary
+        if article_data.date is not None:
+            try:
+                article.date = datetime.strptime(article_data.date, '%Y-%m-%d').date()
+            except ValueError:
+                logger.warning(f"日期格式错误: {article_data.date}")
+        if article_data.status is not None:
+            status_map = {'draft': 0, 'published': 1, 'recycled': 2}
+            if article_data.status in status_map:
+                article.status = status_map[article_data.status]
+        
+        # 处理标签更新
+        if article_data.tags is not None:
+            # 删除现有标签关联
+            db.query(ArticleTag).filter(ArticleTag.article_id == article_id).delete()
+            
+            # 添加新标签
+            for tag_name in article_data.tags:
+                if not tag_name.strip():
+                    continue
+                    
+                tag = db.query(Tag).filter(Tag.name == tag_name.strip()).first()
+                if not tag:
+                    tag = Tag(name=tag_name.strip())
+                    db.add(tag)
+                    db.flush()
+                
+                # 创建文章-标签关联
+                article_tag = ArticleTag(article_id=article.id, tag_id=tag.id)
+                db.add(article_tag)
+        
+        # 更新文件内容
+        if article_data.content is not None:
+            try:
+                save_article_file(article, article_data.content, article.category)
+            except Exception as e:
+                logger.warning(f"更新文章文件失败: {str(e)}")
+        
+        db.commit()
+        
+        logger.info(f"成功编辑文章信息: {article.title}")
+        return {
+            "message": "文章信息编辑成功",
+            "id": article.id,
+            "title": article.title
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"编辑文章信息时发生错误: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"编辑文章信息时发生错误: {str(e)}")
+
+@router.post("/articles/{article_id}/edit")
+def update_article_post(article_id: int, article_data: UpdateArticleRequest, db: Session = Depends(database.get_db)):
+    """编辑文章信息（POST方法，用于兼容性）"""
+    return update_article(article_id, article_data, db)
 
 @router.patch("/articles/{article_id}/status")
 def update_article_status(article_id: int, status_data: dict, db: Session = Depends(database.get_db)):
