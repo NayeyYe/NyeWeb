@@ -71,7 +71,16 @@ const md = markdownit({
     }
     return '<pre class="hljs"><code>' + md.utils.escapeHtml(str) + '</code></pre>';
   }
-}).use(mdKatex)
+}).use(mdKatex, {
+  throwOnError: false,
+  errorColor: '#cc0000',
+  delimiters: [
+    {left: '$$', right: '$$', display: true},
+    {left: '$', right: '$', display: false},
+    {left: '\\(', right: '\\)', display: false},
+    {left: '\\[', right: '\\]', display: true}
+  ]
+})
     .use(mdAnchor, {
       permalink: true,
       level: [1, 2, 3, 4, 5, 6],
@@ -507,4 +516,92 @@ onUnmounted(() => {
 :deep(tr:nth-child(2n)) {
   background-color: #f6f8fa;
 }
+/* 数学公式样式 */
+:deep(.katex) {
+  font: normal 1.21em KaTeX_Main, Times New Roman, serif;
+  line-height: 1.2;
+}
+
+:deep(.katex-display) {
+  margin: 1em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+:deep(.katex-display > .katex) {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+:deep(.katex .boldsymbol) {
+  font-weight: bold;
+}
+
+:deep(.katex .amsrm) {
+  font-family: KaTeX_AMS;
+}
+
+:deep(.katex .mathscr) {
+  font-family: KaTeX_Script;
+}
+
+:deep(.katex .mathfrak) {
+  font-family: KaTeX_Fraktur;
+}
+
+:deep(.katex .mathbb) {
+  font-family: KaTeX_AMS;
+}
+
+:deep(.katex .mathcal) {
+  font-family: KaTeX_Caligraphic;
+}
+
+:deep(.katex .mathdefault) {
+  font-family: KaTeX_Math;
+}
+
+/* 确保希腊字母等数学符号使用正确的字体 */
+:deep(.katex .mathnormal) {
+  font-family: KaTeX_Math;
+  font-style: italic;
+}
+
+:deep(.katex .mathrm) {
+  font-family: KaTeX_Main;
+  font-style: normal;
+}
+
+:deep(.katex .mathit) {
+  font-family: KaTeX_Main;
+  font-style: italic;
+}
+
+:deep(.katex .mathbf) {
+  font-family: KaTeX_Main;
+  font-weight: bold;
+}
+
+:deep(.katex .mathsf) {
+  font-family: KaTeX_SansSerif;
+}
+
+:deep(.katex .mathtt) {
+  font-family: KaTeX_Typewriter;
+}
+
+/* 行内数学公式的间距调整 */
+:deep(.katex-inline) {
+  margin: 0 0.1em;
+}
+
+/* 错误提示样式 */
+:deep(.katex-error) {
+  color: #cc0000;
+  background-color: #ffeeee;
+  padding: 2px 4px;
+  border-radius: 3px;
+  border: 1px solid #ffcccc;
+}
+
 </style>
