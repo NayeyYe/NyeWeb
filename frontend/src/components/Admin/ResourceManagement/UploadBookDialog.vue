@@ -120,7 +120,7 @@ const emit = defineEmits(['update:modelValue', 'upload-success'])
 const formData = reactive({
   title: '',
   description: '',
-  cover: 'https://s21.ax1x.com/2025/09/16/pVfLCfe.png',  // 使用图床URL作为默认封面
+  cover: 'https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg',  // 使用图床URL作为默认封面
   tags: [],
   status: 'draft',
   filename: ''  // 改为存储网盘URL
@@ -260,7 +260,7 @@ const resetForm = () => {
   Object.assign(formData, {
     title: '',
     description: '',
-    cover: 'https://s21.ax1x.com/2025/09/16/pVfLCfe.png',
+    cover: 'https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg',
     tags: [],
     status: 'draft',
     filename: ''

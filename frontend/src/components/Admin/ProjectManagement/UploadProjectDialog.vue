@@ -97,7 +97,7 @@
             <el-icon>
               <Check/>
             </el-icon>
-            ��布
+            发布
           </el-radio>
         </el-radio-group>
       </el-form-item>
@@ -298,7 +298,7 @@ const handleFileChange = (file) => {
   if (file && file.raw) {
     formData.file = file.raw
 
-    // 自动从文件名提取标题（如果标题为空）
+    // 自动从文件名提取标题(如果标题为空)
     if (!formData.title) {
       const fileName = file.name.replace(/\.(md|markdown)$/i, '')
       formData.title = fileName

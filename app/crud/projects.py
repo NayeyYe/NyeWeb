@@ -40,15 +40,15 @@ class UpdateProjectRequest(BaseModel):
     date: Optional[str] = None
 
 
+# 获取所有项目，按日期倒序排列
 @router.get("/projects")
 def get_projects(db: Session = Depends(database.get_db)):
-    """获取所有项目，按日期倒序排列"""
     logger.info("收到获取项目数据的请求")
     try:
         projects = db.query(Project).filter(Project.status == 1).order_by(Project.date.desc()).all()
         logger.info(f"成功获取到 {len(projects)} 个已发布项目")
 
-        # 转换�����前端需要的格式
+        # 转换为前端需要的格式
         projects_data = []
         for project in projects:
             # 获取项目的标签
@@ -72,9 +72,9 @@ def get_projects(db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=500, detail=f"获取项目数据时发生错误: {str(e)}")
 
 
+# 根据slug获取单个项目详情
 @router.get("/projects/{project_slug}")
 def get_project_by_slug(project_slug: str, db: Session = Depends(database.get_db)):
-    """根据slug获取单个项目详情"""
     logger.info(f"收到获取项目详情的请求，slug: {project_slug}")
     try:
         project = db.query(Project).filter(Project.slug == project_slug, Project.status == 1).first()
@@ -82,7 +82,7 @@ def get_project_by_slug(project_slug: str, db: Session = Depends(database.get_db
             logger.warning(f"未找到项目，slug: {project_slug}")
             raise HTTPException(status_code=404, detail="项目未找到")
 
-        # 获取项目的标��
+        # 获取项目的title
         project_tags = db.query(Tag).join(ProjectTag).filter(ProjectTag.project_id == project.id).all()
         tags = [tag.name for tag in project_tags]
 
@@ -104,9 +104,9 @@ def get_project_by_slug(project_slug: str, db: Session = Depends(database.get_db
         raise HTTPException(status_code=500, detail=f"获取项目详情时发生错误: {str(e)}")
 
 
+# 获取所有项目标签及其项目数量
 @router.get("/project-tags")
 def get_all_project_tags(db: Session = Depends(database.get_db)):
-    """获取所有项目标签及其项目数量"""
     logger.info("收到获取所有项目标签的请求")
     try:
         all_tags = []
@@ -131,10 +131,9 @@ def get_all_project_tags(db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=500, detail=f"获取项目标签时发生错误: {str(e)}")
 
 
-# 新增管理员获取全部项目的接口
+# 管理员获取所有项目(包含所有状态)，按日期倒序排列
 @router.get("/admin/projects")
 def get_all_projects_admin(db: Session = Depends(database.get_db)):
-    """管理员获取所有项目（包含所有状态），按日期倒序排列"""
     logger.info("收到管理员获取全部项目数据的请求")
     try:
         projects = db.query(Project).order_by(Project.date.desc()).all()
@@ -168,10 +167,9 @@ def get_all_projects_admin(db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=500, detail=f"获取项目数据时发生错误: {str(e)}")
 
 
-# 新增修改项目状态的接口
+# 修改项目状态
 @router.patch("/projects/{project_id}/status")
 def update_project_status(project_id: int, status_data: dict, db: Session = Depends(database.get_db)):
-    """修改项目状态"""
     logger.info(f"收到修改项目状态请求: ID={project_id}, 状态={status_data.get('status')}")
     try:
         # 查找项目
@@ -199,13 +197,13 @@ def update_project_status(project_id: int, status_data: dict, db: Session = Depe
     except Exception as e:
         db.rollback()
         logger.error(f"修改项目状态时发生错误: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"修改项目状态���发生错误: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"修改项目状态时发生错误: {str(e)}")
 
 
-# ===== PROJECT MANAGEMENT APIs =====
+# 项目管理api
+# 创建新项目
 @router.post("/projects")
 def create_project(project_data: CreateProjectRequest, db: Session = Depends(database.get_db)):
-    """创建新项目"""
     logger.info(f"收到创建项目请求: {project_data.title}")
     try:
         # 生成或验证slug，自动从标题生成
@@ -285,9 +283,9 @@ def create_project(project_data: CreateProjectRequest, db: Session = Depends(dat
         raise HTTPException(status_code=500, detail=f"创建项目时发生错误: {str(e)}")
 
 
+# 编辑项目信息
 @router.put("/projects/{project_id}")
 def update_project(project_id: int, project_data: UpdateProjectRequest, db: Session = Depends(database.get_db)):
-    """编辑项目信息"""
     logger.info(f"收到编辑项目信息请求: ID={project_id}")
     try:
         # 查找项目
@@ -354,15 +352,15 @@ def update_project(project_id: int, project_data: UpdateProjectRequest, db: Sess
         raise HTTPException(status_code=500, detail=f"编辑项目信息时发生错误: {str(e)}")
 
 
+# 编辑项目信息(POST方法，用于兼容性)
 @router.post("/projects/{project_id}/edit")
 def update_project_post(project_id: int, project_data: UpdateProjectRequest, db: Session = Depends(database.get_db)):
-    """编辑项目信息（POST方法，用于兼容性）"""
     return update_project(project_id, project_data, db)
 
 
+# 删除项目，同时删除文件
 @router.delete("/projects/{project_id}")
 def delete_project(project_id: int, db: Session = Depends(database.get_db)):
-    """删除项目，同时删除文件"""
     logger.info(f"收到删除项目请求: ID={project_id}")
     try:
         # 查找项目
@@ -395,8 +393,8 @@ def delete_project(project_id: int, db: Session = Depends(database.get_db)):
 
 
 # ===== HELPER FUNCTIONS =====
+# 生成安全的slug
 def generate_safe_slug(text: str) -> str:
-    """生成安全的slug"""
     if not text:
         return "untitled"
 
@@ -412,8 +410,8 @@ def generate_safe_slug(text: str) -> str:
     return slug or "untitled"
 
 
+# 保存项目文件到磁盘
 def save_project_file(project: Project, content: str):
-    """保存项目文件到磁盘"""
     try:
         # 项目文件保存到articles/projects目录
         base_paths = ["../frontend/dist/articles/projects", "../frontend/public/articles/projects"]
@@ -436,8 +434,8 @@ def save_project_file(project: Project, content: str):
         raise
 
 
+# 删除项目文件
 def delete_project_file(project: Project):
-    """删除项目文件"""
     try:
         base_paths = ["../frontend/dist/articles/projects", "../frontend/public/articles/projects"]
 

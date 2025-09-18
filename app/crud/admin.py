@@ -34,18 +34,18 @@ class AdminLoginResponse(BaseModel):
     username: str
 
 
+# 使用SHA-256哈希密码
 def hash_password(password: str) -> str:
-    """使用SHA-256哈希密码"""
     return hashlib.sha256(password.encode()).hexdigest()
 
 
+# 生成随机令牌
 def generate_token() -> str:
-    """生成随机令牌"""
     return secrets.token_urlsafe(32)
 
 
+# 验证管理员密码 - 哈希对比
 def verify_admin_password(db: Session, username: str, password: str) -> bool:
-    """验证管理员密码 - 哈希对比"""
     admin = db.query(Admin).filter(Admin.username == username).first()
     if not admin:
         return False
@@ -55,8 +55,8 @@ def verify_admin_password(db: Session, username: str, password: str) -> bool:
     return input_password_hash == admin.password_hash
 
 
+# 创建管理员账户 - 使用哈希存储密码
 def create_admin(db: Session, username: str, password: str):
-    """创建管理员账户 - 使用哈希存储密码"""
     password_hash = hash_password(password)
     admin = Admin(username=username, password_hash=password_hash)
     db.add(admin)
@@ -65,9 +65,9 @@ def create_admin(db: Session, username: str, password: str):
     return admin
 
 
+# 管理员登录接口
 @router.post("/admin/login", response_model=AdminLoginResponse)
 async def admin_login(login_data: AdminLoginRequest, db: Session = Depends(get_db)):
-    """管理员登录接口"""
     try:
         # 验证用户名和密码
         if verify_admin_password(db, login_data.username, login_data.password):
@@ -97,9 +97,9 @@ async def admin_login(login_data: AdminLoginRequest, db: Session = Depends(get_d
         )
 
 
+# 管理员登出接口
 @router.post("/admin/logout")
 async def admin_logout(token: str, db: Session = Depends(get_db)):
-    """管理员登出接口"""
     try:
         # 清除token
         admin = db.query(Admin).filter(Admin.login_token == token).first()
@@ -115,9 +115,9 @@ async def admin_logout(token: str, db: Session = Depends(get_db)):
         )
 
 
+# 验证token有效性
 @router.get("/admin/verify")
 async def verify_token(token: str, db: Session = Depends(get_db)):
-    """验证token有效性"""
     try:
         admin = db.query(Admin).filter(Admin.login_token == token).first()
         if admin:

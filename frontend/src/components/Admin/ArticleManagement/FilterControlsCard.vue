@@ -106,7 +106,7 @@ const emit = defineEmits(['update:tags', 'update:title', 'update:status', 'updat
 const allTags = ref([])
 const loading = ref(false)
 
-// 获取标签（获取所有文章的标签，不限制状态）
+// 获取标签(获取所有文章的标签，不限制状态)
 const fetchTags = async () => {
   try {
     loading.value = true

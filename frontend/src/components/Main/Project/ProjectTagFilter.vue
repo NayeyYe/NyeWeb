@@ -90,7 +90,7 @@ const getTagStyle = (count) => {
   }
 }
 
-// 监听props变化，当props��据更新时重新获取标签
+// 监听props变化，当props根据更新时重新获取标签
 watch(() => [props.tags, props.counts], ([newTags, newCounts]) => {
   if (newTags && newTags.length > 0 && tagsFromDB.value.length === 0) {
     // 如果还没有从数据库获取到数据，且有新的标签数据，则尝试重新获取

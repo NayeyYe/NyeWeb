@@ -39,9 +39,9 @@ app.include_router(admin.router, prefix="/api", tags=["admin"])
 
 
 # 添加根路径API测试端点
+# 健康检查端点
 @app.get("/api/health")
 def health_check():
-    """健康检查端点"""
     return {"status": "ok", "message": "API服务正常运行"}
 
 

@@ -111,7 +111,7 @@ const emit = defineEmits(['update:modelValue', 'upload-success'])
 const formData = reactive({
   title: '',
   description: '',
-  url: 'https://s21.ax1x.com/2025/09/16/pVfLCfe.png',
+  url: 'https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg',
   tags: [],
   status: 'draft'
 })
@@ -218,7 +218,7 @@ const handleUpload = async () => {
 const handleClose = () => {
   // 检查是否有未保存的内容
   const hasUnsavedContent = formData.title || formData.description ||
-      formData.url !== 'https://s21.ax1x.com/2025/09/16/pVfLCfe.png' ||
+      formData.url !== 'https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg' ||
       formData.tags.length > 0
 
   if (hasUnsavedContent) {
@@ -246,7 +246,7 @@ const resetForm = () => {
   Object.assign(formData, {
     title: '',
     description: '',
-    url: 'https://s21.ax1x.com/2025/09/16/pVfLCfe.png',
+    url: 'https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg',
     tags: [],
     status: 'draft'
   })

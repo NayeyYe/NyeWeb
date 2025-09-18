@@ -135,7 +135,7 @@ CREATE TABLE IF NOT EXISTS `timeline`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
--- 收藏图片表（修复：使用正确的图床链接）
+-- 收藏图片表(修复：使用正确的图床链接)
 CREATE TABLE IF NOT EXISTS `favorite_images`
 (
     `id`  INT AUTO_INCREMENT PRIMARY KEY,

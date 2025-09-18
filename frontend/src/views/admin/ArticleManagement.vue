@@ -77,7 +77,7 @@ const showUploadDialog = ref(false)
 const showEditDialog = ref(false)
 const editingArticle = ref(null)
 
-// 获取文章列表（管理员接口，包含所有状态）
+// 获取文章列表(管理员接口，包含所有状态)
 const fetchArticles = async () => {
   try {
     const res = await axios.get('/api/admin/articles')
@@ -176,7 +176,7 @@ const updateArticleStatus = async (article, newStatus) => {
   }
 }
 
-// 快速更新状态（用于操作按钮）
+// 快速更新状态(用于操作按钮)
 const quickUpdateStatus = async (article, newStatus) => {
   const actionText = newStatus === 'recycled' ? '回收' : '恢复'
 

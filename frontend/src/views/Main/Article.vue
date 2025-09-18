@@ -119,7 +119,7 @@ md.renderer.rules.image = function (tokens, idx, options, env, self) {
   const src = token.attrGet('src')
   if (src && src.startsWith('./')) {
     const articlePath = env.articlePath || ''
-    // 确保路径正确拼接，��使分类为空
+    // 确保路径正确拼接，即使分类为空
     const basePath = articlePath ? `/articles/knowledge/${articlePath}` : '/articles/knowledge'
     token.attrSet('src', `${basePath}/${src.substring(2)}`)
   }
@@ -133,7 +133,7 @@ const setupCopyButtons = () => {
       const code = wrapper.querySelector('code');
       if (code) {
         navigator.clipboard.writeText(code.innerText).then(() => {
-          button.textContent = '���复制!';
+          button.textContent = '成功复制!';
           setTimeout(() => {
             button.textContent = '复制';
           }, 2000);

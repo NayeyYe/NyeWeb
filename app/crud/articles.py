@@ -20,7 +20,7 @@ logger = logging.getLogger("articles_api")
 router = APIRouter()
 
 
-# ===== REQUEST MODELS =====
+# 数据库请求模型
 class CreateArticleRequest(BaseModel):
     title: str
     slug: Optional[str] = None
@@ -48,10 +48,10 @@ class UpdateArticleRequest(BaseModel):
     date: Optional[str] = None
 
 
-# ===== CATEGORY MANAGEMENT APIs =====
+# 文件分类树管理api
+# 获取所有文章分类树结构(基于物理文件夹)
 @router.get("/articles/categories")
 def get_article_categories():
-    """获取所有文章分类树结构（基于物理文件夹）"""
     logger.info("收到获取文章分类树的请求")
     try:
         # 扫描物理文件夹获取所有分类
@@ -85,9 +85,9 @@ def get_article_categories():
         }
 
 
+# 创建新的文章分类文件夹
 @router.post("/articles/categories")
 def create_category(request: CreateCategoryRequest, db: Session = Depends(database.get_db)):
-    """创建新的文章分类文件夹"""
     logger.info(f"收到创建分类文件夹请求: {request.name}")
     try:
         # 生成分类路径
@@ -137,10 +137,10 @@ def create_category(request: CreateCategoryRequest, db: Session = Depends(databa
         raise HTTPException(status_code=500, detail=f"创建分类文件夹时发生错误: {str(e)}")
 
 
-# ===== ARTICLE QUERY APIs =====
+# 文章获取api
+# 获取所有已发布文章，按日期倒序排列
 @router.get("/articles")
 def get_articles(db: Session = Depends(database.get_db)):
-    """获取所有已发布文章，按日期倒序排列"""
     logger.info("收到获取文章数据的请求")
     try:
         articles = db.query(Article).filter(Article.status == 1).order_by(Article.date.desc()).all()
@@ -166,13 +166,13 @@ def get_articles(db: Session = Depends(database.get_db)):
 
         return articles_data
     except Exception as e:
-        logger.error(f"获取文章数据时��生错误: {str(e)}")
+        logger.error(f"获取文章数据时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取文章数据时发生错误: {str(e)}")
 
 
+# 管理员获取所有文章(包含所有状态)，按日期倒序排列
 @router.get("/admin/articles")
 def get_all_articles_admin(db: Session = Depends(database.get_db)):
-    """管理员获取所有文章（包含所有状态），按日期倒序排列"""
     logger.info("收到管理员获取全部文章数据的请求")
     try:
         articles = db.query(Article).order_by(Article.date.desc()).all()
@@ -206,9 +206,9 @@ def get_all_articles_admin(db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=500, detail=f"获取文章数据时发生错误: {str(e)}")
 
 
+# 根据分类和slug获取单篇文章详情
 @router.get("/articles/{category:path}/{article_slug}")
 def get_article_by_category_and_slug(category: str, article_slug: str, db: Session = Depends(database.get_db)):
-    """根据分类和slug获取单篇文章详情"""
     logger.info(f"收到获取文章详情的请求，分类: {category}, slug: {article_slug}")
     try:
         article = db.query(Article).filter(
@@ -244,9 +244,9 @@ def get_article_by_category_and_slug(category: str, article_slug: str, db: Sessi
         raise HTTPException(status_code=500, detail=f"获取文章详情时发生错误: {str(e)}")
 
 
+# 根据slug获取单篇文章详情
 @router.get("/articles/{article_slug}")
 def get_article_by_slug(article_slug: str, db: Session = Depends(database.get_db)):
-    """根据slug获取单篇文章详情"""
     logger.info(f"收到获取文章详情的请求，slug: {article_slug}")
     try:
         article = db.query(Article).filter(Article.slug == article_slug, Article.status == 1).first()
@@ -277,10 +277,10 @@ def get_article_by_slug(article_slug: str, db: Session = Depends(database.get_db
         raise HTTPException(status_code=500, detail=f"获取文章详情时发生错误: {str(e)}")
 
 
-# ===== ARTICLE MANAGEMENT APIs =====
+# 文章管理api
+# 创建新文章
 @router.post("/articles")
 def create_article(article_data: CreateArticleRequest, db: Session = Depends(database.get_db)):
-    """创建新文章"""
     logger.info(f"收到创建文章请求: {article_data.title}")
     try:
         # 生成或验证slug，自动从标题生成
@@ -361,9 +361,9 @@ def create_article(article_data: CreateArticleRequest, db: Session = Depends(dat
         raise HTTPException(status_code=500, detail=f"创建文章时发生错误: {str(e)}")
 
 
+# 编辑文章信息
 @router.put("/articles/{article_id}")
 def update_article(article_id: int, article_data: UpdateArticleRequest, db: Session = Depends(database.get_db)):
-    """编辑文章信息"""
     logger.info(f"收到编辑文章信息请求: ID={article_id}")
     try:
         # 查找文章
@@ -432,15 +432,15 @@ def update_article(article_id: int, article_data: UpdateArticleRequest, db: Sess
         raise HTTPException(status_code=500, detail=f"编辑文章信息时发生错误: {str(e)}")
 
 
+# 编辑文章信息(POST方法，用于兼容性)
 @router.post("/articles/{article_id}/edit")
 def update_article_post(article_id: int, article_data: UpdateArticleRequest, db: Session = Depends(database.get_db)):
-    """编辑文章信息（POST方法，用于兼容性）"""
     return update_article(article_id, article_data, db)
 
 
+# 修改文章状态
 @router.patch("/articles/{article_id}/status")
 def update_article_status(article_id: int, status_data: dict, db: Session = Depends(database.get_db)):
-    """修改文章状态"""
     logger.info(f"收到修改文章状态请求: ID={article_id}, 状态={status_data.get('status')}")
     try:
         # 查找文章
@@ -471,9 +471,9 @@ def update_article_status(article_id: int, status_data: dict, db: Session = Depe
         raise HTTPException(status_code=500, detail=f"修改文章状态时发生错误: {str(e)}")
 
 
+# 删除文章，同时删除dist和public中的文件
 @router.delete("/articles/{article_id}")
 def delete_article(article_id: int, db: Session = Depends(database.get_db)):
-    """删除文章，同时删除dist和public中的文件"""
     logger.info(f"收到删除文章请求: ID={article_id}")
     try:
         # 查找文章
@@ -484,7 +484,7 @@ def delete_article(article_id: int, db: Session = Depends(database.get_db)):
         # 删除文章-标签关联
         db.query(ArticleTag).filter(ArticleTag.article_id == article_id).delete()
 
-        # 删除markdown文件（dist和public）
+        # 删除markdown文件(dist和public)
         for base_path in ["../frontend/dist/articles/knowledge", "../frontend/public/articles/knowledge"]:
             try:
                 file_path = base_path
@@ -514,15 +514,15 @@ def delete_article(article_id: int, db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=500, detail=f"删除文章时发生错误: {str(e)}")
 
 
+# 获取所有标签及其文章数量
 @router.get("/tags")
 def get_all_tags(db: Session = Depends(database.get_db)):
-    """获取所有标签及其文章数量"""
     logger.info("收到获取所有标签的请求")
     try:
         all_tags = []
         tag_counts = {}
 
-        # 获取所有文章的标签统计（不限制状态）
+        # 获取所有文章的标签统计(不限制状态)
         articles = db.query(Article).all()
         for article in articles:
             article_tags = db.query(Tag).join(ArticleTag).filter(ArticleTag.article_id == article.id).all()
@@ -545,9 +545,9 @@ def get_all_tags(db: Session = Depends(database.get_db)):
         }
 
 
-# ===== HELPER FUNCTIONS =====
+# 扫描物理文件夹获取分类(完全基于文件系统)
+# 辅助函数
 def scan_physical_categories():
-    """扫��物理文件夹获取分类（完全基于文件系统）"""
     categories = []
     base_path = "../frontend/dist/articles/knowledge"
 
@@ -580,7 +580,7 @@ def scan_physical_categories():
                 if any(part.startswith('.') or part == 'assets' for part in path_parts):
                     continue
 
-                # 统计markdown文件数量（排除README.md和其他特殊文件）
+                # 统计markdown文件数量(排除README.md和其他特殊文件)
                 md_files = [f for f in files
                             if f.endswith('.md')
                             and f not in ['README.md', '.gitkeep', 'index.md']
@@ -609,8 +609,8 @@ def scan_physical_categories():
     return categories
 
 
+# 创建物理分类文件夹，同时在dist和public目录创建
 def create_physical_category_folder(category_path: str):
-    """创建物理分类文件夹，��时在dist和public目录创建"""
     try:
         # 构建完整的文件系统路径，同时在两个目录创建
         base_paths = [
@@ -631,8 +631,8 @@ def create_physical_category_folder(category_path: str):
         raise
 
 
+# 生成安全的slug
 def generate_safe_slug(text: str) -> str:
-    """生成安全的slug"""
     if not text:
         return "untitled"
 
@@ -649,8 +649,8 @@ def generate_safe_slug(text: str) -> str:
     return slug or "untitled"
 
 
+# 保存文章文件磁盘，确保分类文件夹存在(dist和public)
 def save_article_file(article: Article, content: str, category: str = None):
-    """保存文章文件���磁盘，确保分类文件夹存在（dist和public）"""
     try:
         # 构建文件路径
         dist_base_path = "../frontend/dist/articles/knowledge"
@@ -681,8 +681,8 @@ def save_article_file(article: Article, content: str, category: str = None):
         raise
 
 
+# 简单的摘要提取降级方案
 def extract_simple_summary(content: str) -> str:
-    """简单的摘要提取降级方案"""
     if not content:
         return ""
 

@@ -1,7 +1,5 @@
-"""
-数据库初始化脚本
-用于创建表和插入初始数据
-"""
+# 数据库初始化脚本
+# 用于创建表和插入初始数据
 import os
 
 from dotenv import load_dotenv
@@ -16,8 +14,8 @@ from database import Base
 load_dotenv()
 
 
+# 创建数据库表
 def create_database_tables(engine):
-    """创建数据库表"""
     Base.metadata.create_all(bind=engine)
     print("数据库表创建成功!")
 
@@ -38,8 +36,8 @@ def create_admin_account(db):
         print("管理员账户已存在!")
 
 
+# 初始化数据库表
 def init_database():
-    """初始化数据库表"""
     DATABASE_URL = os.getenv("DATABASE_URL")
 
     if not DATABASE_URL:

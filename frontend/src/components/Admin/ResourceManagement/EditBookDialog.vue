@@ -78,7 +78,7 @@
         </el-radio-group>
       </el-form-item>
 
-      <!-- 文件信息（只读） -->
+      <!-- 文件信息(只读) -->
       <el-form-item label="文件信息">
         <el-input
             :value="book?.filename || '暂无文件'"
@@ -122,7 +122,7 @@ const emit = defineEmits(['update:modelValue', 'save-success'])
 const formData = reactive({
   title: '',
   description: '',
-  cover: 'https://s21.ax1x.com/2025/09/16/pVfLCfe.png',  // 默认图床封面
+  cover: 'https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg',  // 默认图床封面
   tags: [],
   status: 'draft'
 })
@@ -181,7 +181,7 @@ const initFormData = () => {
     Object.assign(formData, {
       title: props.book.title || '',
       description: props.book.description || '',
-      cover: props.book.cover || 'https://s21.ax1x.com/2025/09/16/pVfLCfe.png',  // 使用图床URL
+      cover: props.book.cover || 'https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg',  // 使用图床URL
       tags: props.book.tags || [],
       status: props.book.status || 'draft'
     })
@@ -190,7 +190,7 @@ const initFormData = () => {
     originalData.value = {
       title: props.book.title || '',
       description: props.book.description || '',
-      cover: props.book.cover || 'https://s21.ax1x.com/2025/09/16/pVfLCfe.png',
+      cover: props.book.cover || 'https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg',
       tags: [...(props.book.tags || [])],
       status: props.book.status || 'draft'
     }

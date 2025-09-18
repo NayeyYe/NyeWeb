@@ -120,7 +120,7 @@ router.beforeEach((to, from, next) => {
         document.title = '卟瓿钚的布罗格'
     }
 
-    // 检查是否访问管理后台路由（除了登录页面）
+    // 检查是否访问管理后台路由(除了登录页面)
     if (to.path.startsWith('/admin') && to.path !== '/admin/login') {
         // 检查是否已登录
         const token = localStorage.getItem('admin_token')

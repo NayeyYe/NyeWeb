@@ -50,7 +50,7 @@ const activeTag = ref(null)
 
 const API_BASE_URL = '/api'
 
-// 优先显示数据库数据，���果没有则使用props数据
+// 优先显示数据库数据，如果没有则使用props数据
 const displayTags = computed(() => {
   return tagsFromDB.value.length > 0 ? tagsFromDB.value : props.tags
 })

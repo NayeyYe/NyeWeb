@@ -17,16 +17,13 @@ logger = logging.getLogger("timeline_api")
 
 router = APIRouter()
 
-
-# 注意：更具体的路由需要放在前面！先移动数据库端点到顶部
-# 添加新的数据库直接获取端点，模拟 test_timeline.py 的成功方法
+"""
+直接从数据库获取时间线数据
+模拟 test_timeline.py 中测试通过的数据获取方法
+返回与测试相同的数据格式
+"""
 @router.get("/timeline/database")
 def get_timeline_from_database(db: Session = Depends(database.get_db)) -> Dict[str, Any]:
-    """
-    直接从数据库获取时间线数据
-    模拟 test_timeline.py 中测试通过的数据获取方法
-    返回与测试相同的数据格式
-    """
     logger.info("收到从数据库直接获取时间线数据的请求")
     try:
         # 使用与 test_timeline.py 相同的查询方法
@@ -83,7 +80,6 @@ def get_timeline_from_database(db: Session = Depends(database.get_db)) -> Dict[s
 # 修改基本时间线端点使用相同的数据格式
 @router.get("/timeline")
 def get_timeline(db: Session = Depends(database.get_db)):
-    """获取所有时间线条目，按时间倒序排列"""
     logger.info("收到获取时间线数据的请求")
     try:
         timeline_items = db.query(Timeline).order_by(Timeline.timestamp.desc()).all()
@@ -108,12 +104,12 @@ def get_timeline(db: Session = Depends(database.get_db)):
 
 
 # 创建新的时间线条目
+
 @router.post("/timeline", response_model=schemas.TimelineResponse)
 def create_timeline_item(
         timeline_item: schemas.TimelineCreate,
         db: Session = Depends(database.get_db)
 ):
-    """创建新的时间线条目"""
     logger.info("收到创建时间线条目的请求")
     try:
         db_timeline = Timeline(
@@ -131,13 +127,13 @@ def create_timeline_item(
 
 
 # 更新时间线条目
+
 @router.put("/timeline/{item_id}", response_model=schemas.TimelineResponse)
 def update_timeline_item(
         item_id: int,
         timeline_update: schemas.TimelineUpdate,
         db: Session = Depends(database.get_db)
 ):
-    """更新指定ID的时间线条目"""
     logger.info(f"收到更新时间线条目的请求，ID: {item_id}")
     db_timeline = db.query(Timeline).filter(Timeline.id == item_id).first()
     if not db_timeline:
@@ -156,9 +152,9 @@ def update_timeline_item(
 
 
 # 删除时间线条目
+
 @router.delete("/timeline/{item_id}")
 def delete_timeline_item(item_id: int, db: Session = Depends(database.get_db)):
-    """删除指定ID的时间线条目"""
     logger.info(f"收到删除时间线条目的请求，ID: {item_id}")
     db_timeline = db.query(Timeline).filter(Timeline.id == item_id).first()
     if not db_timeline:
@@ -178,9 +174,9 @@ class CreateTimelineRequest(BaseModel):
 
 
 # 创建新的时间线项目
+
 @router.post("/timeline")
 def create_timeline_item(item_data: CreateTimelineRequest, db: Session = Depends(database.get_db)):
-    """创建新的时间线项目"""
     logger.info(f"收到创建时间线项目请求: {item_data.content[:50]}...")
     try:
         # 解析时间戳
@@ -216,7 +212,6 @@ def create_timeline_item(item_data: CreateTimelineRequest, db: Session = Depends
 # 更新时间线项目
 @router.put("/timeline/{timeline_id}")
 def update_timeline_item(timeline_id: int, item_data: CreateTimelineRequest, db: Session = Depends(database.get_db)):
-    """更新时间线项目"""
     logger.info(f"收到更新时间线项目请求: ID={timeline_id}")
     try:
         # 查找时间线项目
@@ -249,7 +244,6 @@ def update_timeline_item(timeline_id: int, item_data: CreateTimelineRequest, db:
 # 删除时间线项目
 @router.delete("/timeline/{timeline_id}")
 def delete_timeline_item(timeline_id: int, db: Session = Depends(database.get_db)):
-    """删除时间线项目"""
     logger.info(f"收到删除时间线项目请求: ID={timeline_id}")
     try:
         # 查找时间线项目
