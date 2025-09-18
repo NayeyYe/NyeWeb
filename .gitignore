@@ -49,3 +49,5 @@ venv/
 frontend/public
 !frontend/public/avatar.jpg
 !frontend/public/favicon.svg
+
+db/data_insertion.sql
