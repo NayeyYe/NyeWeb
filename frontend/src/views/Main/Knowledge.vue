@@ -50,7 +50,7 @@ const tagCounts = ref({})
 
 const API_BASE_URL = '/api'
 
-// ���取文章数据
+// 获取文章数据
 const fetchArticles = async () => {
   loading.value = true
   try {
@@ -140,7 +140,7 @@ const availableTagCounts = computed(() => {
   return counts
 })
 
-// 3. 最终筛选结果（分类+标签）
+// 3. 最终筛选结果(分类+标签)
 const filteredArticles = computed(() => {
   if (!selectedTag.value) {
     return articlesByCategory.value

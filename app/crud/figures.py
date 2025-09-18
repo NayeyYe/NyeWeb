@@ -34,9 +34,9 @@ class UpdateFigureRequest(BaseModel):
     status: Optional[str] = None
 
 
+# 获取所有图表
 @router.get("/figures")
 def get_figures(db: Session = Depends(database.get_db)):
-    """获取所有图表"""
     logger.info("收到获取图表数据的请求")
     try:
         figures = db.query(Figure).filter(Figure.status == 1).all()
@@ -54,7 +54,7 @@ def get_figures(db: Session = Depends(database.get_db)):
                     "id": figure.id,
                     "title": figure.title or "",
                     "description": figure.description or "",
-                    "url": figure.url or "https://s21.ax1x.com/2025/09/16/pVfLCfe.png",  # 提供默认图床链接
+                    "url": figure.url or "https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg",  # 提供默认图床链接
                     "tags": tags
                 }
                 figures_data.append(figure_dict)
@@ -73,9 +73,9 @@ def get_figures(db: Session = Depends(database.get_db)):
         return []
 
 
+# 根据ID获取单个图表详情
 @router.get("/figures/{figure_id}")
 def get_figure_by_id(figure_id: int, db: Session = Depends(database.get_db)):
-    """根据ID获取单个图表详情"""
     logger.info(f"收到获取图表详情的请求，ID: {figure_id}")
     try:
         figure = db.query(Figure).filter(Figure.id == figure_id, Figure.status == 1).first()
@@ -91,7 +91,7 @@ def get_figure_by_id(figure_id: int, db: Session = Depends(database.get_db)):
             "id": figure.id,
             "title": figure.title or "",
             "description": figure.description or "",
-            "url": figure.url or "https://s21.ax1x.com/2025/09/16/pVfLCfe.png",
+            "url": figure.url or "https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg",
             "tags": tags
         }
 
@@ -104,9 +104,9 @@ def get_figure_by_id(figure_id: int, db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=500, detail=f"获取图表详情时发生错误: {str(e)}")
 
 
+# 获取所有图表标签及其图表数量
 @router.get("/figure-tags")
 def get_all_figure_tags(db: Session = Depends(database.get_db)):
-    """获取所有图表标签及其图表数量"""
     logger.info("收到获取所有图表标签的请求")
     try:
         all_tags = []
@@ -131,10 +131,9 @@ def get_all_figure_tags(db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=500, detail=f"获取图表标签时发生错误: {str(e)}")
 
 
-# 新增管理员获取全部图片的接口
+# 管理员获取所有图片(包含所有状态)
 @router.get("/admin/figures")
 def get_all_figures_admin(db: Session = Depends(database.get_db)):
-    """管理员获取所有图片（包含所有状态）"""
     logger.info("收到管理员获取全部图片数据的请求")
     try:
         figures = db.query(Figure).all()
@@ -155,7 +154,7 @@ def get_all_figures_admin(db: Session = Depends(database.get_db)):
                     "id": figure.id,
                     "title": figure.title or "",
                     "description": figure.description or "",
-                    "url": figure.url or "https://s21.ax1x.com/2025/09/16/pVfLCfe.png",
+                    "url": figure.url or "https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg",
                     "tags": tags,
                     "status": status_map.get(figure.status, 'draft')
                 }
@@ -174,10 +173,9 @@ def get_all_figures_admin(db: Session = Depends(database.get_db)):
         return []
 
 
-# 新增修改图片状态的接口
+# 修改图片状态
 @router.patch("/figures/{figure_id}/status")
 def update_figure_status(figure_id: int, status_data: dict, db: Session = Depends(database.get_db)):
-    """修改图片状态"""
     logger.info(f"收到修改图片状态请求: ID={figure_id}, 状态={status_data.get('status')}")
     try:
         # 查找图片
@@ -208,10 +206,9 @@ def update_figure_status(figure_id: int, status_data: dict, db: Session = Depend
         raise HTTPException(status_code=500, detail=f"修改图片状态时发生错误: {str(e)}")
 
 
-# 新增删除图片的接口
+# 删除图片
 @router.delete("/figures/{figure_id}")
 def delete_figure(figure_id: int, db: Session = Depends(database.get_db)):
-    """删除图片"""
     logger.info(f"收到删除图片请求: ID={figure_id}")
     try:
         # 查找图片
@@ -237,9 +234,9 @@ def delete_figure(figure_id: int, db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=500, detail=f"删除图片时发生错误: {str(e)}")
 
 
+# 创建新图片
 @router.post("/admin/figures")
 def create_figure(figure_data: CreateFigureRequest, db: Session = Depends(database.get_db)):
-    """创建新图片"""
     logger.info(f"收到创建图片请求: {figure_data.title}")
     try:
         # 状态映射
@@ -298,9 +295,9 @@ def create_figure(figure_data: CreateFigureRequest, db: Session = Depends(databa
         raise HTTPException(status_code=500, detail=f"创建图片时发生错误: {str(e)}")
 
 
+# 编辑图片信息
 @router.put("/admin/figures/{figure_id}")
 def update_figure(figure_id: int, figure_data: UpdateFigureRequest, db: Session = Depends(database.get_db)):
-    """编辑图片信息"""
     logger.info(f"收到编辑图片信息请求: ID={figure_id}")
     try:
         # 查找图片

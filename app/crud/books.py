@@ -36,9 +36,9 @@ class UpdateBookRequest(BaseModel):
     status: Optional[str] = None
 
 
+# 获取所有书籍
 @router.get("/books")
 def get_books(db: Session = Depends(database.get_db)):
-    """获取所有书籍"""
     logger.info("收到获取书籍数据的请求")
     try:
         books = db.query(Book).filter(Book.status == 1).all()
@@ -56,7 +56,7 @@ def get_books(db: Session = Depends(database.get_db)):
                 "title": book.title,
                 "description": book.description,
                 "cover": book.cover if book.cover and book.cover.startswith(
-                    'http') else "https://s21.ax1x.com/2025/09/16/pVfLCfe.png",  # 使用图床URL
+                    'http') else "https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg",  # 使用图床URL
                 "filename": book.filename,
                 "tags": tags
             }
@@ -69,9 +69,9 @@ def get_books(db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=500, detail=f"获取书籍数据时发生错误: {str(e)}")
 
 
+# 根据ID获取单本书籍详情
 @router.get("/books/{book_id}")
 def get_book_by_id(book_id: int, db: Session = Depends(database.get_db)):
-    """根据ID获取单本书籍详情"""
     logger.info(f"收到获取书籍详情的请求，ID: {book_id}")
     try:
         book = db.query(Book).filter(Book.id == book_id, Book.status == 1).first()
@@ -88,7 +88,7 @@ def get_book_by_id(book_id: int, db: Session = Depends(database.get_db)):
             "title": book.title,
             "description": book.description,
             "cover": book.cover if book.cover and book.cover.startswith(
-                'http') else "https://s21.ax1x.com/2025/09/16/pVfLCfe.png",  # 使用图床URL
+                'http') else "https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg",  # 使用图床URL
             "filename": book.filename,
             "tags": tags
         }
@@ -102,9 +102,9 @@ def get_book_by_id(book_id: int, db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=500, detail=f"获取书籍详情时发生错误: {str(e)}")
 
 
+# 获取所有书籍标签及其书籍数量
 @router.get("/book-tags")
 def get_all_book_tags(db: Session = Depends(database.get_db)):
-    """获取所有书籍标签及其书籍数量"""
     logger.info("收到获取所有书籍标签的请求")
     try:
         all_tags = []
@@ -129,10 +129,9 @@ def get_all_book_tags(db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=500, detail=f"获取书籍标签时发生错误: {str(e)}")
 
 
-# 新增管理员获取全部书籍的接口
+# 管理员获取所有书籍(包含所有状态)
 @router.get("/admin/books")
 def get_all_books_admin(db: Session = Depends(database.get_db)):
-    """管理员获取所有书籍（包含所有状态）"""
     logger.info("收到管理员获取全部书籍数据的请求")
     try:
         books = db.query(Book).all()
@@ -153,7 +152,7 @@ def get_all_books_admin(db: Session = Depends(database.get_db)):
                 "title": book.title,
                 "description": book.description,
                 "cover": book.cover if book.cover and book.cover.startswith(
-                    'http') else "https://s21.ax1x.com/2025/09/16/pVfLCfe.png",  # 使用图床URL
+                    'http') else "https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg",  # 使用图床URL
                 "filename": book.filename,
                 "tags": tags,
                 "status": status_map.get(book.status, 'draft')
@@ -167,10 +166,9 @@ def get_all_books_admin(db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=500, detail=f"获取书籍数据时发生错误: {str(e)}")
 
 
-# 新增修改书籍状态的接口
+# 修改书籍状态
 @router.patch("/books/{book_id}/status")
 def update_book_status(book_id: int, status_data: dict, db: Session = Depends(database.get_db)):
-    """修改书籍状态"""
     logger.info(f"收到修改书籍状态请求: ID={book_id}, 状态={status_data.get('status')}")
     try:
         # 查找书籍
@@ -201,10 +199,9 @@ def update_book_status(book_id: int, status_data: dict, db: Session = Depends(da
         raise HTTPException(status_code=500, detail=f"修改书籍状态时发生错误: {str(e)}")
 
 
-# 新增删除书籍的接口
+# 删除书籍
 @router.delete("/books/{book_id}")
 def delete_book(book_id: int, db: Session = Depends(database.get_db)):
-    """删除书籍"""
     logger.info(f"收到删除书籍请求: ID={book_id}")
     try:
         # 查找书籍
@@ -230,9 +227,9 @@ def delete_book(book_id: int, db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=500, detail=f"删除书籍时发生错误: {str(e)}")
 
 
+# 创建新图书
 @router.post("/admin/books")
 def create_book(book_data: CreateBookRequest, db: Session = Depends(database.get_db)):
-    """创建新图书"""
     logger.info(f"收到创建图书请求: {book_data.title}")
     try:
         # 状态映射
@@ -242,14 +239,14 @@ def create_book(book_data: CreateBookRequest, db: Session = Depends(database.get
         # 处理封面URL，确保是有效的图床链接
         cover_url = book_data.cover
         if not cover_url or cover_url == "/avatar.jpg":
-            cover_url = "https://s21.ax1x.com/2025/09/16/pVfLCfe.png"
+            cover_url = "https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg"
 
         # 验证URL格式
         import re
         url_pattern = r'^https?://.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$'
         if not re.match(url_pattern, cover_url, re.IGNORECASE):
             logger.warning(f"封面URL格式不正确，使用默认封面: {cover_url}")
-            cover_url = "https://s21.ax1x.com/2025/09/16/pVfLCfe.png"
+            cover_url = "https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg"
 
         # 验证网盘URL格式
         if not book_data.filename.startswith(('http://', 'https://')):
@@ -301,13 +298,9 @@ def create_book(book_data: CreateBookRequest, db: Session = Depends(database.get
         raise HTTPException(status_code=500, detail=f"创建图书时发生错误: {str(e)}")
 
 
-# 删除文件上传接口
-# @router.post("/admin/books/upload") 整个接口已删除
-
-# 新增编辑书籍信息的接口
+# 编辑图书信息
 @router.put("/admin/books/{book_id}")
 def update_book(book_id: int, book_data: UpdateBookRequest, db: Session = Depends(database.get_db)):
-    """编辑图书信息"""
     logger.info(f"收到编辑图书信息请求: ID={book_id}")
     try:
         # 查找书籍
@@ -324,14 +317,14 @@ def update_book(book_id: int, book_data: UpdateBookRequest, db: Session = Depend
             # 处理封面URL，验证格式
             cover_url = book_data.cover
             if cover_url == "/avatar.jpg":
-                cover_url = "https://s21.ax1x.com/2025/09/16/pVfLCfe.png"
+                cover_url = "https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg"
             else:
                 # 验证URL格式
                 import re
                 url_pattern = r'^https?://.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$'
                 if not re.match(url_pattern, cover_url, re.IGNORECASE):
                     logger.warning(f"封面URL格式不正确，使用默认封面: {cover_url}")
-                    cover_url = "https://s21.ax1x.com/2025/09/16/pVfLCfe.png"
+                    cover_url = "https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg"
 
             book.cover = cover_url
         if book_data.status is not None:
@@ -380,14 +373,14 @@ def update_book(book_id: int, book_data: UpdateBookRequest, db: Session = Depend
             # 处理封面URL，验证格式
             cover_url = book_data.cover
             if cover_url == "/avatar.jpg":
-                cover_url = "https://s21.ax1x.com/2025/09/16/pVfLCfe.png"
+                cover_url = "https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg"
             else:
                 # 验证URL格式
                 import re
                 url_pattern = r'^https?://.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$'
                 if not re.match(url_pattern, cover_url, re.IGNORECASE):
                     logger.warning(f"封面URL格式不正确，使用默认封面: {cover_url}")
-                    cover_url = "https://s21.ax1x.com/2025/09/16/pVfLCfe.png"
+                    cover_url = "https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg"
 
             book.cover = cover_url
         if book_data.status is not None:

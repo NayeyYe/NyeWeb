@@ -107,14 +107,14 @@ const fetchProjects = async () => {
   }
 }
 
-// 最近文章（从数据库获取，取前3篇）
+// 最近文章(从数据库获取，取前3篇)
 const recentArticles = computed(() => {
   return [...articlesFromDB.value]
       .sort((a, b) => new Date(b.date) - new Date(a.date))
       .slice(0, 3)
 })
 
-// 最近项目（从数据库获取，取前3个）
+// 最近项目(从数据库获取，取前3个)
 const recentProjects = computed(() => {
   return [...projectsFromDB.value]
       .sort((a, b) => new Date(b.date) - new Date(a.date))

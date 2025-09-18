@@ -39,7 +39,7 @@
         />
       </el-form-item>
 
-      <!-- 分类文件夹���������������择 -->
+      <!-- 分类文件夹选择 -->
       <el-form-item label="分类文件夹" prop="category">
         <div class="category-section">
           <el-card class="category-selector-card" shadow="never">
@@ -459,7 +459,7 @@ const showDevelopingMessage = () => {
 const fetchCategories = async () => {
   categoryLoading.value = true
   try {
-    console.log('开��获取分类数据...')
+    console.log('开始获取分类数据...')
 
     const response = await axios.get('/api/articles/categories', {
       timeout: 10000,
@@ -512,7 +512,7 @@ const refreshCategories = async () => {
   await fetchCategories()
 }
 
-// 从数据库数据构建分类树（与ArticleManagement保持一致）
+// 从数据库数据构建分类树(与ArticleManagement保持一致)
 const buildCategoryTreeFromData = (categories) => {
   console.log('输入分类数据:', categories)
 
@@ -867,7 +867,7 @@ const handleFileChange = (file) => {
   if (file && file.raw) {
     formData.file = file.raw
 
-    // 自动从文件名提取标题（如果标题为空）
+    // 自动从文件名提取标题(如果标题为空)
     if (!formData.title) {
       const fileName = file.name.replace(/\.(md|markdown)$/i, '')
       formData.title = fileName

@@ -24,9 +24,9 @@ class FavoriteImageUpdate(BaseModel):
     url: str
 
 
+# 获取所有收藏图片
 @router.get("/favorite-images")
 def get_favorite_images(db: Session = Depends(database.get_db)):
-    """获取所有收藏图片"""
     logger.info("收到获取收藏图片数据的请求")
     try:
         images = db.query(FavoriteImage).all()
@@ -38,7 +38,7 @@ def get_favorite_images(db: Session = Depends(database.get_db)):
             try:
                 image_dict = {
                     "id": image.id,
-                    "url": image.url or "https://s21.ax1x.com/2025/09/16/pVfLCfe.png"
+                    "url": image.url or "https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg"
                 }
                 images_data.append(image_dict)
                 logger.info(f"收藏图片数据: ID={image.id}, URL={image.url}")
@@ -55,9 +55,9 @@ def get_favorite_images(db: Session = Depends(database.get_db)):
         return []
 
 
+# 根据ID获取单张收藏图片详情
 @router.get("/favorite-images/{image_id}")
 def get_favorite_image_by_id(image_id: int, db: Session = Depends(database.get_db)):
-    """根据ID获取单张收藏图片详情"""
     logger.info(f"收到获取收藏图片详情的请求，ID: {image_id}")
     try:
         image = db.query(FavoriteImage).filter(FavoriteImage.id == image_id).first()
@@ -67,7 +67,7 @@ def get_favorite_image_by_id(image_id: int, db: Session = Depends(database.get_d
 
         image_dict = {
             "id": image.id,
-            "url": image.url or "https://s21.ax1x.com/2025/09/16/pVfLCfe.png"
+            "url": image.url or "https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg"
         }
 
         logger.info(f"成功获取收藏图片详情: {image.url}")
@@ -79,13 +79,13 @@ def get_favorite_image_by_id(image_id: int, db: Session = Depends(database.get_d
         raise HTTPException(status_code=500, detail=f"获取收藏图片详情时发生错误: {str(e)}")
 
 
+# 更新收藏图片URL
 @router.put("/favorite-images/{image_id}")
 def update_favorite_image(
         image_id: int,
         image_data: FavoriteImageUpdate,
         db: Session = Depends(database.get_db)
 ):
-    """更新收藏图片URL"""
     logger.info(f"收到更新收藏图片的请求，ID: {image_id}, URL: {image_data.url}")
     try:
         image = db.query(FavoriteImage).filter(FavoriteImage.id == image_id).first()
@@ -111,12 +111,12 @@ def update_favorite_image(
         raise HTTPException(status_code=500, detail=f"更新收藏图片时发生错误: {str(e)}")
 
 
+# 创建新的收藏图片
 @router.post("/favorite-images")
 def create_favorite_image(
         image_data: FavoriteImageCreate,
         db: Session = Depends(database.get_db)
 ):
-    """创建新的收藏图片"""
     logger.info(f"收到创建收藏图片的请求，URL: {image_data.url}")
     try:
         # 检查是否已达到5张图片限制
@@ -144,9 +144,9 @@ def create_favorite_image(
         raise HTTPException(status_code=500, detail=f"创建收藏图片时发生错误: {str(e)}")
 
 
+# 删除收藏图片
 @router.delete("/favorite-images/{image_id}")
 def delete_favorite_image(image_id: int, db: Session = Depends(database.get_db)):
-    """删除收藏图片"""
     logger.info(f"收到删除收藏图片的请求，ID: {image_id}")
     try:
         image = db.query(FavoriteImage).filter(FavoriteImage.id == image_id).first()

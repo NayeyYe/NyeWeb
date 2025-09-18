@@ -112,7 +112,7 @@ const emit = defineEmits(['update:modelValue', 'save-success'])
 const formData = reactive({
   title: '',
   description: '',
-  url: 'https://s21.ax1x.com/2025/09/16/pVfLCfe.png',
+  url: 'https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg',
   tags: [],
   status: 'draft'
 })
@@ -171,7 +171,7 @@ const initFormData = () => {
     Object.assign(formData, {
       title: props.figure.title || '',
       description: props.figure.description || '',
-      url: props.figure.url || 'https://s21.ax1x.com/2025/09/16/pVfLCfe.png',
+      url: props.figure.url || 'https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg',
       tags: props.figure.tags || [],
       status: props.figure.status || 'draft'
     })
@@ -180,7 +180,7 @@ const initFormData = () => {
     originalData.value = {
       title: props.figure.title || '',
       description: props.figure.description || '',
-      url: props.figure.url || 'https://s21.ax1x.com/2025/09/16/pVfLCfe.png',
+      url: props.figure.url || 'https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg',
       tags: [...(props.figure.tags || [])],
       status: props.figure.status || 'draft'
     }

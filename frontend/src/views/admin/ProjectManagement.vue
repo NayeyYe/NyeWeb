@@ -75,7 +75,7 @@ const showUploadDialog = ref(false)
 const showEditDialog = ref(false)
 const editingProject = ref(null)
 
-// 获取项目列表（管理员接口，包含所有状态）
+// 获取项目列表(管理员接口，包含所有状态)
 const fetchProjects = async () => {
   try {
     const res = await axios.get('/api/admin/projects')
@@ -170,7 +170,7 @@ const updateProjectStatus = async (project, newStatus) => {
   }
 }
 
-// 快速更新状态（用于操作按钮）
+// 快速更新状态(用于操作按钮)
 const quickUpdateStatus = async (project, newStatus) => {
   const actionText = newStatus === 'recycled' ? '回收' : '恢复'
 

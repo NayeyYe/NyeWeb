@@ -9,7 +9,7 @@ const isAdminPage = computed(() => {
   return route.path.startsWith('/admin')
 })
 
-// 判断是否为管理员登录页面（只在登录页显示Header）
+// 判断是否为管理员登录页面(只在登录页显示Header)
 const isAdminLogin = computed(() => {
   return route.path === '/admin/login'
 })

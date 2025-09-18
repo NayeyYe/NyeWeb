@@ -389,7 +389,7 @@ const figureFilterForm = reactive({
   status: ''
 })
 
-// 获取图书列表（管理员接口，包含所有状态）
+// 获取图书列表(管理员接口，包含所有状态)
 const fetchBooks = async () => {
   try {
     const res = await axios.get('/api/admin/books')
@@ -400,7 +400,7 @@ const fetchBooks = async () => {
   }
 }
 
-// 获取图片列表（管理员接口，包含所有状态）
+// 获取图片列表(管理员接口，包含所有状态)
 const fetchFigures = async () => {
   try {
     const res = await axios.get('/api/admin/figures')
@@ -569,7 +569,7 @@ const updateBookStatus = async (book, newStatus) => {
   }
 }
 
-// 快速更新图书状态（用于操作按钮）
+// 快速更新图书状态(用于操作按钮)
 const quickUpdateBookStatus = async (book, newStatus) => {
   const actionText = newStatus === 'recycled' ? '回收' : '恢复'
 
@@ -602,7 +602,7 @@ const updateFigureStatus = async (figure, newStatus) => {
   }
 }
 
-// 快速更新图片状态（用于操作按钮）
+// 快速更新图片状态(用于操作按钮)
 const quickUpdateFigureStatus = async (figure, newStatus) => {
   const actionText = newStatus === 'recycled' ? '回收' : '恢复'
 

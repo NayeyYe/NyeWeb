@@ -15,9 +15,9 @@ logger = logging.getLogger("tools_api")
 router = APIRouter()
 
 
+# 获取所有工具
 @router.get("/tools")
 def get_tools(db: Session = Depends(database.get_db)):
-    """获取所有工具"""
     logger.info("收到获取工具数据的请求")
     try:
         tools = db.query(Tool).filter(Tool.status == 1).all()
@@ -46,9 +46,9 @@ def get_tools(db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=500, detail=f"获取工具数据时发生错误: {str(e)}")
 
 
+# 根据ID获取单个工具详情
 @router.get("/tools/{tool_id}")
 def get_tool_by_id(tool_id: int, db: Session = Depends(database.get_db)):
-    """根据ID获取单个工具详情"""
     logger.info(f"收到获取工具详情的请求，ID: {tool_id}")
     try:
         tool = db.query(Tool).filter(Tool.id == tool_id, Tool.status == 1).first()
@@ -77,9 +77,9 @@ def get_tool_by_id(tool_id: int, db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=500, detail=f"获取工具详情时发生错误: {str(e)}")
 
 
+# 获取所有工具标签及其工具数量
 @router.get("/tool-tags")
 def get_all_tool_tags(db: Session = Depends(database.get_db)):
-    """获取所有工具标签及其工具数量"""
     logger.info("收到获取所有工具标签的请求")
     try:
         all_tags = []
@@ -104,10 +104,9 @@ def get_all_tool_tags(db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=500, detail=f"获取工具标签时发生错误: {str(e)}")
 
 
-# 新增管理员获取全部工具的接口
+# 管理员获取所有工具(包含所有状态)
 @router.get("/admin/tools")
 def get_all_tools_admin(db: Session = Depends(database.get_db)):
-    """管理员获取所有工具（包含所有状态）"""
     logger.info("收到管理员获取全部工具数据的请求")
     try:
         tools = db.query(Tool).all()
@@ -140,10 +139,9 @@ def get_all_tools_admin(db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=500, detail=f"获取工具数据时发生错误: {str(e)}")
 
 
-# 新增修改工具状态的接口
+# 修改工具状态
 @router.patch("/tools/{tool_id}/status")
 def update_tool_status(tool_id: int, status_data: dict, db: Session = Depends(database.get_db)):
-    """修改工具状态"""
     logger.info(f"收到修改工具状态请求: ID={tool_id}, 状态={status_data.get('status')}")
     try:
         # 查找工具
@@ -174,10 +172,9 @@ def update_tool_status(tool_id: int, status_data: dict, db: Session = Depends(da
         raise HTTPException(status_code=500, detail=f"修改工具状态时发生错误: {str(e)}")
 
 
-# 新增创建工具的接口
+# 创建新工具
 @router.post("/tools")
 def create_tool(tool_data: dict, db: Session = Depends(database.get_db)):
-    """创建新工具"""
     logger.info(f"收到创建工具请求: {tool_data.get('title')}")
     try:
         # 创建工具记录
@@ -217,10 +214,9 @@ def create_tool(tool_data: dict, db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=500, detail=f"创建工具时发生错误: {str(e)}")
 
 
-# 新增删除工具的接口
+# 删除工具
 @router.delete("/tools/{tool_id}")
 def delete_tool(tool_id: int, db: Session = Depends(database.get_db)):
-    """删除工具"""
     logger.info(f"收到删除工具请求: ID={tool_id}")
     try:
         # 查找工具
@@ -246,10 +242,9 @@ def delete_tool(tool_id: int, db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=500, detail=f"删除工具时发生错误: {str(e)}")
 
 
-# 新增更新工具的接口
+# 更新工具信息
 @router.put("/tools/{tool_id}")
 def update_tool(tool_id: int, tool_data: dict, db: Session = Depends(database.get_db)):
-    """更新工具信息"""
     logger.info(f"收到更新工具请求: ID={tool_id}, 数据={tool_data}")
     try:
         # 查找工具
@@ -275,12 +270,12 @@ def update_tool(tool_id: int, tool_data: dict, db: Session = Depends(database.ge
         if not (url.startswith('http://') or url.startswith('https://')):
             raise HTTPException(status_code=400, detail="请输入有效的URL地址")
 
-        # 检查标题是否重复（排除当前工具）
+        # 检查标题是否重复(排除当前工具)
         existing_tool = db.query(Tool).filter(Tool.title == title, Tool.id != tool_id).first()
         if existing_tool:
             raise HTTPException(status_code=409, detail="工具标题已存在")
 
-        # 检查URL是否重复（排除当前工具）
+        # 检查URL是否重复(排除当前工具)
         existing_url = db.query(Tool).filter(Tool.url == url, Tool.id != tool_id).first()
         if existing_url:
             raise HTTPException(status_code=409, detail="工具链接已存在")

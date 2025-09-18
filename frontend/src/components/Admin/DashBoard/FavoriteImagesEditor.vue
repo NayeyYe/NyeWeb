@@ -209,7 +209,7 @@ const saveImages = async () => {
             })
         )
       } else if (image.id && !image.url) {
-        // 删除现有图片（URL为空）
+        // 删除现有图片(URL为空)
         requests.push(
             axios.delete(`${API_BASE_URL}/favorite-images/${image.id}`)
         )
