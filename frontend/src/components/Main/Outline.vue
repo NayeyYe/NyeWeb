@@ -34,7 +34,15 @@ defineProps({
 const scrollTo = (id) => {
   const element = document.getElementById(id);
   if (element) {
-    element.scrollIntoView({behavior: 'smooth'});
+    // 计算固定头部的高度偏移
+    const headerHeight = 55; // 头部实际高度为55px
+    const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+    const offsetPosition = elementPosition - headerHeight;
+
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: 'smooth'
+    });
   }
 };
 </script>
