@@ -1,5 +1,5 @@
 <script setup>
-import {computed} from 'vue'
+import {computed, ref, onMounted, onUnmounted} from 'vue'
 import {useRoute} from 'vue-router'
 
 const route = useRoute()
@@ -13,11 +13,37 @@ const isAdminPage = computed(() => {
 const isAdminLogin = computed(() => {
   return route.path === '/admin/login'
 })
+
+// 滚动显示/隐藏Header逻辑
+const isHeaderVisible = ref(true)
+let lastScrollTop = 0
+
+const handleScroll = () => {
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+  
+  if (scrollTop > lastScrollTop && scrollTop > 100) {
+    // 向下滚动超过100px，隐藏Header
+    isHeaderVisible.value = false
+  } else if (scrollTop < lastScrollTop) {
+    // 向上滚动，显示Header
+    isHeaderVisible.value = true
+  }
+  
+  lastScrollTop = scrollTop
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
 </script>
 
 <template>
   <!--  这是我的网站的顶栏  -->
-  <el-header v-if="!isAdminPage || isAdminLogin" class="fixed-header">
+  <el-header v-if="!isAdminPage || isAdminLogin" :class="['fixed-header', { 'header-hidden': !isHeaderVisible }]">
     <!-- 管理员登录页面的简化Header -->
     <div v-if="isAdminLogin" class="admin-header">
       <!-- 左侧Logo -->
@@ -91,6 +117,15 @@ const isAdminLogin = computed(() => {
   border-radius: 0;
   background: #ffffff;
   border-bottom: 1px solid #f0f0f0;
+}
+
+/* Header显示/隐藏动画 */
+.fixed-header {
+  transition: transform 0.3s ease-in-out;
+}
+
+.header-hidden {
+  transform: translateY(-100%);
 }
 
 /* 管理员页面Header样式 */
