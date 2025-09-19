@@ -13,7 +13,6 @@
       </aside>
       <main class="main-content">
         <article class="markdown-body">
-          <h1>{{ projectTitle }}</h1>
           <div v-html="projectContent"></div>
         </article>
       </main>
@@ -83,8 +82,15 @@ const md = markdownit({
 }).use(mdAnchor, {
   permalink: true, // 强制为所有层级应用permalink，从而确保生成ID
   level: [1, 2, 3, 4, 5, 6],
-  slugify: s => slugify(s, {lower: true, strict: true}),
-  permalinkSymbol: '¶', // 你可以自定义这个符号，或者设为空字符串''来隐藏它
+  slugify: s => {
+    let slug = slugify(s, {lower: true, locale: 'zh'});
+    // 如果slug为空或以减号开头，生成正数ID
+    if (!slug || slug.startsWith('-')) {
+      slug = 'heading-' + Math.abs(Math.floor(Math.random() * 1000000));
+    }
+    return slug;
+  },
+  permalinkSymbol: '', // 你可以自定义这个符号，或者设为空字符串''来隐藏它
   permalinkBefore: true,
   permalinkClass: 'header-anchor'
 }).use(mdTable, {
@@ -206,29 +212,30 @@ const fetchProject = async () => {
         }
         const markdownText = await markdownResponse.text()
 
-        // 提取标题
-        const tokens = md.parse(markdownText, {})
-        const extractedHeadings = []
-        tokens.forEach((token, i) => {
-          if (token.type === 'heading_open') {
-            const textToken = tokens[i + 1]
-            const id = token.attrGet('id')
-            if (textToken && textToken.type === 'inline' && id) {
-              extractedHeadings.push({
-                level: parseInt(token.tag.substring(1), 10),
-                text: textToken.content,
-                id: id
-              })
-            }
-          }
-        })
-        headings.value = extractedHeadings
-
         // 3. 渲染Markdown
         projectContent.value = md.render(markdownText)
 
-        // DOM更新后设置复制按钮和滚动监听
+        // DOM更新后提取标题、设置复制按钮和滚动监听
         await nextTick()
+        
+        // 从DOM中提取标题，确保ID与实际渲染的ID一致
+        const headingElements = document.querySelectorAll('.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6')
+        const extractedHeadings = []
+        headingElements.forEach((element, index) => {
+          let id = element.id
+          // 如果ID为空或为负数，使用基于索引的确定性ID
+          if (!id || id.startsWith('-')) {
+            id = 'heading-' + index
+            element.id = id // 确保DOM中的ID也被更新
+          }
+          extractedHeadings.push({
+            level: parseInt(element.tagName.substring(1), 10),
+            text: element.textContent.replace('¶', '').trim(), // 移除锚点符号
+            id: id
+          })
+        })
+        headings.value = extractedHeadings
+
         setupCopyButtons()
         setupIntersectionObserver()
         // 渲染 Mermaid 图表
