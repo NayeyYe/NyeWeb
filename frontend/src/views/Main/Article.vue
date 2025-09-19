@@ -13,7 +13,6 @@
       </aside>
       <main class="main-content">
         <article class="markdown-body">
-          <h1>{{ articleTitle }}</h1>
           <div v-html="articleContent"></div>
         </article>
       </main>
@@ -238,7 +237,11 @@ const fetchArticle = async () => {
         tokens.forEach((token, i) => {
           if (token.type === 'heading_open') {
             const textToken = tokens[i + 1]
-            const id = token.attrGet('id')
+            let id = token.attrGet('id')
+            // 如果id为空，从文本生成id（确保所有标题都被捕获）
+            if (!id && textToken && textToken.type === 'inline' && textToken.content) {
+              id = slugify(textToken.content, {lower: true, strict: true})
+            }
             if (textToken && textToken.type === 'inline' && id) {
               extractedHeadings.push({
                 level: parseInt(token.tag.substring(1), 10),
