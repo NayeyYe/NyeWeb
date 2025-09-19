@@ -15,22 +15,22 @@
       />
       <div class="tags-container">
         <el-tag
-            :type="!selectedTag ? '' : 'info'"
+            :type="selectedTags.length === 0 ? '' : 'info'"
             class="tag-item"
             effect="light"
             size="large"
-            @click="selectedTag = null"
+            @click="selectedTags = []"
         >
           全部
         </el-tag>
         <el-tag
             v-for="tag in allTags"
             :key="tag"
-            :type="selectedTag === tag ? '' : 'info'"
+            :type="selectedTags.includes(tag) ? '' : 'info'"
             class="tag-item"
             effect="light"
             size="large"
-            @click="selectedTag = tag"
+            @click="toggleTag(tag)"
         >
           {{ tag }}
         </el-tag>
@@ -62,7 +62,7 @@ import axios from 'axios';
 import ToolCard from '@/components/Main/Tools/ToolCard.vue';
 
 const searchQuery = ref('');
-const selectedTag = ref(null);
+const selectedTags = ref([]);
 const loading = ref(false);
 const toolsFromDB = ref([]);
 
@@ -109,11 +109,24 @@ const filteredTools = computed(() => {
         tool.description.toLowerCase().includes(searchQuery.value.toLowerCase());
 
     const tagMatch =
-        !selectedTag.value || (tool.tags && tool.tags.includes(selectedTag.value));
+        selectedTags.value.length === 0 ||
+        (tool.tags && selectedTags.value.every(selectedTag => tool.tags.includes(selectedTag)));
 
     return searchMatch && tagMatch;
   });
 });
+
+// 切换标签选择状态
+const toggleTag = (tag) => {
+  const index = selectedTags.value.indexOf(tag);
+  if (index === -1) {
+    // 添加标签
+    selectedTags.value.push(tag);
+  } else {
+    // 移除标签
+    selectedTags.value.splice(index, 1);
+  }
+};
 
 onMounted(() => {
   fetchTools();
