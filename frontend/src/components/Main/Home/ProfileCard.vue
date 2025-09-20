@@ -23,7 +23,6 @@
         <p><span class="icon">Email:</span>
           <el-link href="mailto:Nayey.Ye@outlook.com">NayeyYe@163.com</el-link>
         </p>
-        <p><span class="icon">Tel:</span> <span>+86-13597646338</span></p>
       </div>
     </div>
   </el-card>

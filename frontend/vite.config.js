@@ -15,4 +15,5 @@ export default defineConfig({
             '@': fileURLToPath(new URL('./src', import.meta.url))
         },
     },
+    envDir: '../', // Load .env files from the root directory
 })

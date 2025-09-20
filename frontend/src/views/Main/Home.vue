@@ -5,6 +5,9 @@
       <Timeline class="timeline-editor-container"/>
     </div>
     <div class="right-column-content">
+      <!-- GitHub热力图放在最近文章上方 -->
+      <GitHubHeatmap class="github-heatmap-card"/>
+      
       <el-card class="content-card">
         <template #header>
           <div class="card-header">
@@ -53,6 +56,7 @@ import ProfileCard from '@/components/Main/Home/ProfileCard.vue'
 import Timeline from '@/components/Main/Home/Timeline.vue'
 import ArticleCard from '@/components/Main/Article/ArticleCard.vue'
 import ProjectCard from '@/components/Main/Project/ProjectCard.vue'
+import GitHubHeatmap from '@/components/Main/Home/GitHubHeatmap.vue'
 
 const articlesLoading = ref(false)
 const projectsLoading = ref(false)
@@ -162,6 +166,22 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  min-width: 0;
+}
+
+.top-row {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.github-heatmap {
+  flex: 1;
+  min-width: 0;
+}
+
+.spacer {
+  flex: 1;
   min-width: 0;
 }
 
