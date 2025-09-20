@@ -36,19 +36,42 @@ class UpdateBookRequest(BaseModel):
     status: Optional[str] = None
 
 
-# 获取所有书籍（支持分页）
+# 获取所有书籍（支持分页和筛选）
 @router.get("/books")
-def get_books(page: int = 1, limit: int = 6, db: Session = Depends(database.get_db)):
-    logger.info(f"收到获取书籍数据的请求，页码: {page}, 每页数量: {limit}")
+def get_books(
+    page: int = 1,
+    limit: int = 6,
+    search: str = None,
+    tags: str = None,
+    db: Session = Depends(database.get_db)
+):
+    logger.info(f"收到获取书籍数据的请求，页码: {page}, 每页数量: {limit}, 搜索: {search}, 标签: {tags}")
     try:
-        # 计算偏移量
-        offset = (page - 1) * limit
+        # 构建基础查询
+        query = db.query(Book).filter(Book.status == 1)
+        
+        # 应用搜索筛选
+        if search:
+            search = f"%{search}%"
+            query = query.filter(
+                (Book.title.ilike(search)) |
+                (Book.description.ilike(search))
+            )
+        
+        # 应用标签筛选
+        if tags:
+            tag_list = [tag.strip() for tag in tags.split(',') if tag.strip()]
+            if tag_list:
+                # 通过书籍标签关联表进行筛选
+                query = query.join(BookTag).join(Tag).filter(Tag.name.in_(tag_list))
         
         # 获取总数量
-        total_count = db.query(Book).filter(Book.status == 1).count()
+        total_count = query.count()
         
-        # 获取分页数据
-        books = db.query(Book).filter(Book.status == 1).offset(offset).limit(limit).all()
+        # 计算偏移量并获取分页数据
+        offset = (page - 1) * limit
+        books = query.offset(offset).limit(limit).all()
+        
         logger.info(f"成功获取到 {len(books)} 本已发布书籍")
 
         # 转换为前端需要的格式
@@ -68,7 +91,6 @@ def get_books(page: int = 1, limit: int = 6, db: Session = Depends(database.get_
                 "tags": tags
             }
             books_data.append(book_dict)
-            logger.info(f"书籍数据: ID={book.id}, 标题={book.title}")
 
         # 返回分页数据
         return {
@@ -77,7 +99,7 @@ def get_books(page: int = 1, limit: int = 6, db: Session = Depends(database.get_
                 "page": page,
                 "limit": limit,
                 "total": total_count,
-                "pages": (total_count + limit - 1) // limit  # 计算总页数
+                "pages": (total_count + limit - 1) // limit if limit > 0 else 0  # 计算总页数
             }
         }
     except Exception as e:

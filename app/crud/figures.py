@@ -34,19 +34,42 @@ class UpdateFigureRequest(BaseModel):
     status: Optional[str] = None
 
 
-# 获取所有图表（支持分页）
+# 获取所有图表（支持分页和筛选）
 @router.get("/figures")
-def get_figures(page: int = 1, limit: int = 6, db: Session = Depends(database.get_db)):
-    logger.info(f"收到获取图表数据的请求，页码: {page}, 每页数量: {limit}")
+def get_figures(
+    page: int = 1,
+    limit: int = 6,
+    search: str = None,
+    tags: str = None,
+    db: Session = Depends(database.get_db)
+):
+    logger.info(f"收到获取图表数据的请求，页码: {page}, 每页数量: {limit}, 搜索: {search}, 标签: {tags}")
     try:
-        # 计算偏移量
-        offset = (page - 1) * limit
+        # 构建基础查询
+        query = db.query(Figure).filter(Figure.status == 1)
+        
+        # 应用搜索筛选
+        if search:
+            search = f"%{search}%"
+            query = query.filter(
+                (Figure.title.ilike(search)) |
+                (Figure.description.ilike(search))
+            )
+        
+        # 应用标签筛选
+        if tags:
+            tag_list = [tag.strip() for tag in tags.split(',') if tag.strip()]
+            if tag_list:
+                # 通过图表标签关联表进行筛选
+                query = query.join(FigureTag).join(Tag).filter(Tag.name.in_(tag_list))
         
         # 获取总数量
-        total_count = db.query(Figure).filter(Figure.status == 1).count()
+        total_count = query.count()
         
-        # 获取分页数据
-        figures = db.query(Figure).filter(Figure.status == 1).offset(offset).limit(limit).all()
+        # 计算偏移量并获取分页数据
+        offset = (page - 1) * limit
+        figures = query.offset(offset).limit(limit).all()
+        
         logger.info(f"成功获取到 {len(figures)} 个已发布图表")
 
         # 转换为前端需要的格式
@@ -78,7 +101,7 @@ def get_figures(page: int = 1, limit: int = 6, db: Session = Depends(database.ge
                 "page": page,
                 "limit": limit,
                 "total": total_count,
-                "pages": (total_count + limit - 1) // limit  # 计算总页数
+                "pages": (total_count + limit - 1) // limit if limit > 0 else 0  # 计算总页数
             }
         }
     except Exception as e:

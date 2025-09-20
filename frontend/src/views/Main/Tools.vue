@@ -40,7 +40,7 @@
     <div v-loading="loading">
       <el-row :gutter="20">
         <el-col
-            v-for="tool in filteredTools"
+            v-for="tool in displayedTools"
             :key="tool.id"
             :md="8"
             :sm="12"
@@ -51,10 +51,10 @@
         </el-col>
       </el-row>
 
-      <el-empty v-if="!loading && filteredTools.length === 0" description="没有找到匹配的工具"></el-empty>
+      <el-empty v-if="!loading && displayedTools.length === 0" description="没有找到匹配的工具"></el-empty>
 
       <!-- 分页控件 -->
-      <div v-if="!loading && filteredTools.length > 0 && totalPages > 1" class="pagination-container">
+      <div v-if="!loading && displayedTools.length > 0 && totalPages > 1" class="pagination-container">
         <el-pagination
             v-model:current-page="currentPage"
             :page-size="pageSize"
@@ -91,11 +91,23 @@ const totalPages = ref(0);
 const fetchTools = async () => {
   loading.value = true;
   try {
+    const params = {
+      page: currentPage.value,
+      limit: pageSize.value
+    };
+    
+    // 添加搜索参数
+    if (searchQuery.value.trim()) {
+      params.search = searchQuery.value.trim();
+    }
+    
+    // 添加标签参数
+    if (selectedTags.value.length > 0) {
+      params.tags = selectedTags.value.join(',');
+    }
+
     const response = await axios.get(`${API_BASE_URL}/tools`, {
-      params: {
-        page: currentPage.value,
-        limit: pageSize.value
-      },
+      params: params,
       timeout: 10000,
       headers: {
         'Accept': 'application/json'
@@ -124,6 +136,13 @@ const handlePageChange = (page) => {
   fetchTools();
 };
 
+// 监听搜索和标签变化，重新获取数据
+watch([searchQuery, selectedTags], () => {
+  // 重置到第一页
+  currentPage.value = 1;
+  fetchTools();
+});
+
 const allTags = computed(() => {
   const tags = new Set();
   toolsFromDB.value.forEach(tool => {
@@ -134,19 +153,9 @@ const allTags = computed(() => {
   return Array.from(tags).sort();
 });
 
-const filteredTools = computed(() => {
-  return toolsFromDB.value.filter(tool => {
-    const searchMatch =
-        searchQuery.value.trim() === '' ||
-        tool.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        tool.description.toLowerCase().includes(searchQuery.value.toLowerCase());
-
-    const tagMatch =
-        selectedTags.value.length === 0 ||
-        (tool.tags && selectedTags.value.every(selectedTag => tool.tags.includes(selectedTag)));
-
-    return searchMatch && tagMatch;
-  });
+// 直接使用API返回的数据（筛选已在后端完成）
+const displayedTools = computed(() => {
+  return toolsFromDB.value;
 });
 
 // 切换标签选择状态

@@ -40,7 +40,7 @@
       <div v-if="activeTab === 'books'">
         <el-row :gutter="20">
           <el-col
-              v-for="book in filteredItems"
+              v-for="book in displayedItems"
               :key="book.id"
               :md="8" :sm="12" :xs="24"
               class="grid-col"
@@ -50,7 +50,7 @@
         </el-row>
 
         <!-- 书籍分页控件 -->
-        <div v-if="!loading && filteredItems.length > 0 && booksTotalPages > 1" class="pagination-container">
+        <div v-if="!loading && displayedItems.length > 0 && booksTotalPages > 1" class="pagination-container">
           <el-pagination
               v-model:current-page="booksCurrentPage"
               :page-size="booksPageSize"
@@ -67,7 +67,7 @@
       <div v-if="activeTab === 'gallery'">
         <el-row :gutter="20">
           <el-col
-              v-for="figure in filteredItems"
+              v-for="figure in displayedItems"
               :key="figure.id"
               :md="8" :sm="12" :xs="24"
               class="grid-col"
@@ -77,7 +77,7 @@
         </el-row>
 
         <!-- 图表分页控件 -->
-        <div v-if="!loading && filteredItems.length > 0 && figuresTotalPages > 1" class="pagination-container">
+        <div v-if="!loading && displayedItems.length > 0 && figuresTotalPages > 1" class="pagination-container">
           <el-pagination
               v-model:current-page="figuresCurrentPage"
               :page-size="figuresPageSize"
@@ -90,7 +90,7 @@
         </div>
       </div>
 
-      <el-empty v-if="!loading && filteredItems.length === 0" description="没有找到匹配的资源"></el-empty>
+      <el-empty v-if="!loading && displayedItems.length === 0" description="没有找到匹配的资源"></el-empty>
     </div>
   </div>
 </template>
@@ -129,11 +129,23 @@ const API_BASE_URL = '/api';
 const fetchBooks = async () => {
   loading.value = true;
   try {
+    const params = {
+      page: booksCurrentPage.value,
+      limit: booksPageSize.value
+    };
+    
+    // 添加搜索参数
+    if (searchQuery.value.trim()) {
+      params.search = searchQuery.value.trim();
+    }
+    
+    // 添加标签参数
+    if (selectedTags.value.length > 0) {
+      params.tags = selectedTags.value.join(',');
+    }
+
     const response = await axios.get(`${API_BASE_URL}/books`, {
-      params: {
-        page: booksCurrentPage.value,
-        limit: booksPageSize.value
-      },
+      params: params,
       timeout: 10000,
       headers: {
         'Accept': 'application/json'
@@ -180,11 +192,23 @@ const fetchBookTags = async () => {
 const fetchFigures = async () => {
   loading.value = true;
   try {
+    const params = {
+      page: figuresCurrentPage.value,
+      limit: figuresPageSize.value
+    };
+    
+    // 添加搜索参数
+    if (searchQuery.value.trim()) {
+      params.search = searchQuery.value.trim();
+    }
+    
+    // 添加标签参数
+    if (selectedTags.value.length > 0) {
+      params.tags = selectedTags.value.join(',');
+    }
+
     const response = await axios.get(`${API_BASE_URL}/figures`, {
-      params: {
-        page: figuresCurrentPage.value,
-        limit: figuresPageSize.value
-      },
+      params: params,
       timeout: 10000,
       headers: {
         'Accept': 'application/json'
@@ -247,21 +271,9 @@ const allTags = computed(() => {
   return Array.from(tags).sort();
 });
 
-const filteredItems = computed(() => {
-  const sourceData = activeTab.value === 'books' ? booksFromDB.value : figuresFromDB.value;
-
-  return sourceData.filter(item => {
-    const searchMatch =
-        searchQuery.value.trim() === '' ||
-        item.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        item.description.toLowerCase().includes(searchQuery.value.toLowerCase());
-
-    const tagMatch =
-        selectedTags.value.length === 0 ||
-        selectedTags.value.every(tag => item.tags && item.tags.includes(tag));
-
-    return searchMatch && tagMatch;
-  });
+// 直接使用API返回的数据（筛选已在后端完成）
+const displayedItems = computed(() => {
+  return activeTab.value === 'books' ? booksFromDB.value : figuresFromDB.value;
 });
 
 // 切换书籍页码
@@ -278,16 +290,25 @@ const handleFiguresPageChange = (page) => {
 
 // 监听activeTab变化，切换标签时获取对应数据
 watch(activeTab, (newTab) => {
-  if (newTab === 'books' && booksFromDB.value.length === 0) {
+  if (newTab === 'books') {
     booksCurrentPage.value = 1;
     fetchBooks();
-  } else if (newTab === 'gallery' && figuresFromDB.value.length === 0) {
+  } else if (newTab === 'gallery') {
     figuresCurrentPage.value = 1;
     fetchFigures();
   }
-  // 清空搜索和筛选
-  searchQuery.value = '';
-  selectedTags.value = [];
+});
+
+// 监听搜索和标签变化，重新获取数据
+watch([searchQuery, selectedTags], () => {
+  // 重置到第一页
+  if (activeTab.value === 'books') {
+    booksCurrentPage.value = 1;
+    fetchBooks();
+  } else if (activeTab.value === 'gallery') {
+    figuresCurrentPage.value = 1;
+    fetchFigures();
+  }
 });
 
 onMounted(async () => {
