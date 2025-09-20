@@ -143,15 +143,26 @@ watch([searchQuery, selectedTags], () => {
   fetchTools();
 });
 
-const allTags = computed(() => {
-  const tags = new Set();
-  toolsFromDB.value.forEach(tool => {
-    if (tool.tags) {
-      tool.tags.forEach(tag => tags.add(tag));
+// 获取所有工具标签
+const allTags = ref([]);
+const fetchToolTags = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/tool-tags`, {
+      timeout: 10000,
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    
+    if (response.data && response.data.tags) {
+      allTags.value = response.data.tags.sort();
+      console.log(`Tools: 成功获取 ${allTags.value.length} 个工具标签`);
     }
-  });
-  return Array.from(tags).sort();
-});
+  } catch (error) {
+    console.error('Tools: 获取工具标签失败:', error);
+    allTags.value = [];
+  }
+};
 
 // 直接使用API返回的数据（筛选已在后端完成）
 const displayedTools = computed(() => {
@@ -172,6 +183,7 @@ const toggleTag = (tag) => {
 
 onMounted(() => {
   fetchTools();
+  fetchToolTags();
 });
 </script>
 

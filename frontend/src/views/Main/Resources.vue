@@ -252,23 +252,13 @@ const fetchFigureTags = async () => {
 };
 
 const allTags = computed(() => {
-  const tags = new Set();
   if (activeTab.value === 'books') {
-    // 使用数据库书籍数据
-    booksFromDB.value.forEach(book => {
-      if (book.tags) {
-        book.tags.forEach(tag => tags.add(tag));
-      }
-    });
+    // 使用从API获取的所有书籍标签
+    return bookTagsFromDB.value.sort();
   } else {
-    // 使用数据库图表数据
-    figuresFromDB.value.forEach(figure => {
-      if (figure.tags) {
-        figure.tags.forEach(tag => tags.add(tag));
-      }
-    });
+    // 使用从API获取的所有图表标签
+    return figureTagsFromDB.value.sort();
   }
-  return Array.from(tags).sort();
 });
 
 // 直接使用API返回的数据（筛选已在后端完成）
