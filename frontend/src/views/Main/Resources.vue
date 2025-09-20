@@ -278,14 +278,16 @@ const handleFiguresPageChange = (page) => {
   fetchFigures();
 };
 
-// 监听activeTab变化，切换标签时获取对应数据
+// 监听activeTab变化，切换标签时获取对应数据和标签
 watch(activeTab, (newTab) => {
   if (newTab === 'books') {
     booksCurrentPage.value = 1;
     fetchBooks();
+    fetchBookTags(); // 获取书籍标签
   } else if (newTab === 'gallery') {
     figuresCurrentPage.value = 1;
     fetchFigures();
+    fetchFigureTags(); // 获取图表标签
   }
 });
 
