@@ -70,7 +70,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from 'vue';
+import {computed, onMounted, ref, watch} from 'vue';
 import axios from 'axios';
 import ToolCard from '@/components/Main/Tools/ToolCard.vue';
 
