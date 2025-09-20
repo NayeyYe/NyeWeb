@@ -52,6 +52,19 @@
       </el-row>
 
       <el-empty v-if="!loading && filteredTools.length === 0" description="没有找到匹配的工具"></el-empty>
+
+      <!-- 分页控件 -->
+      <div v-if="!loading && filteredTools.length > 0 && totalPages > 1" class="pagination-container">
+        <el-pagination
+            v-model:current-page="currentPage"
+            :page-size="pageSize"
+            :total="totalItems"
+            :pager-count="5"
+            layout="prev, pager, next, jumper"
+            background
+            @current-change="handlePageChange"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -68,27 +81,47 @@ const toolsFromDB = ref([]);
 
 const API_BASE_URL = '/api';
 
+// 分页状态
+const currentPage = ref(1);
+const pageSize = ref(6);
+const totalItems = ref(0);
+const totalPages = ref(0);
+
 // 获取工具数据
 const fetchTools = async () => {
   loading.value = true;
   try {
     const response = await axios.get(`${API_BASE_URL}/tools`, {
+      params: {
+        page: currentPage.value,
+        limit: pageSize.value
+      },
       timeout: 10000,
       headers: {
         'Accept': 'application/json'
       }
     });
 
-    if (response.data && Array.isArray(response.data)) {
-      toolsFromDB.value = response.data;
-      console.log(`Tools: 成功获取 ${toolsFromDB.value.length} 个工具`);
+    if (response.data && response.data.data) {
+      toolsFromDB.value = response.data.data;
+      totalItems.value = response.data.pagination.total;
+      totalPages.value = response.data.pagination.pages;
+      console.log(`Tools: 成功获取 ${toolsFromDB.value.length} 个工具，页码: ${currentPage.value}`);
     }
   } catch (error) {
     console.error('Tools: 获取工具数据失败:', error);
     toolsFromDB.value = [];
+    totalItems.value = 0;
+    totalPages.value = 0;
   } finally {
     loading.value = false;
   }
+};
+
+// 切换页码
+const handlePageChange = (page) => {
+  currentPage.value = page;
+  fetchTools();
 };
 
 const allTags = computed(() => {
@@ -183,5 +216,11 @@ onMounted(() => {
 
 .tool-col {
   margin-bottom: 20px;
+}
+
+.pagination-container {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
 }
 </style>

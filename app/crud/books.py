@@ -36,12 +36,19 @@ class UpdateBookRequest(BaseModel):
     status: Optional[str] = None
 
 
-# 获取所有书籍
+# 获取所有书籍（支持分页）
 @router.get("/books")
-def get_books(db: Session = Depends(database.get_db)):
-    logger.info("收到获取书籍数据的请求")
+def get_books(page: int = 1, limit: int = 6, db: Session = Depends(database.get_db)):
+    logger.info(f"收到获取书籍数据的请求，页码: {page}, 每页数量: {limit}")
     try:
-        books = db.query(Book).filter(Book.status == 1).all()
+        # 计算偏移量
+        offset = (page - 1) * limit
+        
+        # 获取总数量
+        total_count = db.query(Book).filter(Book.status == 1).count()
+        
+        # 获取分页数据
+        books = db.query(Book).filter(Book.status == 1).offset(offset).limit(limit).all()
         logger.info(f"成功获取到 {len(books)} 本已发布书籍")
 
         # 转换为前端需要的格式
@@ -63,7 +70,16 @@ def get_books(db: Session = Depends(database.get_db)):
             books_data.append(book_dict)
             logger.info(f"书籍数据: ID={book.id}, 标题={book.title}")
 
-        return books_data
+        # 返回分页数据
+        return {
+            "data": books_data,
+            "pagination": {
+                "page": page,
+                "limit": limit,
+                "total": total_count,
+                "pages": (total_count + limit - 1) // limit  # 计算总页数
+            }
+        }
     except Exception as e:
         logger.error(f"获取书籍数据时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取书籍数据时发生错误: {str(e)}")

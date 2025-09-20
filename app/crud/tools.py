@@ -15,12 +15,19 @@ logger = logging.getLogger("tools_api")
 router = APIRouter()
 
 
-# 获取所有工具
+# 获取所有工具（支持分页）
 @router.get("/tools")
-def get_tools(db: Session = Depends(database.get_db)):
-    logger.info("收到获取工具数据的请求")
+def get_tools(page: int = 1, limit: int = 6, db: Session = Depends(database.get_db)):
+    logger.info(f"收到获取工具数据的请求，页码: {page}, 每页数量: {limit}")
     try:
-        tools = db.query(Tool).filter(Tool.status == 1).all()
+        # 计算偏移量
+        offset = (page - 1) * limit
+        
+        # 获取总数量
+        total_count = db.query(Tool).filter(Tool.status == 1).count()
+        
+        # 获取分页数据
+        tools = db.query(Tool).filter(Tool.status == 1).offset(offset).limit(limit).all()
         logger.info(f"成功获取到 {len(tools)} 个已发布工具")
 
         # 转换为前端需要的格式
@@ -40,7 +47,16 @@ def get_tools(db: Session = Depends(database.get_db)):
             tools_data.append(tool_dict)
             logger.info(f"工具数据: ID={tool.id}, 标题={tool.title}")
 
-        return tools_data
+        # 返回分页数据
+        return {
+            "data": tools_data,
+            "pagination": {
+                "page": page,
+                "limit": limit,
+                "total": total_count,
+                "pages": (total_count + limit - 1) // limit  # 计算总页数
+            }
+        }
     except Exception as e:
         logger.error(f"获取工具数据时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"获取工具数据时发生错误: {str(e)}")

@@ -37,28 +37,58 @@
 
     <div v-loading="loading" class="content-grid">
       <!-- Books Grid -->
-      <el-row v-if="activeTab === 'books'" :gutter="20">
-        <el-col
-            v-for="book in filteredItems"
-            :key="book.id"
-            :md="8" :sm="12" :xs="24"
-            class="grid-col"
-        >
-          <BookCard :book="book"/>
-        </el-col>
-      </el-row>
+      <div v-if="activeTab === 'books'">
+        <el-row :gutter="20">
+          <el-col
+              v-for="book in filteredItems"
+              :key="book.id"
+              :md="8" :sm="12" :xs="24"
+              class="grid-col"
+          >
+            <BookCard :book="book"/>
+          </el-col>
+        </el-row>
+
+        <!-- 书籍分页控件 -->
+        <div v-if="!loading && filteredItems.length > 0 && booksTotalPages > 1" class="pagination-container">
+          <el-pagination
+              v-model:current-page="booksCurrentPage"
+              :page-size="booksPageSize"
+              :total="booksTotalItems"
+              :pager-count="5"
+              layout="prev, pager, next, jumper"
+              background
+              @current-change="handleBooksPageChange"
+          />
+        </div>
+      </div>
 
       <!-- Gallery Grid -->
-      <el-row v-if="activeTab === 'gallery'" :gutter="20">
-        <el-col
-            v-for="figure in filteredItems"
-            :key="figure.id"
-            :md="8" :sm="12" :xs="24"
-            class="grid-col"
-        >
-          <FigureCard :figure="figure"/>
-        </el-col>
-      </el-row>
+      <div v-if="activeTab === 'gallery'">
+        <el-row :gutter="20">
+          <el-col
+              v-for="figure in filteredItems"
+              :key="figure.id"
+              :md="8" :sm="12" :xs="24"
+              class="grid-col"
+          >
+            <FigureCard :figure="figure"/>
+          </el-col>
+        </el-row>
+
+        <!-- 图表分页控件 -->
+        <div v-if="!loading && filteredItems.length > 0 && figuresTotalPages > 1" class="pagination-container">
+          <el-pagination
+              v-model:current-page="figuresCurrentPage"
+              :page-size="figuresPageSize"
+              :total="figuresTotalItems"
+              :pager-count="5"
+              layout="prev, pager, next, jumper"
+              background
+              @current-change="handleFiguresPageChange"
+          />
+        </div>
+      </div>
 
       <el-empty v-if="!loading && filteredItems.length === 0" description="没有找到匹配的资源"></el-empty>
     </div>
@@ -82,6 +112,17 @@ const bookTagsFromDB = ref([]);
 const figuresFromDB = ref([]);
 const figureTagsFromDB = ref([]);
 
+// 分页状态
+const booksCurrentPage = ref(1);
+const booksPageSize = ref(6);
+const booksTotalItems = ref(0);
+const booksTotalPages = ref(0);
+
+const figuresCurrentPage = ref(1);
+const figuresPageSize = ref(6);
+const figuresTotalItems = ref(0);
+const figuresTotalPages = ref(0);
+
 const API_BASE_URL = '/api';
 
 // 获取书籍数据
@@ -89,19 +130,27 @@ const fetchBooks = async () => {
   loading.value = true;
   try {
     const response = await axios.get(`${API_BASE_URL}/books`, {
+      params: {
+        page: booksCurrentPage.value,
+        limit: booksPageSize.value
+      },
       timeout: 10000,
       headers: {
         'Accept': 'application/json'
       }
     });
 
-    if (response.data && Array.isArray(response.data)) {
-      booksFromDB.value = response.data;
-      console.log(`Resources: 成功获取 ${booksFromDB.value.length} 本书籍`);
+    if (response.data && response.data.data) {
+      booksFromDB.value = response.data.data;
+      booksTotalItems.value = response.data.pagination.total;
+      booksTotalPages.value = response.data.pagination.pages;
+      console.log(`Resources: 成功获取 ${booksFromDB.value.length} 本书籍，页码: ${booksCurrentPage.value}`);
     }
   } catch (error) {
     console.error('Resources: 获取书籍数据失败:', error);
     booksFromDB.value = [];
+    booksTotalItems.value = 0;
+    booksTotalPages.value = 0;
   } finally {
     loading.value = false;
   }
@@ -132,19 +181,27 @@ const fetchFigures = async () => {
   loading.value = true;
   try {
     const response = await axios.get(`${API_BASE_URL}/figures`, {
+      params: {
+        page: figuresCurrentPage.value,
+        limit: figuresPageSize.value
+      },
       timeout: 10000,
       headers: {
         'Accept': 'application/json'
       }
     });
 
-    if (response.data && Array.isArray(response.data)) {
-      figuresFromDB.value = response.data;
-      console.log(`Resources: 成功获取 ${figuresFromDB.value.length} 个图表`);
+    if (response.data && response.data.data) {
+      figuresFromDB.value = response.data.data;
+      figuresTotalItems.value = response.data.pagination.total;
+      figuresTotalPages.value = response.data.pagination.pages;
+      console.log(`Resources: 成功获取 ${figuresFromDB.value.length} 个图表，页码: ${figuresCurrentPage.value}`);
     }
   } catch (error) {
     console.error('Resources: 获取图表数据失败:', error);
     figuresFromDB.value = [];
+    figuresTotalItems.value = 0;
+    figuresTotalPages.value = 0;
   } finally {
     loading.value = false;
   }
@@ -207,11 +264,25 @@ const filteredItems = computed(() => {
   });
 });
 
+// 切换书籍页码
+const handleBooksPageChange = (page) => {
+  booksCurrentPage.value = page;
+  fetchBooks();
+};
+
+// 切换图表页码
+const handleFiguresPageChange = (page) => {
+  figuresCurrentPage.value = page;
+  fetchFigures();
+};
+
 // 监听activeTab变化，切换标签时获取对应数据
 watch(activeTab, (newTab) => {
   if (newTab === 'books' && booksFromDB.value.length === 0) {
+    booksCurrentPage.value = 1;
     fetchBooks();
   } else if (newTab === 'gallery' && figuresFromDB.value.length === 0) {
+    figuresCurrentPage.value = 1;
     fetchFigures();
   }
   // 清空搜索和筛选
@@ -278,5 +349,11 @@ onMounted(async () => {
 
 .grid-col {
   margin-bottom: 20px;
+}
+
+.pagination-container {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
 }
 </style>
