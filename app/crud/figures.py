@@ -56,12 +56,15 @@ def get_figures(
                 (Figure.description.ilike(search))
             )
         
-        # 应用标签筛选
+        # 应用标签筛选 (AND 逻辑 - 必须包含所有选中的标签)
         if tags:
             tag_list = [tag.strip() for tag in tags.split(',') if tag.strip()]
             if tag_list:
-                # 通过图表标签关联表进行筛选
-                query = query.join(FigureTag).join(Tag).filter(Tag.name.in_(tag_list))
+                # 对每个标签进行单独的join和filter，实现AND筛选
+                for tag_name in tag_list:
+                    # 为每个标签创建一个子查询，确保图表包含所有选中的标签
+                    subquery = db.query(FigureTag.figure_id).join(Tag).filter(Tag.name == tag_name).subquery()
+                    query = query.filter(Figure.id.in_(subquery))
         
         # 获取总数量
         total_count = query.count()
