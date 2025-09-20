@@ -136,12 +136,12 @@ const handlePageChange = (page) => {
   fetchTools();
 };
 
-// 监听搜索和标签变化，重新获取数据
+// 监听搜索和标签变化，重新获取数据（深度监听以检测数组变化）
 watch([searchQuery, selectedTags], () => {
   // 重置到第一页
   currentPage.value = 1;
   fetchTools();
-});
+}, { deep: true });
 
 // 获取所有工具标签
 const allTags = ref([]);
