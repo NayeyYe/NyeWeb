@@ -237,5 +237,18 @@ onMounted(async () => {
   .projects-grid {
     grid-template-columns: 1fr;
   }
+
+  /* 调整响应式布局时的组件顺序 */
+  .timeline-sidebar {
+    order: 1; /* 归档 */
+  }
+
+  .tags-sidebar {
+    order: 2; /* tag */
+  }
+
+  .projects-main {
+    order: 3; /* 文章 */
+  }
 }
 </style>

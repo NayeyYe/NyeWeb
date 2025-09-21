@@ -125,4 +125,30 @@ p {
 .contact-section .el-button {
   margin: 5px;
 }
+
+/* 响应式布局 */
+@media (max-width: 1024px) {
+  .home-container {
+    flex-direction: column;
+  }
+
+  .left-column {
+    width: 100%;
+    order: 1; /* ProfileCard 和 ImageCarousel */
+  }
+
+  .intro-card {
+    order: 2; /* 个人介绍 */
+  }
+}
+
+@media (max-width: 768px) {
+  .home-container {
+    padding: 80px 10px 20px;
+  }
+
+  .left-column {
+    gap: 15px;
+  }
+}
 </style>

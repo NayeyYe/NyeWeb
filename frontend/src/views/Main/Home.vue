@@ -219,4 +219,21 @@ onMounted(async () => {
 .list-item-card {
   width: 100%;
 }
+
+/* 响应式布局 */
+@media (max-width: 1024px) {
+  .home-container {
+    flex-direction: column;
+  }
+
+  .left-column {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .home-container {
+    padding: 80px 10px 20px;
+  }
+}
 </style>

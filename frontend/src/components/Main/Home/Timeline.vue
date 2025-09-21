@@ -2,7 +2,7 @@
   <el-card class="timeline-card">
     <template #header>
       <div class="card-header">
-        <span>我的历程</span>
+        <span>网站历程</span>
       </div>
     </template>
 

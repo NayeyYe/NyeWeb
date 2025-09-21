@@ -1,6 +1,7 @@
 <script setup>
 import {computed, ref, onMounted, onUnmounted} from 'vue'
 import {useRoute} from 'vue-router'
+import {Menu as IconMenu} from '@element-plus/icons-vue'
 
 const route = useRoute()
 
@@ -32,8 +33,32 @@ const handleScroll = () => {
   lastScrollTop = scrollTop
 }
 
+// 响应式菜单相关
+const isMenuOpen = ref(false)
+
+// 切换菜单开关
+const toggleMenu = () => {
+  isMenuOpen.value = !isMenuOpen.value
+}
+
+// 关闭菜单
+const closeMenu = () => {
+  isMenuOpen.value = false
+}
+
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
+  
+  // 点击其他地方关闭菜单
+  const handleClickOutside = (event) => {
+    const menu = document.querySelector('.mobile-menu')
+    const hamburger = document.querySelector('.hamburger')
+    if (menu && !menu.contains(event.target) && hamburger && !hamburger.contains(event.target)) {
+      closeMenu()
+    }
+  }
+  
+  window.addEventListener('click', handleClickOutside)
 })
 
 onUnmounted(() => {
@@ -62,44 +87,50 @@ onUnmounted(() => {
       <div class="admin-placeholder"></div>
     </div>
 
-    <!-- 普通页面的完整Header -->
-    <el-row v-else align="middle" justify="space-between" style="height: 100%; width: 100%;">
-      <!-- 左侧 Logo/Icon -->
-      <el-col :span="4">
-        <div class="logo-section">
-          <router-link class="logo-link" to="/">
-            <span class="logo-text">NyeWeb</span>
-          </router-link>
-        </div>
-      </el-col>
+<!-- 普通页面的完整Header -->
+    <div v-else class="main-header">
+      <!-- 左侧 Logo/Icon 和 汉堡菜单 -->
+      <div class="header-left">
+        <router-link class="logo-link" to="/">
+          <span class="logo-text">NyeWeb</span>
+        </router-link>
+        <el-icon class="hamburger" @click="toggleMenu">
+          <IconMenu/>
+        </el-icon>
+      </div>
 
-      <!-- 中间导航选项 -->
-      <el-col :span="16">
-        <div class="nav-center">
-          <el-menu :ellipsis="false" class="nav-menu" mode="horizontal" router>
-            <el-menu-item index="/">首页</el-menu-item>
-            <el-menu-item index="/projects">项目</el-menu-item>
-            <el-menu-item index="/knowledge">知识</el-menu-item>
-            <el-menu-item index="/tools">小工具</el-menu-item>
-            <el-menu-item index="/resources">资源</el-menu-item>
-          </el-menu>
-        </div>
-      </el-col>
+      <!-- 中间导航选项 (大屏幕) -->
+      <div class="nav-center">
+        <el-menu :ellipsis="false" class="nav-menu" mode="horizontal" router>
+          <el-menu-item index="/">首页</el-menu-item>
+          <el-menu-item index="/projects">项目</el-menu-item>
+          <el-menu-item index="/knowledge">知识</el-menu-item>
+          <el-menu-item index="/tools">小工具</el-menu-item>
+          <el-menu-item index="/resources">资源</el-menu-item>
+        </el-menu>
+      </div>
 
       <!-- 右侧头像和关于我 -->
-      <el-col :span="4">
-        <div class="user-section">
-          <router-link class="user-info-link" to="/about">
-            <span class="about-me">关于我</span>
-          </router-link>
-          <router-link class="avatar-link" to="/admin/login">
-            <el-avatar class="user-avatar" size="small">
-              <img alt="用户头像" src="/avatar.jpg"/>
-            </el-avatar>
-          </router-link>
-        </div>
-      </el-col>
-    </el-row>
+      <div class="header-right">
+        <router-link class="user-info-link" to="/about">
+          <span class="about-me">关于我</span>
+        </router-link>
+        <router-link class="avatar-link" to="/admin/login">
+          <el-avatar class="user-avatar" size="small">
+            <img alt="用户头像" src="/avatar.jpg"/>
+          </el-avatar>
+        </router-link>
+      </div>
+    </div>
+
+    <!-- 移动端菜单 -->
+    <div v-if="isMenuOpen" class="mobile-menu">
+      <router-link @click="closeMenu" class="mobile-menu-item" to="/">首页</router-link>
+      <router-link @click="closeMenu" class="mobile-menu-item" to="/projects">项目</router-link>
+      <router-link @click="closeMenu" class="mobile-menu-item" to="/knowledge">知识</router-link>
+      <router-link @click="closeMenu" class="mobile-menu-item" to="/tools">小工具</router-link>
+      <router-link @click="closeMenu" class="mobile-menu-item" to="/resources">资源</router-link>
+    </div>
   </el-header>
 </template>
 
@@ -265,5 +296,94 @@ onUnmounted(() => {
 .avatar-link:hover .user-avatar {
   transform: scale(1.1);
   transition: transform 0.2s ease;
+}
+
+/* 新增的响应式样式 */
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 0 40px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.hamburger {
+  display: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #409eff;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* 移动端菜单样式 */
+.mobile-menu {
+  position: absolute;
+  top: 55px;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 999;
+  display: none;
+  flex-direction: column;
+  padding: 10px 0;
+}
+
+.mobile-menu-item {
+  padding: 15px 20px;
+  text-decoration: none;
+  color: #333;
+  font-size: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.mobile-menu-item:last-child {
+  border-bottom: none;
+}
+
+.mobile-menu-item:hover {
+  background-color: #f5f7fa;
+  color: #409eff;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .hamburger {
+    display: block;
+  }
+  
+  .nav-center {
+    display: none;
+  }
+  
+  .mobile-menu {
+    display: flex;
+  }
+  
+  .main-header {
+    padding: 0 20px;
+  }
+  
+  .header-right {
+    gap: 10px;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-menu {
+    display: none !important;
+  }
 }
 </style>

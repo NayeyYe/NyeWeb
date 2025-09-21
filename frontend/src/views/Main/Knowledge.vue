@@ -258,4 +258,44 @@ onMounted(async () => {
   position: sticky;
   top: 100px;
 }
+
+/* 响应式布局 */
+@media (max-width: 1024px) {
+  .main-content {
+    flex-direction: column;
+  }
+
+  .timeline-sidebar,
+  .tags-sidebar {
+    width: 100%;
+    position: static;
+  }
+
+  /* 调整响应式布局时的组件顺序 */
+  .timeline-sidebar {
+    order: 1; /* 归档 */
+  }
+
+  .tags-sidebar {
+    order: 2; /* 文件夹分类和tag分类 */
+  }
+
+  .articles-main {
+    order: 3; /* 文章列表 */
+  }
+}
+
+@media (max-width: 768px) {
+  .knowledge-container {
+    padding: 100px 10px 10px;
+  }
+
+  .header h1 {
+    font-size: 2em;
+  }
+
+  .header p {
+    font-size: 1em;
+  }
+}
 </style>
