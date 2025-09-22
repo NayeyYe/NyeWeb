@@ -366,7 +366,7 @@ onUnmounted(() => {
   
   .outline-sidebar {
     width: 100%;
-    order: 2;
+    order: 1; /* 大纲在上 */
   }
   
   .outline-fixed-container {
@@ -376,7 +376,7 @@ onUnmounted(() => {
   }
   
   .main-content {
-    order: 1;
+    order: 2; /* 文章在下 */
   }
 }
 
@@ -519,6 +519,9 @@ onUnmounted(() => {
   border-radius: 0;
   overflow-x: auto;
   border: none;
+  /* 确保代码块在窄屏幕上可以横向滚动 */
+  white-space: pre;
+  word-wrap: normal;
 }
 
 /* 行内代码 */

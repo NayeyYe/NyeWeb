@@ -3,9 +3,15 @@
     <template #header>
       <div class="card-header">
         <span>大纲</span>
+        <el-button class="toggle-button" link @click="toggleOutline">
+          <el-icon>
+            <ArrowDown v-if="isExpanded"/>
+            <ArrowRight v-else/>
+          </el-icon>
+        </el-button>
       </div>
     </template>
-    <nav>
+    <nav v-show="isExpanded">
       <ul>
         <li v-for="item in outline" :key="item.id" :class="`toc-level-${item.level}`">
           <a
@@ -20,7 +26,10 @@
 </template>
 
 <script setup>
-defineProps({
+import {ref} from 'vue'
+import {ArrowDown, ArrowRight} from '@element-plus/icons-vue'
+
+const props = defineProps({
   outline: {
     type: Array,
     required: true,
@@ -30,6 +39,12 @@ defineProps({
     default: '',
   },
 });
+
+const isExpanded = ref(true)
+
+const toggleOutline = () => {
+  isExpanded.value = !isExpanded.value
+}
 
 const scrollTo = (id) => {
   const element = document.getElementById(id);
@@ -62,6 +77,18 @@ const scrollTo = (id) => {
 
 .card-header {
   font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.toggle-button {
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 ul {
