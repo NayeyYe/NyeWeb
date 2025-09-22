@@ -5,11 +5,27 @@
       <ImageCarousel class="image-carousel-container"/>
     </div>
     <el-card class="intro-card">
-      <!-- 英雄区域 -->
+<!-- 英雄区域 -->
       <div class="hero-section">
-        <h1>你好，我是 [你的名字]</h1>
-        <p class="subtitle">一位热情的 [你的职业，如：前端开发者]</p>
+        <h1>你好，我是 卟瓿钚</h1>
+        <p class="subtitle">目前是 <a href="https://www.whu.edu.cn/" class="whu-link">武汉大学</a> 在读本科生</p>
         <p>欢迎来到我的个人空间。在这里，你可以了解我的项目、技术栈和个人思考。</p>
+      </div>
+
+<el-divider/>
+
+<!-- 就读经历 -->
+      <div class="education-section">
+        <h2>就读经历</h2>
+        <a href="https://maths.whu.edu.cn/" target="_blank" style="text-decoration: none; color: inherit;">
+          <el-card class="education-card" shadow="hover">
+            <div class="education-content">
+              <h3>武汉大学数学与统计学院</h3>
+              <p class="education-period">2022.9 - 2026.6</p>
+              <p class="education-description">本科在读</p>
+            </div>
+          </el-card>
+        </a>
       </div>
 
       <el-divider/>
@@ -17,32 +33,62 @@
       <!-- 关于我 -->
       <div class="about-section">
         <h2>关于我</h2>
-        <p>我专注于 [你擅长的领域]，致力于构建高质量、用户友好的 Web 应用。我对 [你感兴趣的技术或方向]
-          充满热情，并乐于探索新的技术和解决方案。</p>
+        <p>破大专的数学系，妄想指染机器学习的圣域，拼尽全力无法战胜</p>
       </div>
 
       <el-divider/>
 
-      <!-- 技术栈 -->
+<!-- 技术栈 -->
       <div class="skills-section">
         <h2>技术栈</h2>
-        <el-tag class="skill-tag" type="primary">Vue.js</el-tag>
-        <el-tag class="skill-tag" type="success">JavaScript</el-tag>
-        <el-tag class="skill-tag" type="info">HTML5 & CSS3</el-tag>
+        <h3>基本技能</h3>
+        <el-tag class="skill-tag" type="primary">Linux</el-tag>
+        <el-tag class="skill-tag" type="success">Git</el-tag>
+        <el-tag class="skill-tag" type="info">Docker</el-tag>
+        
+        <h3 style="margin-top: 15px;">编程语言</h3>
+        <el-tag class="skill-tag" type="primary">C</el-tag>
+        <el-tag class="skill-tag" type="success">C++</el-tag>
+        <el-tag class="skill-tag" type="info">Java</el-tag>
         <el-tag class="skill-tag" type="warning">Node.js</el-tag>
-        <el-tag class="skill-tag" type="danger">Element Plus</el-tag>
-        <!-- 在这里添加更多技术标签 -->
+        <el-tag class="skill-tag" type="danger">Python</el-tag>
+        <el-tag class="skill-tag" type="primary">Vue3</el-tag>
+        
+        <h3 style="margin-top: 15px;">机器学习</h3>
+        <el-tag class="skill-tag" type="primary">TensorFlow</el-tag>
+        <el-tag class="skill-tag" type="success">PyTorch</el-tag>
+      </div>
+
+<el-divider/>
+
+      <!-- 兴趣爱好 -->
+      <div class="hobbies-section">
+        <h2>兴趣爱好</h2>
+        <p>二次元（bushi）、游戏、技术宅</p>
       </div>
 
       <el-divider/>
 
-      <!-- 联系方式 -->
+<!-- 联系方式 -->
       <div class="contact-section">
         <h2>联系我</h2>
         <p>你可以在以下平台找到我：</p>
-        <el-button plain type="primary">GitHub</el-button>
-        <el-button plain type="success">LinkedIn</el-button>
-        <el-button plain type="info">Email</el-button>
+        <a href="https://github.com/NayeyYe" target="_blank" style="text-decoration: none;">
+          <el-button plain type="primary">GitHub</el-button>
+        </a>
+        <a href="https://x.com/NayeyYeX" target="_blank" style="text-decoration: none;">
+          <el-button plain type="success">X</el-button>
+        </a>
+        <a href="https://space.bilibili.com/68134624?spm_id_from=333.1007.0.0" target="_blank" style="text-decoration: none;">
+          <el-button plain type="info">Bilibili</el-button>
+        </a>
+        <a href="https://blog.csdn.net/2302_77222155?spm=1000.2115.3001.5343" target="_blank" style="text-decoration: none;">
+          <el-button plain type="warning">CSDN</el-button>
+        </a>
+        <a href="https://gitee.com/NayeyYe" target="_blank" style="text-decoration: none;">
+          <el-button plain type="danger">Gitee</el-button>
+        </a>
+        <p style="margin-top: 15px;">个人网站: <a href="https://nyeweb.fun" target="_blank">nyeweb.fun</a></p>
       </div>
     </el-card>
   </div>
@@ -126,6 +172,41 @@ p {
   margin: 5px;
 }
 
+.whu-link {
+  color: #606266;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.whu-link:hover {
+  color: #28a745; /* WHU绿色 */
+}
+
+.education-card {
+  margin-top: 15px;
+}
+
+.education-content h3 {
+  margin: 0 0 10px 0;
+  color: #303133;
+}
+
+.education-period {
+  font-weight: bold;
+  color: #409eff;
+  margin: 5px 0;
+}
+
+.education-description {
+  color: #606266;
+  margin: 5px 0;
+}
+
+.hobbies-section p {
+  font-size: 16px;
+  color: #303133;
+}
+
 /* 响应式布局 */
 @media (max-width: 1024px) {
   .home-container {
@@ -149,6 +230,18 @@ p {
 
   .left-column {
     gap: 15px;
+  }
+  
+  .hero-section h1 {
+    font-size: 2em;
+  }
+  
+  .subtitle {
+    font-size: 1.2em;
+  }
+  
+  h2 {
+    font-size: 1.5em;
   }
 }
 </style>
