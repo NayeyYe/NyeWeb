@@ -50,7 +50,7 @@ const tagCounts = ref({})
 
 const API_BASE_URL = '/api'
 
-// 获取文章数据
+// 取文章数据
 const fetchArticles = async () => {
   loading.value = true
   try {
@@ -283,6 +283,14 @@ onMounted(async () => {
   .articles-main {
     order: 3; /* 文章列表 */
   }
+  
+  .articles-grid {
+    gap: 15px;
+  }
+  
+  .load-more-container {
+    margin-top: 15px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -290,12 +298,51 @@ onMounted(async () => {
     padding: 100px 10px 10px;
   }
 
+  .header {
+    margin-bottom: 30px;
+  }
+  
   .header h1 {
     font-size: 2em;
   }
 
   .header p {
     font-size: 1em;
+  }
+  
+  .articles-grid {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .knowledge-container {
+    padding: 90px 5px 5px;
+  }
+  
+  .header {
+    margin-bottom: 20px;
+  }
+  
+  .header h1 {
+    font-size: 1.8em;
+  }
+  
+  .header p {
+    font-size: 0.9em;
+  }
+  
+  .articles-grid {
+    gap: 10px;
+  }
+  
+  .load-more-container {
+    margin-top: 10px;
+  }
+  
+  :deep(.el-button) {
+    --el-button-font-size: 12px;
+    --el-button-padding-horizontal: 12px;
   }
 }
 </style>

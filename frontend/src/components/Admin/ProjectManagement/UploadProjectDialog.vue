@@ -1,10 +1,9 @@
 <template>
-  <el-dialog
+<el-dialog
       :before-close="handleClose"
       :close-on-click-modal="false"
       :model-value="modelValue"
       title="上传项目"
-      width="700px"
       @update:model-value="$emit('update:modelValue', $event)"
   >
     <el-form ref="formRef" :model="formData" :rules="formRules" label-width="100px">
@@ -369,5 +368,145 @@ onMounted(() => {
 
 :deep(.el-select .el-input__inner) {
   border-radius: 6px;
+}
+
+/* 响应式布局优化 */
+@media (max-width: 768px) {
+  :deep(.el-dialog) {
+    width: 95% !important;
+    max-width: none !important;
+  }
+  
+  :deep(.el-dialog__body) {
+    padding: 15px 20px;
+  }
+  
+  :deep(.el-form-item__label) {
+    width: 80px !important;
+  }
+  
+  :deep(.el-form-item__content) {
+    margin-left: 80px !important;
+  }
+  
+  :deep(.el-input__inner),
+  :deep(.el-textarea__inner),
+  :deep(.el-select .el-input__inner) {
+    padding: 8px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  :deep(.el-dialog) {
+    width: 95% !important;
+    max-width: none !important;
+  }
+  
+  :deep(.el-dialog__body) {
+    padding: 10px 15px;
+  }
+  
+  :deep(.el-form-item) {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  :deep(.el-form-item__label) {
+    width: 100% !important;
+    font-size: 13px;
+    margin-bottom: 5px;
+    text-align: left !important;
+    padding-bottom: 0;
+  }
+  
+  :deep(.el-form-item__content) {
+    margin-left: 0 !important;
+    width: 100%;
+  }
+  
+  :deep(.el-input__inner),
+  :deep(.el-textarea__inner),
+  :deep(.el-select .el-input__inner) {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+  
+  :deep(.el-button) {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+  
+  .form-tip {
+    font-size: 11px;
+  }
+}
+
+/* 针对小屏幕的额外优化 */
+@media (max-width: 375px) {
+  :deep(.el-dialog) {
+    width: 95% !important;
+    max-width: none !important;
+  }
+  
+  :deep(.el-dialog__body) {
+    padding: 8px 12px;
+  }
+  
+  :deep(.el-form-item) {
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  :deep(.el-form-item__label) {
+    width: 100% !important;
+    font-size: 12px;
+    margin-bottom: 5px;
+    text-align: left !important;
+    padding-bottom: 0;
+  }
+  
+  :deep(.el-form-item__content) {
+    margin-left: 0 !important;
+    width: 100%;
+  }
+  
+  :deep(.el-input__inner),
+  :deep(.el-textarea__inner),
+  :deep(.el-select .el-input__inner) {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+  
+  :deep(.el-button) {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+  
+  :deep(.el-radio) {
+    margin-right: 15px;
+  }
+  
+  :deep(.el-radio__label) {
+    font-size: 12px;
+  }
+  
+  .form-tip {
+    font-size: 10px;
+  }
+  
+  :deep(.el-date-editor .el-input__inner) {
+    font-size: 12px;
+    padding: 0 8px;
+  }
+  
+  :deep(.el-radio) {
+    margin-right: 15px;
+  }
+  
+  :deep(.el-radio__label) {
+    font-size: 12px;
+  }
 }
 </style>

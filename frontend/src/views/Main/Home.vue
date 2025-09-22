@@ -235,5 +235,59 @@ onMounted(async () => {
   .home-container {
     padding: 80px 10px 20px;
   }
+  
+  .left-column {
+    gap: 15px;
+  }
+  
+  .right-column-content {
+    gap: 15px;
+  }
+  
+  .card-list {
+    gap: 12px;
+  }
+  
+  .card-header span {
+    font-size: 1.1em;
+  }
+  
+  .more-link {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-container {
+    padding: 70px 5px 15px;
+    gap: 15px;
+  }
+  
+  .left-column {
+    gap: 12px;
+  }
+  
+  .right-column-content {
+    gap: 12px;
+  }
+  
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .card-header span {
+    font-size: 1.05em;
+  }
+  
+  .more-link {
+    align-self: flex-end;
+    font-size: 12px;
+  }
+  
+  .card-list {
+    gap: 10px;
+  }
 }
 </style>

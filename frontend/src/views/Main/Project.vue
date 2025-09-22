@@ -584,4 +584,60 @@ onUnmounted(() => {
   border-radius: 3px;
   border: 1px solid #ffcccc;
 }
+
+/* 响应式布局 */
+@media (max-width: 1024px) {
+  .content-wrapper {
+    flex-direction: column;
+  }
+  
+  .outline-sidebar {
+    width: 100%;
+    order: 2;
+  }
+  
+  .outline-fixed-container {
+    position: static;
+    width: 100%;
+    height: auto;
+  }
+  
+  .main-content {
+    order: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    margin: 90px auto 20px;
+    padding: 15px;
+  }
+  
+  .markdown-body {
+    padding: 1.5em;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-container {
+    margin: 80px auto 15px;
+    padding: 10px;
+  }
+  
+  .markdown-body {
+    padding: 1em;
+  }
+  
+  :deep(h1) {
+    font-size: 1.8em;
+  }
+  
+  :deep(h2) {
+    font-size: 1.5em;
+  }
+  
+  :deep(h3) {
+    font-size: 1.2em;
+  }
+}
 </style>

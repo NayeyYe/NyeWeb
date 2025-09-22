@@ -841,5 +841,95 @@ onMounted(() => {
   height: 28px;
   line-height: 28px;
 }
-</style>
 
+/* 响应式布局 */
+@media (max-width: 768px) {
+  .resource-management {
+    padding: 15px;
+  }
+  
+  .resource-tabs {
+    padding: 15px;
+  }
+  
+  .action-bar {
+    margin-bottom: 15px;
+  }
+  
+  .filter-section {
+    margin-bottom: 15px;
+  }
+  
+  .filter-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .filter-item {
+    width: 100%;
+  }
+  
+  .filter-item label {
+    min-width: 60px;
+  }
+  
+  .action-buttons {
+    flex-wrap: wrap;
+  }
+  
+  .list-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .resource-count {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .resource-management {
+    padding: 10px;
+  }
+  
+  .resource-tabs {
+    padding: 10px;
+  }
+  
+  .action-bar {
+    margin-bottom: 10px;
+  }
+  
+  .filter-section {
+    margin-bottom: 10px;
+  }
+  
+  .tag-row {
+    margin-bottom: 15px;
+  }
+  
+  .filter-row {
+    margin-bottom: 12px;
+  }
+  
+  .filter-item label {
+    min-width: 50px;
+    font-size: 13px;
+  }
+  
+  :deep(.el-tabs__item) {
+    font-size: 14px;
+    padding: 0 15px;
+  }
+  
+  :deep(.el-card__header) {
+    padding: 12px 15px;
+  }
+  
+  :deep(.el-card__body) {
+    padding: 15px;
+  }
+}
+</style>

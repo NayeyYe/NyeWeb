@@ -223,7 +223,7 @@ onMounted(async () => {
   margin-top: 30px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .main-content {
     flex-direction: column;
   }
@@ -232,10 +232,12 @@ onMounted(async () => {
   .tags-sidebar {
     flex: none;
     width: 100%;
+    position: static;
   }
 
   .projects-grid {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
 
   /* 调整响应式布局时的组件顺序 */
@@ -249,6 +251,69 @@ onMounted(async () => {
 
   .projects-main {
     order: 3; /* 文章 */
+  }
+  
+  .load-more-container {
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .projects-container {
+    margin: 80px auto 20px;
+    padding: 15px;
+  }
+  
+  .header {
+    margin-bottom: 30px;
+  }
+  
+  .header h1 {
+    font-size: 2.2em;
+  }
+  
+  .header p {
+    font-size: 1.1em;
+  }
+  
+  .projects-grid {
+    gap: 15px;
+  }
+  
+  .load-more-container {
+    margin-top: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .projects-container {
+    margin: 70px auto 15px;
+    padding: 10px;
+  }
+  
+  .header {
+    margin-bottom: 20px;
+  }
+  
+  .header h1 {
+    font-size: 2em;
+  }
+  
+  .header p {
+    font-size: 1em;
+  }
+  
+  .projects-grid {
+    gap: 12px;
+  }
+  
+  .load-more-container {
+    margin-top: 10px;
+  }
+  
+  :deep(.el-button) {
+    --el-button-font-size: 12px;
+    --el-button-padding-horizontal: 12px;
   }
 }
 </style>

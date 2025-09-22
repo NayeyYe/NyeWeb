@@ -10,18 +10,18 @@
       </div>
     </div>
 
-    <!-- 筛选区域 -->
+<!-- 筛选区域 -->
     <div class="filter-section">
       <el-row :gutter="20">
-                <!-- 分类筛选 -->
-        <el-col :span="12">
+        <!-- 分类筛选 -->
+        <el-col :span="24" :md="12">
           <CategoryFilterCard
             v-model="filterForm.category"
           />
         </el-col>
 
         <!-- 其他筛选条件 -->
-        <el-col :span="12">
+        <el-col :span="24" :md="12">
           <FilterControlsCard
               :filters="filterForm"
               :sort-order="sortOrder"
@@ -254,5 +254,57 @@ onMounted(() => {
 .el-button--danger {
   background: #f56c6c;
   border-color: #f56c6c;
+}
+
+/* 响应式布局 */
+@media (max-width: 768px) {
+  .article-management {
+    padding: 15px;
+  }
+  
+  .action-bar {
+    margin-bottom: 15px;
+  }
+  
+  .filter-section {
+    margin-bottom: 15px;
+  }
+  
+  .action-buttons {
+    flex-wrap: wrap;
+  }
+  
+  /* 在中等屏幕上也使用垂直布局 */
+  .el-row {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .el-col {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .article-management {
+    padding: 10px;
+  }
+  
+  .action-bar {
+    margin-bottom: 10px;
+  }
+  
+  .filter-section {
+    margin-bottom: 10px;
+  }
+  
+  .el-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .el-col {
+    width: 100%;
+  }
 }
 </style>

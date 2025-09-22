@@ -210,5 +210,98 @@ const formatDate = (dateStr) => {
   height: 28px;
   line-height: 28px;
 }
-</style>
 
+/* 响应式布局优化 */
+@media (max-width: 768px) {
+  .list-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .article-count {
+    align-self: flex-end;
+  }
+  
+  :deep(.el-card__header) {
+    padding: 12px 15px;
+  }
+  
+  :deep(.el-card__body) {
+    padding: 15px;
+  }
+  
+  :deep(.el-table) {
+    font-size: 13px;
+  }
+  
+  :deep(.el-table th) {
+    padding: 8px 0;
+  }
+  
+  :deep(.el-table td) {
+    padding: 6px 0;
+  }
+  
+  .action-buttons-table {
+    gap: 4px;
+  }
+  
+  .action-buttons-table .el-button {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  :deep(.el-card__header) {
+    padding: 10px 12px;
+  }
+  
+  :deep(.el-card__body) {
+    padding: 12px;
+  }
+  
+  :deep(.el-table) {
+    font-size: 12px;
+  }
+  
+  :deep(.el-table th) {
+    padding: 6px 0;
+  }
+  
+  :deep(.el-table td) {
+    padding: 4px 0;
+  }
+  
+  :deep(.el-table .el-table__cell) {
+    padding: 4px 2px;
+  }
+  
+  .article-tags {
+    gap: 2px;
+  }
+  
+  :deep(.el-tag) {
+    font-size: 10px;
+    padding: 0 4px;
+    height: 18px;
+    line-height: 16px;
+  }
+  
+  .more-tags {
+    font-size: 10px;
+  }
+  
+  .action-buttons-table {
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .action-buttons-table .el-button {
+    font-size: 11px;
+    padding: 3px 6px;
+    width: 100%;
+  }
+}
+</style>

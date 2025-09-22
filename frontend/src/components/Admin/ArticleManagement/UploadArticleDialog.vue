@@ -1,10 +1,9 @@
 <template>
-  <el-dialog
+<el-dialog
       :before-close="handleClose"
       :close-on-click-modal="false"
       :model-value="modelValue"
       title="上传文章"
-      width="700px"
       @update:model-value="$emit('update:modelValue', $event)"
   >
     <el-form ref="formRef" :model="formData" :rules="formRules" label-width="100px">
@@ -194,13 +193,12 @@
       </div>
     </template>
 
-    <!-- 创建文件夹对话框 -->
+<!-- 创建文件夹对话框 -->
     <el-dialog
         v-model="showCreateFolder"
         :before-close="handleCreateDialogClose"
         :close-on-click-modal="false"
         title="创建分类文件夹"
-        width="600px"
     >
       <el-form ref="folderFormRef" :model="newFolder" :rules="folderRules" label-width="100px">
         <!-- 选择父文件夹提示 -->
@@ -1281,5 +1279,197 @@ onMounted(() => {
   font-size: 14px;
   text-align: center;
   padding: 20px;
+}
+
+/* 响应式布局优化 */
+@media (max-width: 768px) {
+  :deep(.el-dialog) {
+    width: 95% !important;
+    max-width: none !important;
+  }
+  
+  :deep(.el-dialog__body) {
+    padding: 15px 20px;
+  }
+  
+  :deep(.el-form-item__label) {
+    width: 80px !important;
+  }
+  
+  :deep(.el-form-item__content) {
+    margin-left: 80px !important;
+  }
+  
+  :deep(.el-input__inner),
+  :deep(.el-textarea__inner),
+  :deep(.el-select .el-input__inner) {
+    padding: 8px 12px;
+  }
+  
+  :deep(.el-date-editor .el-input__inner) {
+    padding: 0 12px;
+  }
+  
+  .category-selector-card,
+  .parent-selector-card {
+    height: 240px;
+  }
+  
+  .category-tree-container,
+  .parent-tree-container {
+    height: 160px;
+  }
+}
+
+@media (max-width: 480px) {
+  :deep(.el-dialog) {
+    width: 95% !important;
+    max-width: none !important;
+  }
+  
+  :deep(.el-dialog__body) {
+    padding: 10px 15px;
+  }
+  
+  :deep(.el-form-item) {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  :deep(.el-form-item__label) {
+    width: 100% !important;
+    font-size: 13px;
+    margin-bottom: 5px;
+    text-align: left !important;
+    padding-bottom: 0;
+  }
+  
+  :deep(.el-form-item__content) {
+    margin-left: 0 !important;
+    width: 100%;
+  }
+  
+  :deep(.el-input__inner),
+  :deep(.el-textarea__inner),
+  :deep(.el-select .el-input__inner) {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+  
+  :deep(.el-button) {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+  
+  :deep(.el-date-editor) {
+    font-size: 13px;
+  }
+  
+  :deep(.el-date-editor .el-input__inner) {
+    font-size: 13px;
+    padding: 0 10px;
+  }
+  
+  .category-header,
+  .parent-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .category-actions,
+  .parent-actions {
+    align-self: flex-end;
+    gap: 5px;
+  }
+  
+  .category-selector-card,
+  .parent-selector-card {
+    height: 200px;
+  }
+  
+  .category-tree-container,
+  .parent-tree-container {
+    height: 120px;
+  }
+  
+  .path-text {
+    font-size: 12px;
+  }
+}
+
+/* 针对小屏幕的额外优化 */
+@media (max-width: 375px) {
+  :deep(.el-dialog) {
+    width: 95% !important;
+    max-width: none !important;
+  }
+  
+  :deep(.el-dialog__body) {
+    padding: 8px 12px;
+  }
+  
+  :deep(.el-form-item) {
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  :deep(.el-form-item__label) {
+    width: 100% !important;
+    font-size: 12px;
+    margin-bottom: 5px;
+    text-align: left !important;
+    padding-bottom: 0;
+  }
+  
+  :deep(.el-form-item__content) {
+    margin-left: 0 !important;
+    width: 100%;
+  }
+  
+  :deep(.el-input__inner),
+  :deep(.el-textarea__inner),
+  :deep(.el-select .el-input__inner) {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+  
+  :deep(.el-button) {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+  
+  :deep(.el-date-editor) {
+    font-size: 12px;
+  }
+  
+  :deep(.el-date-editor .el-input__inner) {
+    font-size: 12px;
+    padding: 0 8px;
+  }
+  
+  :deep(.el-radio) {
+    margin-right: 15px;
+  }
+  
+  :deep(.el-radio__label) {
+    font-size: 12px;
+  }
+  
+  .category-selector-card,
+  .parent-selector-card {
+    height: 180px;
+  }
+  
+  .category-tree-container,
+  .parent-tree-container {
+    height: 100px;
+  }
+  
+  .path-text {
+    font-size: 11px;
+  }
 }
 </style>

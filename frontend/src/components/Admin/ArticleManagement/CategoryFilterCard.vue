@@ -269,4 +269,56 @@ onMounted(() => {
 :deep(.el-tree-node__content:hover) {
   background-color: #f5f7fa;
 }
+
+/* 响应式布局优化 */
+@media (max-width: 768px) {
+  .filter-card {
+    height: 250px;
+  }
+  
+  .category-content {
+    height: 170px;
+  }
+  
+  :deep(.el-card__header) {
+    padding: 12px 15px;
+  }
+  
+  :deep(.el-card__body) {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .filter-card {
+    height: 220px;
+  }
+  
+  .category-content {
+    height: 140px;
+  }
+  
+  .filter-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .header-actions {
+    align-self: flex-end;
+  }
+  
+  :deep(.el-card__header) {
+    padding: 10px 12px;
+  }
+  
+  :deep(.el-card__body) {
+    padding: 12px;
+  }
+  
+  :deep(.el-button) {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+}
 </style>

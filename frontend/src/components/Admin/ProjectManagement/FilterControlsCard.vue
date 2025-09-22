@@ -201,4 +201,79 @@ onMounted(() => {
 :deep(.el-card__body) {
   padding: 20px;
 }
+
+/* 响应式布局优化 */
+@media (max-width: 768px) {
+  .filter-card {
+    height: 250px;
+  }
+  
+  .filter-controls {
+    height: 170px;
+    padding: 8px 0;
+  }
+  
+  .tag-row {
+    margin-bottom: 15px;
+  }
+  
+  .filter-row {
+    margin-bottom: 12px;
+  }
+  
+  .filter-item label {
+    min-width: 70px;
+    font-size: 13px;
+  }
+  
+  .filter-item :deep(.el-select) {
+    width: 280px !important;
+  }
+  
+  .filter-item :deep(.el-input) {
+    width: 200px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .filter-card {
+    height: 220px;
+  }
+  
+  .filter-controls {
+    height: 140px;
+    padding: 5px 0;
+  }
+  
+  .tag-row {
+    margin-bottom: 10px;
+  }
+  
+  .filter-row {
+    margin-bottom: 8px;
+    gap: 10px;
+  }
+  
+  .filter-item {
+    gap: 5px;
+  }
+  
+  .filter-item label {
+    min-width: 60px;
+    font-size: 12px;
+  }
+  
+  .filter-item :deep(.el-select) {
+    width: 180px !important;
+  }
+  
+  .filter-item :deep(.el-input) {
+    width: 150px !important;
+  }
+  
+  :deep(.el-button) {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+}
 </style>

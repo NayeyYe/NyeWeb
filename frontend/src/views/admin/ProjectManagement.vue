@@ -237,4 +237,37 @@ onMounted(() => {
   background: #f56c6c;
   border-color: #f56c6c;
 }
+
+/* 响应式布局 */
+@media (max-width: 768px) {
+  .project-management {
+    padding: 15px;
+  }
+  
+  .action-bar {
+    margin-bottom: 15px;
+  }
+  
+  .filter-section {
+    margin-bottom: 15px;
+  }
+  
+  .action-buttons {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .project-management {
+    padding: 10px;
+  }
+  
+  .action-bar {
+    margin-bottom: 10px;
+  }
+  
+  .filter-section {
+    margin-bottom: 10px;
+  }
+}
 </style>

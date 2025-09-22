@@ -155,4 +155,59 @@ const handleLogin = async () => {
 :deep(.el-button) {
   border-radius: 8px;
 }
+
+/* 响应式布局 */
+@media (max-width: 768px) {
+  .login-container {
+    padding: 15px;
+  }
+  
+  .login-box {
+    padding: 30px 25px;
+    max-width: 90%;
+  }
+  
+  .login-header {
+    margin-bottom: 25px;
+  }
+  
+  .login-header h2 {
+    font-size: 24px;
+  }
+  
+  .login-header p {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-container {
+    padding: 10px;
+  }
+  
+  .login-box {
+    padding: 25px 20px;
+    max-width: 95%;
+  }
+  
+  .login-header {
+    margin-bottom: 20px;
+  }
+  
+  .login-header h2 {
+    font-size: 22px;
+  }
+  
+  .login-header p {
+    font-size: 12px;
+  }
+  
+  :deep(.el-form-item) {
+    margin-bottom: 18px;
+  }
+  
+  :deep(.el-input) {
+    --el-input-height: 40px;
+  }
+}
 </style>

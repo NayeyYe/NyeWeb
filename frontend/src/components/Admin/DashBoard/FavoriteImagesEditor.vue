@@ -367,4 +367,73 @@ onMounted(() => {
   display: flex;
   align-items: center;
 }
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .favorite-images-editor {
+    height: 300px;
+  }
+  
+  .edit-content {
+    padding: 12px 15px;
+  }
+  
+  .item-number {
+    width: 50px;
+    font-size: 13px;
+  }
+  
+  .item-row {
+    gap: 8px;
+  }
+  
+  .error-text {
+    font-size: 11px;
+    margin-left: 58px;
+  }
+  
+  .header-actions {
+    gap: 5px;
+  }
+  
+  :deep(.el-card__header) {
+    padding: 12px 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .favorite-images-editor {
+    height: 250px;
+  }
+  
+  .edit-content {
+    padding: 10px 12px;
+  }
+  
+  .item-number {
+    width: 45px;
+    font-size: 12px;
+  }
+  
+  .item-row {
+    gap: 6px;
+  }
+  
+  .error-text {
+    font-size: 10px;
+    margin-left: 52px;
+  }
+  
+  .header-actions {
+    gap: 3px;
+  }
+  
+  :deep(.el-button--small) {
+    padding: 6px 8px;
+  }
+  
+  :deep(.el-card__header) {
+    padding: 10px 12px;
+  }
+}
 </style>

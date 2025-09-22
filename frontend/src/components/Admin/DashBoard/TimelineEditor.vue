@@ -345,4 +345,69 @@ onMounted(() => {
   background: #fafafa;
   border-bottom: 1px solid #ebeef5;
 }
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .timeline-editor {
+    height: 300px;
+  }
+  
+  .item-left {
+    width: 100px;
+    padding-right: 10px;
+  }
+  
+  .item-date {
+    font-size: 11px;
+  }
+  
+  .item-content {
+    font-size: 13px;
+    padding-right: 8px;
+  }
+  
+  .header-actions {
+    gap: 5px;
+  }
+  
+  :deep(.el-card__header) {
+    padding: 12px 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .timeline-editor {
+    height: 250px;
+  }
+  
+  .item-left {
+    width: 80px;
+    padding-right: 8px;
+  }
+  
+  .item-date {
+    font-size: 10px;
+  }
+  
+  .item-content {
+    font-size: 12px;
+    padding-right: 6px;
+  }
+  
+  .item-actions {
+    gap: 2px;
+  }
+  
+  .header-actions {
+    gap: 3px;
+  }
+  
+  :deep(.el-button--small) {
+    padding: 6px 8px;
+  }
+  
+  :deep(.el-card__header) {
+    padding: 10px 12px;
+  }
+}
 </style>

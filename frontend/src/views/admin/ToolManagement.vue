@@ -1028,4 +1028,96 @@ onMounted(() => {
   border-radius: inherit;
   background-color: rgba(255, 255, 255, .35);
 }
+
+/* 响应式布局 */
+@media (max-width: 768px) {
+  .tool-management {
+    padding: 15px;
+  }
+  
+  .action-bar {
+    margin-bottom: 15px;
+  }
+  
+  .filter-section {
+    margin-bottom: 15px;
+  }
+  
+  .filter-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .filter-item {
+    width: 100%;
+  }
+  
+  .filter-item label {
+    min-width: 60px;
+  }
+  
+  .action-buttons {
+    flex-wrap: wrap;
+  }
+  
+  .list-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .tool-count {
+    align-self: flex-end;
+  }
+  
+  /* 对话框适配 */
+  :deep(.el-dialog) {
+    width: 90% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .tool-management {
+    padding: 10px;
+  }
+  
+  .action-bar {
+    margin-bottom: 10px;
+  }
+  
+  .filter-section {
+    margin-bottom: 10px;
+  }
+  
+  .tag-row {
+    margin-bottom: 15px;
+  }
+  
+  .filter-row {
+    margin-bottom: 12px;
+  }
+  
+  .filter-item label {
+    min-width: 50px;
+    font-size: 13px;
+  }
+  
+  .tool-table :deep(.el-table__cell) {
+    padding: 8px 0;
+  }
+  
+  /* 对话框适配 */
+  :deep(.el-dialog) {
+    width: 95% !important;
+  }
+  
+  :deep(.el-dialog__body) {
+    padding: 15px;
+  }
+  
+  :deep(.el-form-item__label) {
+    font-size: 14px;
+  }
+}
 </style>

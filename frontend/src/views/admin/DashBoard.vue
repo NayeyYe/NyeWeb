@@ -2,7 +2,7 @@
 <template>
   <div class="dashboard-layout">
     <AdminSidebar/>
-    <div class="main-content">
+    <div class="main-content" :class="{ 'mobile-main-content': isMobile }">
       <router-view v-if="$route.path !== '/admin/dashboard'"/>
       <div v-else class="dashboard-container">
         <!-- 第一行：时间线编辑器和最喜欢图片编辑器 -->
@@ -32,9 +32,28 @@
 </template>
 
 <script setup>
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import AdminSidebar from '@/components/Admin/AdminSidebar.vue'
 import TimelineEditor from '@/components/Admin/DashBoard/TimelineEditor.vue'
 import FavoriteImagesEditor from '@/components/Admin/DashBoard/FavoriteImagesEditor.vue'
+
+const isMobile = ref(false)
+
+// 检查是否为移动设备
+const checkIsMobile = () => {
+  isMobile.value = window.innerWidth <= 768
+}
+
+// 组件挂载时检查屏幕尺寸
+onMounted(() => {
+  checkIsMobile()
+  window.addEventListener('resize', checkIsMobile)
+})
+
+// 组件卸载前移除事件监听器
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', checkIsMobile)
+})
 </script>
 
 <style scoped>
@@ -104,5 +123,80 @@ import FavoriteImagesEditor from '@/components/Admin/DashBoard/FavoriteImagesEdi
   padding: 16px 20px;
   background: #fafafa;
   border-bottom: 1px solid #ebeef5;
+}
+
+/* 响应式布局 */
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    padding: 15px;
+  }
+  
+  .main-content.mobile-main-content {
+    margin-left: 0; /* 在移动设备上，侧边栏不再显示，所以不需要左边距 */
+  }
+  
+  .dashboard-container {
+    gap: 15px;
+    height: calc(100vh - 30px);
+  }
+  
+  .top-row {
+    flex-direction: column;
+    height: auto;
+    gap: 15px;
+  }
+  
+  .top-left,
+  .top-right {
+    width: 100%;
+    height: 300px;
+  }
+  
+  .bottom-row {
+    min-height: 250px;
+  }
+  
+  /* 在移动设备上为组件添加额外的内边距 */
+  .top-left,
+  .top-right,
+  .bottom-row {
+    padding: 0 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 10px;
+  }
+  
+  .main-content.mobile-main-content {
+    margin-left: 0; /* 在移动设备上，侧边栏不再显示，所以不需要左边距 */
+  }
+  
+  .dashboard-container {
+    gap: 10px;
+    height: calc(100vh - 20px);
+  }
+  
+  .top-row {
+    gap: 10px;
+  }
+  
+  .top-left,
+  .top-right {
+    height: 250px;
+  }
+  
+  .bottom-row {
+    min-height: 200px;
+  }
+  
+  /* 在小屏幕设备上为组件添加额外的内边距 */
+  .top-left,
+  .top-right,
+  .bottom-row {
+    padding: 0 3px;
+  }
 }
 </style>

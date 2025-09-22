@@ -244,4 +244,108 @@ onMounted(() => {
   display: flex;
   justify-content: center;
 }
+
+/* 响应式布局 */
+@media (max-width: 1024px) {
+  .tools-page {
+    margin: 90px auto 30px;
+    padding: 0 15px;
+  }
+  
+  .header {
+    margin-bottom: 30px;
+  }
+  
+  .header h1 {
+    font-size: 2.2em;
+  }
+  
+  .filter-bar {
+    gap: 15px;
+    margin-bottom: 30px;
+    padding: 15px;
+  }
+  
+  .search-input {
+    max-width: 100%;
+  }
+  
+  .tool-col {
+    margin-bottom: 15px;
+  }
+  
+  .pagination-container {
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .tools-page {
+    margin: 80px auto 20px;
+    padding: 0 10px;
+  }
+  
+  .header {
+    margin-bottom: 25px;
+  }
+  
+  .header h1 {
+    font-size: 2em;
+  }
+  
+  .header p {
+    font-size: 1em;
+  }
+  
+  .filter-bar {
+    gap: 12px;
+    margin-bottom: 25px;
+    padding: 12px;
+  }
+  
+  .tool-col {
+    margin-bottom: 12px;
+  }
+  
+  .pagination-container {
+    margin-top: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tools-page {
+    margin: 70px auto 15px;
+    padding: 0 5px;
+  }
+  
+  .header {
+    margin-bottom: 20px;
+  }
+  
+  .header h1 {
+    font-size: 1.8em;
+  }
+  
+  .header p {
+    font-size: 0.9em;
+  }
+  
+  .filter-bar {
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 10px;
+  }
+  
+  .tool-col {
+    margin-bottom: 10px;
+  }
+  
+  .pagination-container {
+    margin-top: 10px;
+  }
+  
+  :deep(.el-pagination) {
+    --el-font-size-base: 12px;
+  }
+}
 </style>
