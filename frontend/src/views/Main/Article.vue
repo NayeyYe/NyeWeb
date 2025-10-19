@@ -24,7 +24,9 @@
           <ArticleCategoryTree 
             :articles="[]" 
             :show-collapse-button="true"
+            :show-articles="true"
             @category-selected="handleCategorySelected"
+            @article-selected="handleArticleSelected"
             @collapse="toggleLeft"
           />
         </div>
@@ -68,7 +70,7 @@
 
 <script setup>
 import {nextTick, onMounted, onUnmounted, ref, watch} from 'vue'
-import {useRoute} from 'vue-router'
+import {useRoute, useRouter} from 'vue-router'
 import axios from 'axios'
 import Outline from '@/components/Main/Outline.vue'
 import ArticleCategoryTree from '@/components/Main/Article/ArticleCategoryTree.vue'
@@ -92,6 +94,7 @@ import 'katex/dist/katex.min.css'
 mermaid.initialize({startOnLoad: false, theme: 'default'})
 
 const route = useRoute()
+const router = useRouter()
 const articleContent = ref('')
 const articleTitle = ref('')
 const articleNotFound = ref(false)
@@ -114,6 +117,16 @@ const toggleRight = () => {
 const handleCategorySelected = (path) => {
   console.log('分类选择:', path)
   // 这里可以添加分类选择后的逻辑，比如筛选文章列表等
+}
+
+const handleArticleSelected = (articleInfo) => {
+  console.log('文章选择:', articleInfo)
+  // 跳转到选中的文章
+  if (articleInfo.category) {
+    router.push(`/article/${articleInfo.category}/${articleInfo.slug}`)
+  } else {
+    router.push(`/article/${articleInfo.slug}`)
+  }
 }
 
 // Markdown-it 配置

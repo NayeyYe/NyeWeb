@@ -63,10 +63,51 @@ def get_article_categories():
 
         for cat in physical_categories:
             if cat["path"]:  # 确保路径不为空
+                # 获取该分类下的文章信息
+                articles_info = []
+                for md_file in cat.get("articles", []):
+                    if md_file.endswith('.md'):
+                        article_slug = md_file[:-3]  # 移除.md扩展名
+                        # 从数据库获取文章详细信息
+                        try:
+                            db_session = database.SessionLocal()
+                            article = db_session.query(Article).filter(
+                                Article.slug == article_slug,
+                                Article.category == cat["path"],
+                                Article.status == 1
+                            ).first()
+                            
+                            if article:
+                                articles_info.append({
+                                    "slug": article.slug,
+                                    "title": article.title,
+                                    "summary": article.summary,
+                                    "date": article.date.strftime('%Y-%m-%d') if article.date else None
+                                })
+                            else:
+                                # 如果数据库中没有对应记录，使用文件名作为标题
+                                articles_info.append({
+                                    "slug": article_slug,
+                                    "title": article_slug.replace('-', ' ').title(),
+                                    "summary": None,
+                                    "date": None
+                                })
+                        except Exception as e:
+                            logger.warning(f"获取文章信息失败 {article_slug}: {str(e)}")
+                            articles_info.append({
+                                "slug": article_slug,
+                                "title": article_slug.replace('-', ' ').title(),
+                                "summary": None,
+                                "date": None
+                            })
+                        finally:
+                            if 'db_session' in locals():
+                                db_session.close()
+
                 categories_data.append({
                     "path": cat["path"],
                     "count": cat["count"],
-                    "articles": cat.get("articles", [])
+                    "articles": articles_info  # 返回详细的文章信息而不是文件名
                 })
 
         logger.info(f"成功构建分类树，包含 {len(categories_data)} 个分类")

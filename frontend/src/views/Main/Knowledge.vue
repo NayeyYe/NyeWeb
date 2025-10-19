@@ -28,7 +28,7 @@
         </div>
       </main>
       <aside class="tags-sidebar">
-        <ArticleCategoryTree :articles="sortedArticles" @category-selected="handleCategorySelected"/>
+        <ArticleCategoryTree :articles="sortedArticles" :show-articles="false" @category-selected="handleCategorySelected"/>
         <ArticleTagFilter :counts="availableTagCounts" :tags="availableTags" @tag-selected="handleTagSelected"/>
       </aside>
     </div>
