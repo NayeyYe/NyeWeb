@@ -266,11 +266,10 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-
 .page-container {
-  max-width: 1200px;
+  max-width: 1360px;
   margin: 100px auto 40px;
-  padding: 20px;
+  padding: 20px 28px;
 }
 
 .content-wrapper {
@@ -282,10 +281,11 @@ onUnmounted(() => {
 .outline-sidebar {
   flex: 0 0 250px;
   width: 250px;
+  margin-left: -24px;
 }
 
 .outline-fixed-container {
-  position: fixed;
+  position: sticky;
   top: 100px;
   width: 250px;
   height: calc(100vh - 120px); /* 确保容器有明确的高度 */
@@ -597,6 +597,7 @@ onUnmounted(() => {
   .outline-sidebar {
     width: 100%;
     order: 1; /* 大纲在上 */
+    margin-left: 0;
   }
   
   .outline-fixed-container {
