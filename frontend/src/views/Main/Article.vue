@@ -409,12 +409,12 @@ onUnmounted(() => {
 }
 
 .sidebar-left .sidebar-content {
-  left: calc(50vw - 700px + 20px);
+  left: calc(50vw - 720px + 20px);
   width: 300px;
 }
 
 .sidebar-right .sidebar-content {
-  right: calc(50vw - 700px + 20px);
+  right: calc(50vw - 720px + 20px);
   width: 280px;
 }
 
