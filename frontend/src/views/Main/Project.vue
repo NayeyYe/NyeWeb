@@ -5,27 +5,80 @@
       <p>抱歉，您要查找的项目不存在或链接已更改。</p>
       <router-link to="/projects">返回项目列表</router-link>
     </div>
-    <div v-else class="content-wrapper">
-      <aside class="outline-sidebar">
-        <div class="outline-fixed-container">
-          <Outline v-if="headings.length" :active-id="activeHeadingId" :outline="headings"/>
+    <div v-else class="content-layout">
+      <!-- 左侧展开按钮 -->
+      <el-button 
+        v-if="leftCollapsed" 
+        class="expand-btn expand-btn-left" 
+        circle 
+        @click="toggleLeft"
+      >
+        <el-icon>
+          <ArrowRight />
+        </el-icon>
+      </el-button>
+
+      <!-- 左侧项目时间线 -->
+      <aside class="sidebar sidebar-left" :class="{ collapsed: leftCollapsed }">
+        <div v-show="!leftCollapsed" class="sidebar-content">
+          <div class="timeline-wrapper">
+            <div class="timeline-header">
+              <span class="timeline-title">项目目录</span>
+              <el-button class="collapse-button" link @click="toggleLeft">
+                <el-icon>
+                  <Fold />
+                </el-icon>
+              </el-button>
+            </div>
+            <ProjectTimeline :projects="allProjects" @scroll-to-project="handleProjectSelected"/>
+          </div>
         </div>
       </aside>
+
+      <!-- 主内容区 -->
       <main class="main-content">
         <article class="markdown-body">
           <div v-html="projectContent"></div>
         </article>
       </main>
+
+      <!-- 右侧项目大纲 -->
+      <aside class="sidebar sidebar-right" :class="{ collapsed: rightCollapsed }">
+        <div v-show="!rightCollapsed" class="sidebar-content">
+          <Outline 
+            v-if="headings.length" 
+            :active-id="activeHeadingId" 
+            :outline="headings"
+            :show-collapse-button="true"
+            @collapse="toggleRight"
+          />
+          <el-empty v-else description="暂无大纲" />
+        </div>
+      </aside>
+
+      <!-- 右侧展开按钮 -->
+      <el-button 
+        v-if="rightCollapsed" 
+        class="expand-btn expand-btn-right" 
+        circle 
+        @click="toggleRight"
+      >
+        <el-icon>
+          <ArrowLeft />
+        </el-icon>
+      </el-button>
     </div>
   </div>
 </template>
 
 <script setup>
 import {nextTick, onMounted, onUnmounted, ref, watch} from 'vue'
-import {useRoute} from 'vue-router'
+import {useRoute, useRouter} from 'vue-router'
 import axios from 'axios'
 import Outline from '@/components/Main/Outline.vue'
+import ProjectTimeline from '@/components/Main/Project/ProjectTimeline.vue'
 import mermaid from 'mermaid'
+import {ArrowLeft, ArrowRight, Fold} from '@element-plus/icons-vue'
 
 // Markdown-it and plugins
 import markdownit from 'markdown-it'
@@ -44,14 +97,53 @@ import 'katex/dist/katex.min.css'
 mermaid.initialize({startOnLoad: false, theme: 'default'})
 
 const route = useRoute()
+const router = useRouter()
 const projectContent = ref('')
 const projectTitle = ref('')
 const projectNotFound = ref(false)
 const headings = ref([])
 const activeHeadingId = ref('')
+const leftCollapsed = ref(false)
+const rightCollapsed = ref(false)
+const allProjects = ref([])
 let observer = null
 
 const API_BASE_URL = '/api'
+
+const toggleLeft = () => {
+  leftCollapsed.value = !leftCollapsed.value
+}
+
+const toggleRight = () => {
+  rightCollapsed.value = !rightCollapsed.value
+}
+
+const handleProjectSelected = (projectSlug) => {
+  console.log('项目选择:', projectSlug)
+  if (projectSlug) {
+    router.push(`/projects/${projectSlug}`)
+  }
+}
+
+// 获取所有项目列表
+const fetchAllProjects = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/projects`, {
+      timeout: 10000,
+      headers: {
+        'Accept': 'application/json'
+      }
+    })
+
+    if (response.data && Array.isArray(response.data)) {
+      allProjects.value = response.data
+      console.log(`成功获取 ${allProjects.value.length} 个项目`)
+    }
+  } catch (error) {
+    console.error('获取项目列表失败:', error)
+    allProjects.value = []
+  }
+}
 
 const md = markdownit({
   html: true,
@@ -255,7 +347,11 @@ const fetchProject = async () => {
   }
 }
 
-onMounted(fetchProject)
+onMounted(() => {
+  fetchAllProjects()
+  fetchProject()
+})
+
 watch(() => route.params.slug, fetchProject)
 
 onUnmounted(() => {
@@ -267,28 +363,64 @@ onUnmounted(() => {
 
 <style scoped>
 .page-container {
-  max-width: 1360px;
+  max-width: 1400px;
   margin: 100px auto 40px;
   padding: 20px 28px;
 }
 
-.content-wrapper {
+.content-layout {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   align-items: flex-start;
 }
 
-.outline-sidebar {
-  flex: 0 0 250px;
-  width: 250px;
-  margin-left: -24px;
+.sidebar {
+  position: relative;
+  transition: width 0.3s ease;
 }
 
-.outline-fixed-container {
+.sidebar-left {
+  width: 300px;
+}
+
+.sidebar-right {
+  width: 280px;
+}
+
+.sidebar.collapsed {
+  width: 0;
+  overflow: hidden;
+}
+
+.sidebar-content {
   position: sticky;
   top: 100px;
-  width: 250px;
-  height: calc(100vh - 120px); /* 确保容器有明确的高度 */
+  max-height: calc(100vh - 120px);
+  overflow: hidden auto;
+}
+
+.expand-btn {
+  position: fixed;
+  top: 120px;
+  z-index: 100;
+  width: 36px;
+  height: 36px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+  background-color: var(--el-color-primary);
+  color: white;
+  border: none;
+}
+
+.expand-btn:hover {
+  background-color: var(--el-color-primary-dark-2);
+}
+
+.expand-btn-left {
+  left: 20px;
+}
+
+.expand-btn-right {
+  right: 20px;
 }
 
 .main-content {
@@ -589,25 +721,34 @@ onUnmounted(() => {
 }
 
 /* 响应式布局 */
+@media (max-width: 1200px) {
+  .sidebar-left {
+    width: 260px;
+  }
+  .sidebar-right {
+    width: 240px;
+  }
+}
+
 @media (max-width: 1024px) {
-  .content-wrapper {
+  .content-layout {
     flex-direction: column;
   }
   
-  .outline-sidebar {
+  .sidebar,
+  .sidebar.collapsed {
     width: 100%;
-    order: 1; /* 大纲在上 */
-    margin-left: 0;
   }
   
-  .outline-fixed-container {
+  .sidebar-content {
     position: static;
-    width: 100%;
-    height: auto;
+    max-height: none;
   }
   
-  .main-content {
-    order: 2; /* 文章在下 */
+  .expand-btn {
+    position: relative;
+    top: auto;
+    margin: 12px auto;
   }
 }
 
@@ -643,5 +784,50 @@ onUnmounted(() => {
   :deep(h3) {
     font-size: 1.2em;
   }
+}
+
+.timeline-wrapper {
+  background: white;
+  border-radius: 15px;
+  border: 1px solid var(--el-border-color-lighter);
+  margin-bottom: 20px;
+}
+
+.timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  font-weight: bold;
+}
+
+.timeline-title {
+  font-size: 14px;
+  color: var(--el-text-color-primary);
+}
+
+.collapse-button {
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timeline-wrapper :deep(.timeline-card) {
+  border: none;
+  border-radius: 0;
+  margin-bottom: 0;
+  box-shadow: none;
+}
+
+.timeline-wrapper :deep(.timeline-card .el-card__header) {
+  display: none;
+}
+
+.timeline-wrapper :deep(.timeline-card .el-card__body) {
+  padding: 16px 20px;
 }
 </style>
