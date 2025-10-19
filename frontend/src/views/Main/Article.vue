@@ -385,6 +385,8 @@ onUnmounted(() => {
 .sidebar {
   position: relative;
   transition: width 0.3s ease;
+  overflow: hidden; /* 防止外部容器产生滚动条 */
+  height: calc(100vh - 140px); /* 固定高度，防止外部滚动 */
 }
 
 .sidebar-left {
@@ -405,7 +407,9 @@ onUnmounted(() => {
   top: 100px;
   bottom: 20px;
   overflow-y: auto;
+  overflow-x: hidden;
   z-index: 50;
+  height: calc(100vh - 120px);
 }
 
 .sidebar-left .sidebar-content {
@@ -714,6 +718,65 @@ onUnmounted(() => {
   border: 1px solid #ffcccc;
 }
 
+/* 确保大纲组件不产生额外滚动条 */
+.sidebar-content :deep(.outline-container) {
+  overflow: visible !important;
+  max-height: none !important;
+  height: auto !important;
+}
+
+.sidebar-content :deep(.el-scrollbar) {
+  height: auto !important;
+}
+
+.sidebar-content :deep(.el-scrollbar__wrap) {
+  overflow: visible !important;
+  max-height: none !important;
+}
+
+.sidebar-content :deep(.el-scrollbar__view) {
+  overflow: visible !important;
+}
+
+/* 重新启用内部滚动条，但只对 sidebar-content 生效 */
+.sidebar-content {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  scrollbar-width: thin;
+}
+
+.sidebar-content::-webkit-scrollbar {
+  width: 6px !important;
+  display: block !important;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* 禁用子元素的滚动条，但保留 sidebar-content 的滚动 */
+.sidebar-content > * {
+  overflow: visible !important;
+  max-height: none !important;
+}
+
+.sidebar-content :deep(div:not(.sidebar-content)) {
+  scrollbar-width: none !important;
+}
+
+.sidebar-content :deep(div:not(.sidebar-content)::-webkit-scrollbar) {
+  display: none !important;
+}
+
 /* 响应式布局 */
 @media (max-width: 1024px) {
   .content-layout {
@@ -799,6 +862,10 @@ onUnmounted(() => {
 }
 
 @media (max-width: 1400px) {
+  .sidebar {
+    height: auto; /* 响应式时重置高度 */
+  }
+  
   .sidebar-content {
     position: sticky;
     top: 100px;
@@ -806,7 +873,10 @@ onUnmounted(() => {
     left: auto !important;
     right: auto !important;
     width: auto !important;
+    height: auto; /* 响应式时重置高度 */
     max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    overflow-x: hidden;
     z-index: auto;
   }
 }
