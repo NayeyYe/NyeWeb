@@ -401,28 +401,21 @@ onUnmounted(() => {
 }
 
 .sidebar-content {
-  position: sticky;
+  position: fixed;
   top: 100px;
-  max-height: calc(100vh - 120px);
-  overflow: hidden auto;
+  bottom: 20px;
+  overflow-y: auto;
+  z-index: 50;
 }
 
-.collapse-btn {
-  position: sticky;
-  top: 60px;
-  z-index: 10;
-  width: 32px;
-  height: 32px;
-  margin-bottom: 12px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+.sidebar-left .sidebar-content {
+  left: calc(50vw - 700px + 20px);
+  width: 300px;
 }
 
-.sidebar-left .collapse-btn {
-  margin-left: auto;
-}
-
-.sidebar-right .collapse-btn {
-  margin-right: auto;
+.sidebar-right .sidebar-content {
+  right: calc(50vw - 700px + 20px);
+  width: 280px;
 }
 
 .main-content {
@@ -722,15 +715,6 @@ onUnmounted(() => {
 }
 
 /* 响应式布局 */
-@media (max-width: 1200px) {
-  .sidebar-left {
-    width: 260px;
-  }
-  .sidebar-right {
-    width: 240px;
-  }
-}
-
 @media (max-width: 1024px) {
   .content-layout {
     flex-direction: column;
@@ -749,6 +733,7 @@ onUnmounted(() => {
   .expand-btn {
     position: relative;
     top: auto;
+    transform: none;
     margin: 12px auto;
   }
 }
@@ -784,6 +769,45 @@ onUnmounted(() => {
   
   :deep(h3) {
     font-size: 1.2em;
+  }
+}
+
+/* 展开按钮样式 */
+.expand-btn {
+  position: fixed;
+  top: 50vh;
+  transform: translateY(-50%);
+  z-index: 100;
+  width: 36px;
+  height: 36px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+  background-color: var(--el-color-primary);
+  color: white;
+  border: none;
+}
+
+.expand-btn:hover {
+  background-color: var(--el-color-primary-dark-2);
+}
+
+.expand-btn-left {
+  left: 20px;
+}
+
+.expand-btn-right {
+  right: 20px;
+}
+
+@media (max-width: 1400px) {
+  .sidebar-content {
+    position: sticky;
+    top: 100px;
+    bottom: auto;
+    left: auto !important;
+    right: auto !important;
+    width: auto !important;
+    max-height: calc(100vh - 120px);
+    z-index: auto;
   }
 }
 </style>
