@@ -3,12 +3,19 @@
     <template #header>
       <div class="card-header">
         <span>大纲</span>
-        <el-button class="toggle-button" link @click="toggleOutline">
-          <el-icon>
-            <ArrowDown v-if="isExpanded"/>
-            <ArrowRight v-else/>
-          </el-icon>
-        </el-button>
+        <div class="header-actions">
+          <el-button class="toggle-button" link @click="toggleOutline">
+            <el-icon>
+              <ArrowDown v-if="isExpanded"/>
+              <ArrowRight v-else/>
+            </el-icon>
+          </el-button>
+          <el-button v-if="showCollapseButton" class="collapse-button" link @click="handleCollapse">
+            <el-icon>
+              <Fold />
+            </el-icon>
+          </el-button>
+        </div>
       </div>
     </template>
     <nav v-show="isExpanded">
@@ -27,7 +34,7 @@
 
 <script setup>
 import {ref} from 'vue'
-import {ArrowDown, ArrowRight} from '@element-plus/icons-vue'
+import {ArrowDown, ArrowRight, Fold} from '@element-plus/icons-vue'
 
 const props = defineProps({
   outline: {
@@ -38,12 +45,22 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  showCollapseButton: {
+    type: Boolean,
+    default: false,
+  },
 });
+
+const emit = defineEmits(['collapse'])
 
 const isExpanded = ref(true)
 
 const toggleOutline = () => {
   isExpanded.value = !isExpanded.value
+}
+
+const handleCollapse = () => {
+  emit('collapse')
 }
 
 const scrollTo = (id) => {
@@ -82,7 +99,14 @@ const scrollTo = (id) => {
   align-items: center;
 }
 
-.toggle-button {
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toggle-button,
+.collapse-button {
   padding: 0;
   width: 24px;
   height: 24px;

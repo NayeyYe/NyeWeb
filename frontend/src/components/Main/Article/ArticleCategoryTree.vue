@@ -3,7 +3,14 @@
     <template #header>
       <div class="card-header">
         <span>文章归档</span>
-        <el-button v-if="currentKey" link type="primary" @click="clearFilter">清空</el-button>
+        <div class="header-actions">
+          <el-button v-if="currentKey" link type="primary" @click="clearFilter">清空</el-button>
+          <el-button v-if="showCollapseButton" class="collapse-button" link @click="handleCollapse">
+            <el-icon>
+              <Fold />
+            </el-icon>
+          </el-button>
+        </div>
       </div>
     </template>
     <div v-loading="loading">
@@ -26,15 +33,20 @@
 <script setup>
 import {computed, onMounted, ref, watch} from 'vue'
 import axios from 'axios'
+import {Fold} from '@element-plus/icons-vue'
 
 const props = defineProps({
   articles: {
     type: Array,
     required: true,
   },
+  showCollapseButton: {
+    type: Boolean,
+    default: false,
+  },
 })
 
-const emit = defineEmits(['category-selected'])
+const emit = defineEmits(['category-selected', 'collapse'])
 
 const loading = ref(false)
 const categoriesFromDB = ref([])
@@ -127,6 +139,10 @@ const clearFilter = () => {
   emit('category-selected', null)
 }
 
+const handleCollapse = () => {
+  emit('collapse')
+}
+
 // 监听articles变化，当articles数据更新时重新获取分类
 watch(() => props.articles, (newArticles) => {
   if (newArticles && newArticles.length > 0 && categoriesFromDB.value.length === 0) {
@@ -152,6 +168,21 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   font-weight: bold;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.collapse-button {
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .el-tree {

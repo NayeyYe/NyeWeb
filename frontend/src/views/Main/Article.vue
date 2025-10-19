@@ -5,17 +5,63 @@
       <p>抱歉，您要查找的文章不存在或链接已更改。</p>
       <router-link to="/knowledge">返回文章列表</router-link>
     </div>
-    <div v-else class="content-wrapper">
-      <aside class="outline-sidebar">
-        <div class="outline-fixed-container">
-          <Outline v-if="headings.length" :active-id="activeHeadingId" :outline="headings"/>
+    <div v-else class="content-layout">
+      <!-- 左侧展开按钮 -->
+      <el-button 
+        v-if="leftCollapsed" 
+        class="expand-btn expand-btn-left" 
+        circle 
+        @click="toggleLeft"
+      >
+        <el-icon>
+          <ArrowRight />
+        </el-icon>
+      </el-button>
+
+      <!-- 左侧文章分类树 -->
+      <aside class="sidebar sidebar-left" :class="{ collapsed: leftCollapsed }">
+        <div v-show="!leftCollapsed" class="sidebar-content">
+          <ArticleCategoryTree 
+            :articles="[]" 
+            :show-collapse-button="true"
+            @category-selected="handleCategorySelected"
+            @collapse="toggleLeft"
+          />
         </div>
       </aside>
+
+      <!-- 主内容区 -->
       <main class="main-content">
         <article class="markdown-body">
           <div v-html="articleContent"></div>
         </article>
       </main>
+
+      <!-- 右侧文章大纲 -->
+      <aside class="sidebar sidebar-right" :class="{ collapsed: rightCollapsed }">
+        <div v-show="!rightCollapsed" class="sidebar-content">
+          <Outline 
+            v-if="headings.length" 
+            :active-id="activeHeadingId" 
+            :outline="headings"
+            :show-collapse-button="true"
+            @collapse="toggleRight"
+          />
+          <el-empty v-else description="暂无大纲" />
+        </div>
+      </aside>
+
+      <!-- 右侧展开按钮 -->
+      <el-button 
+        v-if="rightCollapsed" 
+        class="expand-btn expand-btn-right" 
+        circle 
+        @click="toggleRight"
+      >
+        <el-icon>
+          <ArrowLeft />
+        </el-icon>
+      </el-button>
     </div>
   </div>
 </template>
@@ -25,7 +71,9 @@ import {nextTick, onMounted, onUnmounted, ref, watch} from 'vue'
 import {useRoute} from 'vue-router'
 import axios from 'axios'
 import Outline from '@/components/Main/Outline.vue'
+import ArticleCategoryTree from '@/components/Main/Article/ArticleCategoryTree.vue'
 import mermaid from 'mermaid'
+import {ArrowLeft, ArrowRight} from '@element-plus/icons-vue'
 
 // Markdown-it and plugins
 import markdownit from 'markdown-it'
@@ -49,10 +97,26 @@ const articleTitle = ref('')
 const articleNotFound = ref(false)
 const headings = ref([])
 const activeHeadingId = ref('')
+const leftCollapsed = ref(false)
+const rightCollapsed = ref(false)
 let observer = null
 
 const API_BASE_URL = '/api'
 
+const toggleLeft = () => {
+  leftCollapsed.value = !leftCollapsed.value
+}
+
+const toggleRight = () => {
+  rightCollapsed.value = !rightCollapsed.value
+}
+
+const handleCategorySelected = (path) => {
+  console.log('分类选择:', path)
+  // 这里可以添加分类选择后的逻辑，比如筛选文章列表等
+}
+
+// Markdown-it 配置
 const md = markdownit({
   html: true,
   linkify: true,
@@ -294,28 +358,58 @@ onUnmounted(() => {
 
 <style scoped>
 .page-container {
-  max-width: 1360px;
+  max-width: 1400px;
   margin: 100px auto 40px;
   padding: 20px 28px;
 }
 
-.content-wrapper {
+.content-layout {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   align-items: flex-start;
 }
 
-.outline-sidebar {
-  flex: 0 0 250px;
-  width: 250px;
-  margin-left: -24px;
+.sidebar {
+  position: relative;
+  transition: width 0.3s ease;
 }
 
-.outline-fixed-container {
+.sidebar-left {
+  width: 300px;
+}
+
+.sidebar-right {
+  width: 280px;
+}
+
+.sidebar.collapsed {
+  width: 0;
+  overflow: hidden;
+}
+
+.sidebar-content {
   position: sticky;
   top: 100px;
-  width: 250px;
-  height: calc(100vh - 120px);
+  max-height: calc(100vh - 120px);
+  overflow: hidden auto;
+}
+
+.collapse-btn {
+  position: sticky;
+  top: 60px;
+  z-index: 10;
+  width: 32px;
+  height: 32px;
+  margin-bottom: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-left .collapse-btn {
+  margin-left: auto;
+}
+
+.sidebar-right .collapse-btn {
+  margin-right: auto;
 }
 
 .main-content {
@@ -328,10 +422,16 @@ onUnmounted(() => {
   background-color: #fff;
   border-radius: 15px;
   box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.05);
-  position: relative; /* 为锚点定位提供上下文 */
+  position: relative;
   line-height: 1.8;
   color: #333;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+.not-found {
+  text-align: center;
+  padding: 40px;
+  color: #606266;
 }
 
 /* 隐藏默认的锚点符号，因为我们只关心ID的生成 */
@@ -352,68 +452,6 @@ onUnmounted(() => {
   opacity: 1;
 }
 
-.not-found {
-  text-align: center;
-  padding: 40px;
-  color: #606266;
-}
-
-/* 响应式布局 */
-@media (max-width: 1024px) {
-  .content-wrapper {
-    flex-direction: column;
-  }
-  
-  .outline-sidebar {
-    width: 100%;
-    order: 1;
-    margin-left: 0;
-  }
-  
-  .outline-fixed-container {
-    position: static;
-    width: 100%;
-    height: auto;
-  }
-  
-  .main-content {
-    order: 2; /* 文章在下 */
-  }
-}
-
-@media (max-width: 768px) {
-  .page-container {
-    margin: 90px auto 20px;
-    padding: 15px;
-  }
-  
-  .markdown-body {
-    padding: 1.5em;
-  }
-}
-
-@media (max-width: 480px) {
-  .page-container {
-    margin: 80px auto 15px;
-    padding: 10px;
-  }
-  
-  .markdown-body {
-    padding: 1em;
-  }
-  
-  :deep(h1) {
-    font-size: 1.8em;
-  }
-  
-  :deep(h2) {
-    font-size: 1.5em;
-  }
-  
-  :deep(h3) {
-    font-size: 1.2em;
-  }
-}
 /* --- 美化样式 --- */
 
 /* 标题美化 */
@@ -668,5 +706,71 @@ onUnmounted(() => {
   padding: 2px 4px;
   border-radius: 3px;
   border: 1px solid #ffcccc;
+}
+
+/* 响应式布局 */
+@media (max-width: 1200px) {
+  .sidebar-left {
+    width: 260px;
+  }
+  .sidebar-right {
+    width: 240px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .content-layout {
+    flex-direction: column;
+  }
+  
+  .sidebar,
+  .sidebar.collapsed {
+    width: 100%;
+  }
+  
+  .sidebar-content {
+    position: static;
+    max-height: none;
+  }
+  
+  .expand-btn {
+    position: relative;
+    top: auto;
+    margin: 12px auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    margin: 90px auto 20px;
+    padding: 15px;
+  }
+  
+  .markdown-body {
+    padding: 1.5em;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-container {
+    margin: 80px auto 15px;
+    padding: 10px;
+  }
+  
+  .markdown-body {
+    padding: 1em;
+  }
+  
+  :deep(h1) {
+    font-size: 1.8em;
+  }
+  
+  :deep(h2) {
+    font-size: 1.5em;
+  }
+  
+  :deep(h3) {
+    font-size: 1.2em;
+  }
 }
 </style>
