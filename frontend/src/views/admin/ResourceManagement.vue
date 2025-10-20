@@ -314,20 +314,12 @@
                   <div class="action-buttons-table">
                     <el-button size="small" type="primary" @click="handleEditFigure(scope.row)">编辑</el-button>
                     <el-button
-                        v-if="scope.row.status !== 'recycled'"
-                        size="small"
-                        type="warning"
-                        @click="quickUpdateFigureStatus(scope.row, 'recycled')"
-                    >
-                      回收
-                    </el-button>
-                    <el-button
-                        v-if="scope.row.status === 'recycled'"
+                        :disabled="!scope.row.url"
                         size="small"
                         type="success"
-                        @click="quickUpdateFigureStatus(scope.row, 'published')"
+                        @click="openFigureInNewTab(scope.row.url)"
                     >
-                      恢复
+                      访问
                     </el-button>
                     <el-button size="small" type="danger" @click="deleteFigure(scope.row)">删除</el-button>
                   </div>
@@ -680,6 +672,15 @@ const getStatusText = (status) => {
     default:
       return '未知'
   }
+}
+
+// 在新标签页打开图片链接
+const openFigureInNewTab = (url) => {
+  if (!url) {
+    ElMessage.warning('图片链接为空')
+    return
+  }
+  window.open(url, '_blank')
 }
 
 onMounted(() => {
