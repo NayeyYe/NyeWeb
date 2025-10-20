@@ -94,7 +94,7 @@
 </template>
 
 <script setup>
-import {onMounted, reactive, ref} from 'vue'
+import {onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import {Check, Edit, Upload} from '@element-plus/icons-vue'
 import axios from 'axios'
@@ -140,6 +140,7 @@ const formRef = ref(null)
 // 状态数据
 const existingTags = ref([])
 const uploading = ref(false)
+const userHasSetTitle = ref(false) // 标记用户是否手动设置了标题
 
 // 获取标签数据
 const fetchTags = async () => {
@@ -161,6 +162,55 @@ const fetchTags = async () => {
     // 不显示错误消息，静默失败
   }
 }
+
+// 监听标题输入，标记用户是否手动输入了标题
+watch(() => formData.title, (newValue) => {
+  if (newValue && newValue.trim()) {
+    userHasSetTitle.value = true
+  }
+})
+
+// 从URL中提取文件名作为标题
+const extractTitleFromUrl = (url) => {
+  if (!url) return ''
+  
+  try {
+    // 移除URL参数
+    const urlWithoutParams = url.split('?')[0]
+    
+    // 提取最后一个路径段（文件名）
+    const pathSegments = urlWithoutParams.split('/')
+    const filenameWithExt = pathSegments[pathSegments.length - 1]
+    
+    if (!filenameWithExt) return ''
+    
+    // 分离文件名和扩展名
+    const lastDotIndex = filenameWithExt.lastIndexOf('.')
+    if (lastDotIndex === -1) {
+      // 没有扩展名，返回整个文件名
+      return decodeURIComponent(filenameWithExt)
+    }
+    
+    // 只返回文件名部分（不含扩展名）
+    const filename = filenameWithExt.substring(0, lastDotIndex)
+    return decodeURIComponent(filename)
+  } catch (error) {
+    console.error('提取文件名失败:', error)
+    return ''
+  }
+}
+
+// 监听URL变化，自动填充标题
+watch(() => formData.url, (newUrl) => {
+  // 只有当用户没有手动设置标题时才自动填充
+  if (!userHasSetTitle.value || !formData.title.trim()) {
+    const extractedTitle = extractTitleFromUrl(newUrl)
+    if (extractedTitle) {
+      formData.title = extractedTitle
+      // 不设置 userHasSetTitle，这样URL再次改变时仍然会自动更新
+    }
+  }
+})
 
 // 主要操作
 const handleUpload = async () => {
@@ -249,6 +299,9 @@ const resetForm = () => {
     tags: [],
     status: 'draft'
   })
+  
+  // 重置标题手动设置标记
+  userHasSetTitle.value = false
 
   if (formRef.value) {
     formRef.value.resetFields()
