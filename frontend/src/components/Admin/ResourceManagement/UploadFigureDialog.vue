@@ -34,8 +34,38 @@
         <el-input
             v-model="formData.url"
             placeholder="请输入图床链接URL，如：https://nyeimg.asia/img/Failed.jpeg"
-        />
-        <div class="form-tip">请输入完整的图床链接URL，支持JPG、PNG、GIF、WebP格式</div>
+        >
+          <template #suffix>
+            <div class="action-buttons">
+              <el-button
+                  :loading="testingUrl"
+                  size="small"
+                  text
+                  title="测试链接"
+                  type="primary"
+                  @click="testImageUrl"
+              >
+                <el-icon>
+                  <Check/>
+                </el-icon>
+              </el-button>
+              <el-button
+                  :disabled="!formData.url"
+                  size="small"
+                  text
+                  title="访问链接"
+                  type="success"
+                  @click="openUrlInNewTab"
+              >
+                <el-icon>
+                  <Link/>
+                </el-icon>
+              </el-button>
+            </div>
+          </template>
+        </el-input>
+        <div v-if="urlError" class="error-text">{{ urlError }}</div>
+        <div v-else class="form-tip">请输入完整的图床链接URL，支持JPG、PNG、GIF、WebP格式</div>
       </el-form-item>
 
       <!-- 图片标签 -->
@@ -96,7 +126,7 @@
 <script setup>
 import {onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage, ElMessageBox} from 'element-plus'
-import {Check, Edit, Upload} from '@element-plus/icons-vue'
+import {Check, Edit, Link, Upload} from '@element-plus/icons-vue'
 import axios from 'axios'
 
 // Props和Emits
@@ -140,7 +170,9 @@ const formRef = ref(null)
 // 状态数据
 const existingTags = ref([])
 const uploading = ref(false)
-const userHasSetTitle = ref(false) // 标记用户是否手动设置了标题
+const userHasSetTitle = ref(false)
+const testingUrl = ref(false)
+const urlError = ref('')
 
 // 获取标签数据
 const fetchTags = async () => {
@@ -210,6 +242,56 @@ watch(() => formData.url, (newUrl) => {
       // 不设置 userHasSetTitle，这样URL再次改变时仍然会自动更新
     }
   }
+})
+
+// 测试图片URL是否有效
+const testImageUrl = async () => {
+  if (!formData.url) {
+    urlError.value = '请输入图片URL'
+    return
+  }
+
+  testingUrl.value = true
+  urlError.value = ''
+
+  try {
+    const img = new Image()
+    img.onload = () => {
+      urlError.value = ''
+      ElMessage.success('图片链接有效')
+      testingUrl.value = false
+    }
+    img.onerror = () => {
+      urlError.value = '图片链接无效或无法加载'
+      testingUrl.value = false
+    }
+    img.src = formData.url
+
+    // 设置超时
+    setTimeout(() => {
+      if (testingUrl.value) {
+        urlError.value = '图片加载超时'
+        testingUrl.value = false
+      }
+    }, 10000)
+  } catch (error) {
+    urlError.value = '测试图片链接时发生错误'
+    testingUrl.value = false
+  }
+}
+
+// 在新标签页打开URL
+const openUrlInNewTab = () => {
+  if (!formData.url) {
+    ElMessage.warning('图片URL为空')
+    return
+  }
+  window.open(formData.url, '_blank')
+}
+
+// 监听URL变化，清除错误提示
+watch(() => formData.url, () => {
+  urlError.value = ''
 })
 
 // 主要操作
@@ -302,6 +384,7 @@ const resetForm = () => {
   
   // 重置标题手动设置标记
   userHasSetTitle.value = false
+  urlError.value = ''
 
   if (formRef.value) {
     formRef.value.resetFields()
@@ -455,5 +538,28 @@ onMounted(() => {
   .form-tip {
     font-size: 10px;
   }
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding-right: 4px;
+}
+
+.error-text {
+  color: #f56c6c;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+:deep(.el-input__suffix) {
+  display: flex;
+  align-items: center;
+}
+
+:deep(.el-input__suffix-inner) {
+  display: flex;
+  align-items: center;
 }
 </style>
