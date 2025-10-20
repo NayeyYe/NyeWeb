@@ -80,7 +80,7 @@
           </div>
         </template>
         <el-table
-            :data="filteredTools"
+            :data="paginatedTools"
             :header-cell-style="{ background: '#fafafa', color: '#333', fontWeight: '600' }"
             class="tool-table"
             empty-text="暂无工具数据"
@@ -154,6 +154,18 @@
             </template>
           </el-table-column>
         </el-table>
+        
+        <!-- 添加分页组件 -->
+        <div v-if="filteredTools.length > pageSize" class="pagination-wrapper">
+          <el-pagination
+              v-model:current-page="currentPage"
+              :page-size="pageSize"
+              :total="filteredTools.length"
+              background
+              layout="prev, pager, next, jumper, total"
+              @current-change="handlePageChange"
+          />
+        </div>
       </el-card>
     </div>
 
@@ -315,13 +327,17 @@
 </template>
 
 <script setup>
-import {computed, nextTick, onMounted, reactive, ref} from 'vue'
+import {computed, nextTick, onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import {Refresh} from '@element-plus/icons-vue'
 import axios from 'axios'
 
 const tools = ref([])
 const allTags = ref([])
+// 添加分页状态
+const currentPage = ref(1)
+const pageSize = ref(10)
+
 const showCreateDialog = ref(false)
 const showEditDialog = ref(false)
 const creating = ref(false)
@@ -438,14 +454,32 @@ const filteredTools = computed(() => {
   return arr
 })
 
+// 添加分页计算属性
+const paginatedTools = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return filteredTools.value.slice(start, end)
+})
+
 // 筛选操作
 const resetAllFilters = () => {
   filterForm.tags = []
   filterForm.title = ''
   filterForm.status = ''
+  // 重置到第一页
+  currentPage.value = 1
 }
 
-// 工具操作
+// 添加分页处理函数
+const handlePageChange = (page) => {
+  currentPage.value = page
+}
+
+// 监听筛选变化，重置到第一页
+watch([() => filterForm.tags, () => filterForm.title, () => filterForm.status], () => {
+  currentPage.value = 1
+}, { deep: true })
+
 const handleEditTool = (tool) => {
   if (!tool || !tool.id) {
     ElMessage.error('无效的工具数据')
@@ -1027,6 +1061,31 @@ onMounted(() => {
   bottom: -1px;
   border-radius: inherit;
   background-color: rgba(255, 255, 255, .35);
+}
+
+/* 分页样式 */
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+  border-top: 1px solid #ebeef5;
+  margin-top: 20px;
+}
+
+:deep(.el-pagination) {
+  --el-pagination-bg-color: #f8f9fa;
+  --el-pagination-text-color: #666;
+  --el-pagination-border-radius: 6px;
+}
+
+:deep(.el-pagination .btn-prev),
+:deep(.el-pagination .btn-next) {
+  border-radius: 6px;
+}
+
+:deep(.el-pagination .el-pager li) {
+  border-radius: 6px;
+  margin: 0 2px;
 }
 
 /* 响应式布局 */

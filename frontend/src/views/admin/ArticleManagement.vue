@@ -39,12 +39,25 @@
     <!-- 文章列表 -->
     <div class="article-list">
       <ArticleListCard
-          :articles="sortedArticles"
+          :articles="paginatedArticles"
+          :total="sortedArticles.length"
           @delete="deleteArticle"
           @edit="openEditDialog"
           @update-status="updateArticleStatus"
           @quick-update-status="quickUpdateStatus"
       />
+      
+      <!-- 添加分页组件 -->
+      <div v-if="sortedArticles.length > pageSize" class="pagination-wrapper">
+        <el-pagination
+            v-model:current-page="currentPage"
+            :page-size="pageSize"
+            :total="sortedArticles.length"
+            background
+            layout="prev, pager, next, jumper, total"
+            @current-change="handlePageChange"
+        />
+      </div>
     </div>
 
     <!-- 上传文章对话框 -->
@@ -63,7 +76,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted, reactive, ref} from 'vue'
+import {computed, onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import {Refresh} from '@element-plus/icons-vue'
 import axios from 'axios'
@@ -82,9 +95,9 @@ const filterForm = reactive({
 })
 
 const sortOrder = ref('desc')
-const showUploadDialog = ref(false)
-const showEditDialog = ref(false)
-const editingArticle = ref(null)
+// 添加分页状态
+const currentPage = ref(1)
+const pageSize = ref(10)
 
 // 获取文章列表(管理员接口，包含所有状态)
 const fetchArticles = async () => {
@@ -132,13 +145,31 @@ const sortedArticles = computed(() => {
   return arr
 })
 
+// 添加分页计算属性
+const paginatedArticles = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return sortedArticles.value.slice(start, end)
+})
+
 // 筛选和排序操作
 const resetAllFilters = () => {
   filterForm.tags = []
   filterForm.title = ''
   filterForm.category = ''
   filterForm.status = ''
+  currentPage.value = 1
 }
+
+// 添加分页处理函数
+const handlePageChange = (page) => {
+  currentPage.value = page
+}
+
+// 监听筛选变化，重置到第一页
+watch([() => filterForm.tags, () => filterForm.title, () => filterForm.category, () => filterForm.status, () => sortOrder.value], () => {
+  currentPage.value = 1
+}, { deep: true })
 
 // 文章操作
 const openUploadDialog = () => {
@@ -216,6 +247,10 @@ const getStatusText = (status) => {
   }
 }
 
+const showUploadDialog = ref(false)
+const showEditDialog = ref(false)
+const editingArticle = ref(null)
+
 onMounted(() => {
   refreshArticles()
 })
@@ -254,6 +289,37 @@ onMounted(() => {
 .el-button--danger {
   background: #f56c6c;
   border-color: #f56c6c;
+}
+
+.article-list {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* 分页样式 */
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+  border-top: 1px solid #ebeef5;
+  background: white;
+}
+
+:deep(.el-pagination) {
+  --el-pagination-bg-color: #f8f9fa;
+  --el-pagination-text-color: #666;
+  --el-pagination-border-radius: 6px;
+}
+
+:deep(.el-pagination .btn-prev),
+:deep(.el-pagination .btn-next) {
+  border-radius: 6px;
+}
+
+:deep(.el-pagination .el-pager li) {
+  border-radius: 6px;
+  margin: 0 2px;
 }
 
 /* 响应式布局 */

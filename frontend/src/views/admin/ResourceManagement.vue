@@ -83,7 +83,7 @@
               </div>
             </template>
             <el-table
-                :data="filteredBooks"
+                :data="paginatedBooks"
                 :header-cell-style="{ background: '#fafafa', color: '#333', fontWeight: '600' }"
                 class="resource-table"
                 empty-text="暂无图书数据"
@@ -160,6 +160,18 @@
                 </template>
               </el-table-column>
             </el-table>
+            
+            <!-- 添加图书分页组件 -->
+            <div v-if="filteredBooks.length > pageSize" class="pagination-wrapper">
+              <el-pagination
+                  v-model:current-page="bookCurrentPage"
+                  :page-size="pageSize"
+                  :total="filteredBooks.length"
+                  background
+                  layout="prev, pager, next, jumper, total"
+                  @current-change="handleBookPageChange"
+              />
+            </div>
           </el-card>
         </div>
       </el-tab-pane>
@@ -245,7 +257,7 @@
               </div>
             </template>
             <el-table
-                :data="filteredFigures"
+                :data="paginatedFigures"
                 :header-cell-style="{ background: '#fafafa', color: '#333', fontWeight: '600' }"
                 class="resource-table"
                 empty-text="暂无图片数据"
@@ -322,6 +334,18 @@
                 </template>
               </el-table-column>
             </el-table>
+            
+            <!-- 添加图片分页组件 -->
+            <div v-if="filteredFigures.length > pageSize" class="pagination-wrapper">
+              <el-pagination
+                  v-model:current-page="figureCurrentPage"
+                  :page-size="pageSize"
+                  :total="filteredFigures.length"
+                  background
+                  layout="prev, pager, next, jumper, total"
+                  @current-change="handleFigurePageChange"
+              />
+            </div>
           </el-card>
         </div>
       </el-tab-pane>
@@ -356,7 +380,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted, reactive, ref} from 'vue'
+import {computed, onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import {Refresh} from '@element-plus/icons-vue'
 import axios from 'axios'
@@ -388,6 +412,11 @@ const figureFilterForm = reactive({
   title: '',
   status: ''
 })
+
+// 添加分页状态
+const bookCurrentPage = ref(1)
+const figureCurrentPage = ref(1)
+const pageSize = ref(10)
 
 // 获取图书列表(管理员接口，包含所有状态)
 const fetchBooks = async () => {
@@ -446,6 +475,13 @@ const filteredBooks = computed(() => {
   return arr
 })
 
+// 添加图书分页计算属性
+const paginatedBooks = computed(() => {
+  const start = (bookCurrentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return filteredBooks.value.slice(start, end)
+})
+
 // 图片筛选
 const filteredFigures = computed(() => {
   let arr = figures.value
@@ -461,18 +497,45 @@ const filteredFigures = computed(() => {
   return arr
 })
 
+// 添加图片分页计算属性
+const paginatedFigures = computed(() => {
+  const start = (figureCurrentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return filteredFigures.value.slice(start, end)
+})
+
 // 筛选操作
 const resetBookFilters = () => {
   bookFilterForm.tags = []
   bookFilterForm.title = ''
   bookFilterForm.status = ''
+  bookCurrentPage.value = 1
 }
 
 const resetFigureFilters = () => {
   figureFilterForm.tags = []
   figureFilterForm.title = ''
   figureFilterForm.status = ''
+  figureCurrentPage.value = 1
 }
+
+// 添加分页处理函数
+const handleBookPageChange = (page) => {
+  bookCurrentPage.value = page
+}
+
+const handleFigurePageChange = (page) => {
+  figureCurrentPage.value = page
+}
+
+// 监听筛选变化，重置到第一页
+watch([() => bookFilterForm.tags, () => bookFilterForm.title, () => bookFilterForm.status], () => {
+  bookCurrentPage.value = 1
+}, { deep: true })
+
+watch([() => figureFilterForm.tags, () => figureFilterForm.title, () => figureFilterForm.status], () => {
+  figureCurrentPage.value = 1
+}, { deep: true })
 
 // 图书操作
 const handleUploadBook = () => {
@@ -556,10 +619,7 @@ const updateBookStatus = async (book, newStatus) => {
 
   try {
     await axios.patch(`/api/books/${book.id}/status`, {status: newStatus})
-
-    // 更新本地数据
     book.status = newStatus
-
     const statusText = getStatusText(newStatus)
     ElMessage.success(`图书状态已更新为：${statusText}`)
   } catch (error) {
@@ -569,10 +629,8 @@ const updateBookStatus = async (book, newStatus) => {
   }
 }
 
-// 快速更新图书状态(用于操作按钮)
 const quickUpdateBookStatus = async (book, newStatus) => {
   const actionText = newStatus === 'recycled' ? '回收' : '恢复'
-
   try {
     await ElMessageBox.confirm(`确定要${actionText}该图书吗？`, '提示', {type: 'warning'})
     await updateBookStatus(book, newStatus)
@@ -589,10 +647,7 @@ const updateFigureStatus = async (figure, newStatus) => {
 
   try {
     await axios.patch(`/api/figures/${figure.id}/status`, {status: newStatus})
-
-    // 更新本地数据
     figure.status = newStatus
-
     const statusText = getStatusText(newStatus)
     ElMessage.success(`图片状态已更新为：${statusText}`)
   } catch (error) {
@@ -602,10 +657,8 @@ const updateFigureStatus = async (figure, newStatus) => {
   }
 }
 
-// 快速更新图片状态(用于操作按钮)
 const quickUpdateFigureStatus = async (figure, newStatus) => {
   const actionText = newStatus === 'recycled' ? '回收' : '恢复'
-
   try {
     await ElMessageBox.confirm(`确定要${actionText}该图片吗？`, '提示', {type: 'warning'})
     await updateFigureStatus(figure, newStatus)
@@ -616,7 +669,6 @@ const quickUpdateFigureStatus = async (figure, newStatus) => {
   }
 }
 
-// 状态相关方法
 const getStatusText = (status) => {
   switch (status) {
     case 'published':
@@ -831,15 +883,37 @@ onMounted(() => {
   padding: 0 30px;
 }
 
-/* 状态下拉框样式 */
-:deep(.el-select .el-input__inner) {
+/* 状态下拉框样式 */:deep(.el-select .el-input__inner) {
   text-align: center;
   padding: 0 8px;
-}
-
-:deep(.el-select--small .el-input__inner) {
+}:deep(.el-select--small .el-input__inner) {
   height: 28px;
   line-height: 28px;
+}
+
+/* 分页样式 */
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+  border-top: 1px solid #ebeef5;
+  margin-top: 20px;
+}
+
+:deep(.el-pagination) {
+  --el-pagination-bg-color: #f8f9fa;
+  --el-pagination-text-color: #666;
+  --el-pagination-border-radius: 6px;
+}
+
+:deep(.el-pagination .btn-prev),
+:deep(.el-pagination .btn-next) {
+  border-radius: 6px;
+}
+
+:deep(.el-pagination .el-pager li) {
+  border-radius: 6px;
+  margin: 0 2px;
 }
 
 /* 响应式布局 */
