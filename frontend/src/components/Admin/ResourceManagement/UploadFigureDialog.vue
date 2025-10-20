@@ -33,7 +33,7 @@
       <el-form-item label="图片URL" prop="url" required>
         <el-input
             v-model="formData.url"
-            placeholder="请输入图床链接URL，如：https://s21.ax1x.com/xxx.png"
+            placeholder="请输入图床链接URL，如：https://nyeimg.asia/img/Failed.jpeg"
         />
         <div class="form-tip">请输入完整的图床链接URL，支持JPG、PNG、GIF、WebP格式</div>
       </el-form-item>
@@ -110,7 +110,7 @@ const emit = defineEmits(['update:modelValue', 'upload-success'])
 const formData = reactive({
   title: '',
   description: '',
-  url: 'https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg',
+  url: 'https://nyeimg.asia/img/Failed.jpeg',
   tags: [],
   status: 'draft'
 })
@@ -217,7 +217,7 @@ const handleUpload = async () => {
 const handleClose = () => {
   // 检查是否有未保存的内容
   const hasUnsavedContent = formData.title || formData.description ||
-      formData.url !== 'https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg' ||
+      formData.url !== 'https://nyeimg.asia/img/Failed.jpeg' ||
       formData.tags.length > 0
 
   if (hasUnsavedContent) {
@@ -245,7 +245,7 @@ const resetForm = () => {
   Object.assign(formData, {
     title: '',
     description: '',
-    url: 'https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg',
+    url: 'https://nyeimg.asia/img/Failed.jpeg',
     tags: [],
     status: 'draft'
   })

@@ -42,7 +42,7 @@
       <el-form-item label="图书封面" prop="cover">
         <el-input
             v-model="formData.cover"
-            placeholder="请输入图床链接URL，如：https://s21.ax1x.com/xxx.png"
+            placeholder="请输入图床链接URL，如：https://nyeimg.asia/img/Failed.jpeg"
         />
         <div class="form-tip">请输入完整的图床链接URL，支持JPG、PNG等格式</div>
       </el-form-item>
@@ -119,7 +119,7 @@ const emit = defineEmits(['update:modelValue', 'upload-success'])
 const formData = reactive({
   title: '',
   description: '',
-  cover: 'https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg',  // 使用图床URL作为默认封面
+  cover: 'https://nyeimg.asia/img/Failed.jpeg',  // 使用图床URL作为默认封面
   tags: [],
   status: 'draft',
   filename: ''  // 改为存储网盘URL
@@ -259,7 +259,7 @@ const resetForm = () => {
   Object.assign(formData, {
     title: '',
     description: '',
-    cover: 'https://ooo.0x0.ooo/2025/09/18/OlGAw6.jpg',
+    cover: 'https://nyeimg.asia/img/Failed.jpeg',
     tags: [],
     status: 'draft',
     filename: ''
