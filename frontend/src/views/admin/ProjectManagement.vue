@@ -35,7 +35,7 @@
           @delete="deleteProject"
           @edit="openEditDialog"
           @update-status="updateProjectStatus"
-          @quick-update-status="quickUpdateStatus"
+          @visit="visitProject"
       />
       
       <!-- 添加分页组件 -->
@@ -70,6 +70,7 @@
 import {computed, onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import {Refresh} from '@element-plus/icons-vue'
+import {useRouter} from 'vue-router'
 import axios from 'axios'
 import UploadProjectDialog from '@/components/Admin/ProjectManagement/UploadProjectDialog.vue'
 import EditProjectDialog from '@/components/Admin/ProjectManagement/EditProjectDialog.vue'
@@ -201,17 +202,15 @@ const updateProjectStatus = async (project, newStatus) => {
   }
 }
 
-// 快速更新状态(用于操作按钮)
-const quickUpdateStatus = async (project, newStatus) => {
-  const actionText = newStatus === 'recycled' ? '回收' : '恢复'
-
-  try {
-    await ElMessageBox.confirm(`确定要${actionText}该项目吗？`, '提示', {type: 'warning'})
-    await updateProjectStatus(project, newStatus)
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error(`${actionText}项目失败:`, error)
-    }
+// 访问项目
+const visitProject = (project) => {
+  if (project.status === 'published') {
+    // 在新标签页中打开项目详情页
+    const filename = project.slug || project.filename
+    const url = `/projects/${filename}`
+    window.open(url, '_blank')
+  } else {
+    ElMessage.warning('只有已发布的项目才能访问')
   }
 }
 
@@ -232,6 +231,7 @@ const getStatusText = (status) => {
 const showUploadDialog = ref(false)
 const showEditDialog = ref(false)
 const editingProject = ref(null)
+const router = useRouter()
 
 onMounted(() => {
   refreshProjects()

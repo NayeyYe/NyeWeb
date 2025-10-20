@@ -44,7 +44,7 @@
           @delete="deleteArticle"
           @edit="openEditDialog"
           @update-status="updateArticleStatus"
-          @quick-update-status="quickUpdateStatus"
+          @visit="visitArticle"
       />
       
       <!-- 添加分页组件 -->
@@ -79,6 +79,7 @@
 import {computed, onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import {Refresh} from '@element-plus/icons-vue'
+import {useRouter} from 'vue-router'
 import axios from 'axios'
 import UploadArticleDialog from '@/components/Admin/ArticleManagement/UploadArticleDialog.vue'
 import EditArticleDialog from '@/components/Admin/ArticleManagement/EditArticleDialog.vue'
@@ -219,37 +220,23 @@ const updateArticleStatus = async (article, newStatus) => {
   }
 }
 
-// 快速更新状态(用于操作按钮)
-const quickUpdateStatus = async (article, newStatus) => {
-  const actionText = newStatus === 'recycled' ? '回收' : '恢复'
-
-  try {
-    await ElMessageBox.confirm(`确定要${actionText}该文章吗？`, '提示', {type: 'warning'})
-    await updateArticleStatus(article, newStatus)
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error(`${actionText}文章失败:`, error)
-    }
-  }
-}
-
-// 状态相关方法
-const getStatusText = (status) => {
-  switch (status) {
-    case 'published':
-      return '已发布'
-    case 'draft':
-      return '草稿'
-    case 'recycled':
-      return '已回收'
-    default:
-      return '未知'
+// 访问文章
+const visitArticle = (article) => {
+  if (article.status === 'published') {
+    // 在新标签页中打开文章详情页
+    const filepath = article.filepath || article.category || 'uncategorized'
+    const filename = article.slug || article.filename
+    const url = `/article/${filepath}/${filename}`
+    window.open(url, '_blank')
+  } else {
+    ElMessage.warning('只有已发布的文章才能访问')
   }
 }
 
 const showUploadDialog = ref(false)
 const showEditDialog = ref(false)
 const editingArticle = ref(null)
+const router = useRouter()
 
 onMounted(() => {
   refreshArticles()

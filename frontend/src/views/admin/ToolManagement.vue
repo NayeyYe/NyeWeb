@@ -129,26 +129,10 @@
               </el-select>
             </template>
           </el-table-column>
-          <el-table-column align="center" label="操作" min-width="160">
+          <el-table-column align="center" label="操作" min-width="120">
             <template #default="scope">
               <div class="action-buttons-table">
                 <el-button size="small" type="primary" @click="handleEditTool(scope.row)">编辑</el-button>
-                <el-button
-                    v-if="scope.row.status !== 'recycled'"
-                    size="small"
-                    type="warning"
-                    @click="quickUpdateStatus(scope.row, 'recycled')"
-                >
-                  回收
-                </el-button>
-                <el-button
-                    v-if="scope.row.status === 'recycled'"
-                    size="small"
-                    type="success"
-                    @click="quickUpdateStatus(scope.row, 'published')"
-                >
-                  恢复
-                </el-button>
                 <el-button size="small" type="danger" @click="deleteTool(scope.row)">删除</el-button>
               </div>
             </template>
@@ -541,20 +525,6 @@ const updateToolStatus = async (tool, newStatus) => {
     ElMessage.error('更新工具状态失败')
     // 刷新数据以恢复原状态
     refreshTools()
-  }
-}
-
-// 快速更新状态(用于操作按钮)
-const quickUpdateStatus = async (tool, newStatus) => {
-  const actionText = newStatus === 'recycled' ? '回收' : '恢复'
-
-  try {
-    await ElMessageBox.confirm(`确定要${actionText}该工具吗？`, '提示', {type: 'warning'})
-    await updateToolStatus(tool, newStatus)
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error(`${actionText}工具失败:`, error)
-    }
   }
 }
 

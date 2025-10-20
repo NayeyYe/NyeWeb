@@ -70,20 +70,12 @@
           <div class="action-buttons-table">
             <el-button size="small" type="primary" @click="$emit('edit', scope.row)">编辑</el-button>
             <el-button
-                v-if="scope.row.status !== 'recycled'"
                 size="small"
-                type="warning"
-                @click="$emit('quick-update-status', scope.row, 'recycled')"
+                :type="scope.row.status === 'published' ? 'success' : 'info'"
+                :disabled="scope.row.status !== 'published'"
+                @click="$emit('visit', scope.row)"
             >
-              回收
-            </el-button>
-            <el-button
-                v-if="scope.row.status === 'recycled'"
-                size="small"
-                type="success"
-                @click="$emit('quick-update-status', scope.row, 'published')"
-            >
-              恢复
+              访问
             </el-button>
             <el-button size="small" type="danger" @click="$emit('delete', scope.row)">删除</el-button>
           </div>
@@ -98,7 +90,7 @@ defineProps({
   articles: Array
 })
 
-defineEmits(['update-status', 'quick-update-status', 'delete', 'edit'])
+defineEmits(['update-status', 'visit', 'delete', 'edit'])
 
 // 格式化日期
 const formatDate = (dateStr) => {
@@ -303,5 +295,17 @@ const formatDate = (dateStr) => {
     padding: 3px 6px;
     width: 100%;
   }
+}
+
+/* 添加禁用按钮样式 */
+:deep(.el-button:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+:deep(.el-button--info:disabled) {
+  background-color: #c0c4cc;
+  border-color: #c0c4cc;
+  color: #ffffff;
 }
 </style>

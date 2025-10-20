@@ -140,20 +140,12 @@
                   <div class="action-buttons-table">
                     <el-button size="small" type="primary" @click="handleEditBook(scope.row)">编辑</el-button>
                     <el-button
-                        v-if="scope.row.status !== 'recycled'"
                         size="small"
-                        type="warning"
-                        @click="quickUpdateBookStatus(scope.row, 'recycled')"
+                        :type="scope.row.status === 'published' ? 'success' : 'info'"
+                        :disabled="scope.row.status !== 'published'"
+                        @click="visitBook(scope.row)"
                     >
-                      回收
-                    </el-button>
-                    <el-button
-                        v-if="scope.row.status === 'recycled'"
-                        size="small"
-                        type="success"
-                        @click="quickUpdateBookStatus(scope.row, 'published')"
-                    >
-                      恢复
+                      访问
                     </el-button>
                     <el-button size="small" type="danger" @click="deleteBook(scope.row)">删除</el-button>
                   </div>
@@ -621,18 +613,6 @@ const updateBookStatus = async (book, newStatus) => {
   }
 }
 
-const quickUpdateBookStatus = async (book, newStatus) => {
-  const actionText = newStatus === 'recycled' ? '回收' : '恢复'
-  try {
-    await ElMessageBox.confirm(`确定要${actionText}该图书吗？`, '提示', {type: 'warning'})
-    await updateBookStatus(book, newStatus)
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error(`${actionText}图书失败:`, error)
-    }
-  }
-}
-
 // 更新图片状态
 const updateFigureStatus = async (figure, newStatus) => {
   if (figure.status === newStatus) return
@@ -646,18 +626,6 @@ const updateFigureStatus = async (figure, newStatus) => {
     console.error('更新图片状态失败:', error)
     ElMessage.error('更新图片状态失败')
     refreshFigures()
-  }
-}
-
-const quickUpdateFigureStatus = async (figure, newStatus) => {
-  const actionText = newStatus === 'recycled' ? '回收' : '恢复'
-  try {
-    await ElMessageBox.confirm(`确定要${actionText}该图片吗？`, '提示', {type: 'warning'})
-    await updateFigureStatus(figure, newStatus)
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error(`${actionText}图片失败:`, error)
-    }
   }
 }
 
@@ -681,6 +649,21 @@ const openFigureInNewTab = (url) => {
     return
   }
   window.open(url, '_blank')
+}
+
+// 访问图书
+const visitBook = (book) => {
+  if (book.status === 'published') {
+    // 如果有文件名，在新标签页中打开图书链接
+    if (book.filename) {
+      const url = `${book.filename}`
+      window.open(url, '_blank')
+    } else {
+      ElMessage.warning('该图书没有可访问的文件')
+    }
+  } else {
+    ElMessage.warning('只有已发布的图书才能访问')
+  }
 }
 
 onMounted(() => {
@@ -1006,5 +989,17 @@ onMounted(() => {
   :deep(.el-card__body) {
     padding: 15px;
   }
+}
+
+/* 添加禁用按钮样式 */
+:deep(.el-button:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+:deep(.el-button--info:disabled) {
+  background-color: #c0c4cc;
+  border-color: #c0c4cc;
+  color: #ffffff;
 }
 </style>
