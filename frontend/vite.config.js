@@ -1,31 +1,14 @@
 import {fileURLToPath, URL} from 'node:url'
+
 import {defineConfig} from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
-// 新增自动引入插件
-import Components from 'unplugin-vue-components/vite'
-import AutoImport from 'unplugin-auto-import/vite'
-import {ElementPlusResolver} from 'unplugin-vue-components/resolvers'
 
 // https://vite.dev/config/
 export default defineConfig({
     plugins: [
         vue(),
         vueDevTools(),
-        // 自动引入 Element Plus 组件和样式
-        AutoImport({
-            resolvers: [ElementPlusResolver()],
-            imports: ['vue', 'vue-router'],
-            dts: false, // 如需自动生成类型声明文件可设为 true
-        }),
-        Components({
-            resolvers: [
-                ElementPlusResolver({
-                    importStyle: 'css', // 自动引入 css 样式（可选 'sass'）
-                }),
-            ],
-            dts: false, // 如需自动生成类型声明文件可设为 true
-        }),
     ],
     resolve: {
         alias: {
