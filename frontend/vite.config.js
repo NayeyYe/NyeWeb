@@ -21,12 +21,50 @@ export default defineConfig({
     build: {
         outDir: 'dist',
         sourcemap: false, // 不生成 sourcemap
-        chunkSizeWarningLimit: 1000,
+        chunkSizeWarningLimit: Infinity, // 关闭 chunk 大小警告
         cssCodeSplit: true,
         assetsInlineLimit: 4096, // 小于 4KB 的资源内联为 base64
         
-        // 使用 esbuild 压缩（速度更快，无需额外安装）
-        minify: 'esbuild',
+        // 使用 terser 进行深度压缩和混淆
+        minify: 'terser',
+        terserOptions: {
+            compress: {
+                // 移除 console
+                drop_console: true,
+                // 移除 debugger
+                drop_debugger: true,
+                // 移除所有注释
+                passes: 2,
+                // 移除未使用的代码
+                dead_code: true,
+                // 优化布尔值
+                booleans: true,
+                // 优化 if 返回和 continue
+                if_return: true,
+                // 合并连续变量声明
+                join_vars: true,
+                // 移除未引用的函数和变量
+                unused: true,
+            },
+            mangle: {
+                // 混淆顶级作用域变量名
+                toplevel: true,
+                // 混淆 eval 中的变量名
+                eval: true,
+                // 保留类名（避免某些框架出问题）
+                keep_classnames: false,
+                // 保留函数名（避免某些框架出问题）
+                keep_fnames: false,
+                // Safari 10 兼容
+                safari10: true,
+            },
+            format: {
+                // 移除所有注释
+                comments: false,
+                // 使用 ASCII 字符
+                ascii_only: true,
+            },
+        },
         
         // Rollup 配置
         rollupOptions: {
@@ -52,13 +90,19 @@ export default defineConfig({
                     }
                     return 'assets/[name]-[hash].[ext]'
                 },
+                // 压缩输出
+                compact: true,
             },
         },
-    },
-    
-    // esbuild 配置（用于移除 console 和 debugger）
-    esbuild: {
-        drop: ['console', 'debugger'],
+        
+        // 启用 CSS 压缩
+        cssMinify: true,
+        
+        // 报告压缩后的大小
+        reportCompressedSize: true,
+        
+        // 开启 Brotli 压缩（需要服务器支持）
+        brotliSize: true,
     },
     
     // 依赖预构建 - 只包含实际使用的依赖
