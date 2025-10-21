@@ -59,7 +59,7 @@ const fetchProjectTags = async () => {
 
 // 所有项目，按日期降序排序
 const sortedProjects = computed(() => {
-  return [...projects.value].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  return [...projects.value].sort((a, b) => new Date(b.date) - new Date(a.date))
 })
 
 // 当前选择的标签
@@ -76,8 +76,8 @@ const filteredProjects = computed(() => {
 })
 
 // 计算可用标签
-const allTags = computed<string[]>(() => {
-  const tagSet = new Set<string>()
+const allTags = computed(() => {
+  const tagSet = new Set()
   projects.value.forEach(project => {
     if (project.tags) {
       project.tags.forEach(tag => tagSet.add(tag))
@@ -168,8 +168,8 @@ onMounted(async () => {
 <style scoped>
 .projects-container {
   max-width: 1200px;
-  margin: 100px auto 40px;
-  padding: 0 20px; /* 从 padding: 20px 改为 0 20px */
+  margin: 80px auto 40px;
+  padding: 20px;
 }
 
 .header {
@@ -179,13 +179,13 @@ onMounted(async () => {
 
 .header h1 {
   font-size: 2.5em;
-  color: inherit; /* 从 #2c3e50 改为 inherit,使用默认颜色 */
+  color: #2c3e50;
   margin-bottom: 10px;
 }
 
 .header p {
-  font-size: 1.1em; /* 从 1.2em 改为 1.1em,与 Resources/Tools 一致 */
-  color: #606266; /* 从 #7f8c8d 改为 #606266,与 Resources/Tools 一致 */
+  font-size: 1.2em;
+  color: #7f8c8d;
 }
 
 .main-content {
@@ -224,11 +224,6 @@ onMounted(async () => {
 }
 
 @media (max-width: 1024px) {
-  .projects-container {
-    margin: 90px auto 30px; /* 与 Resources/Tools 一致 */
-    padding: 0 15px;
-  }
-  
   .main-content {
     flex-direction: column;
   }
@@ -266,19 +261,19 @@ onMounted(async () => {
 @media (max-width: 768px) {
   .projects-container {
     margin: 80px auto 20px;
-    padding: 0 10px; /* 从 15px 改为 10px */
+    padding: 15px;
   }
   
   .header {
-    margin-bottom: 25px; /* 从 40px 改为 25px */
+    margin-bottom: 30px;
   }
   
   .header h1 {
-    font-size: 2em; /* 从 2.2em 改为 2em */
+    font-size: 2.2em;
   }
   
   .header p {
-    font-size: 1em; /* 从 1.1em 改为 1em */
+    font-size: 1.1em;
   }
   
   .projects-grid {
@@ -293,19 +288,19 @@ onMounted(async () => {
 @media (max-width: 480px) {
   .projects-container {
     margin: 70px auto 15px;
-    padding: 0 5px; /* 从 10px 改为 5px */
+    padding: 10px;
   }
   
   .header {
-    margin-bottom: 20px; /* 从 40px 改为 20px */
+    margin-bottom: 20px;
   }
   
   .header h1 {
-    font-size: 1.8em; /* 从 2em 改为 1.8em */
+    font-size: 2em;
   }
   
   .header p {
-    font-size: 0.9em; /* 从 1em 改为 0.9em */
+    font-size: 1em;
   }
   
   .projects-grid {

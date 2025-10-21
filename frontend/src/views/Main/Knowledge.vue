@@ -204,9 +204,9 @@ onMounted(async () => {
 
 <style scoped>
 .knowledge-container {
+  padding: 100px 20px 20px;
   max-width: 1200px;
-  margin: 100px auto 40px; /* 从 padding 改为 margin,与 Resources/Tools 一致 */
-  padding: 0 20px; /* 只保留左右 padding */
+  margin: 0 auto;
 }
 
 .header {
@@ -217,7 +217,6 @@ onMounted(async () => {
 .header h1 {
   font-size: 2.5em;
   margin-bottom: 10px;
-  color: inherit; /* 移除颜色设置,使用默认 */
 }
 
 .header p {
@@ -262,11 +261,6 @@ onMounted(async () => {
 
 /* 响应式布局 */
 @media (max-width: 1024px) {
-  .knowledge-container {
-    margin: 90px auto 30px; /* 与 Resources/Tools 一致 */
-    padding: 0 15px;
-  }
-  
   .main-content {
     flex-direction: column;
   }
@@ -301,12 +295,11 @@ onMounted(async () => {
 
 @media (max-width: 768px) {
   .knowledge-container {
-    margin: 80px auto 20px; /* 与 Resources/Tools 一致 */
-    padding: 0 10px;
+    padding: 100px 10px 10px;
   }
 
   .header {
-    margin-bottom: 25px; /* 从 30px 改为 25px */
+    margin-bottom: 30px;
   }
   
   .header h1 {
@@ -324,8 +317,7 @@ onMounted(async () => {
 
 @media (max-width: 480px) {
   .knowledge-container {
-    margin: 70px auto 15px; /* 与 Resources/Tools 一致 */
-    padding: 0 5px;
+    padding: 90px 5px 5px;
   }
   
   .header {
