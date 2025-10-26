@@ -109,7 +109,7 @@ onMounted(() => {
   top: 100px;
   border: 1px solid var(--el-border-color-lighter);
   margin-bottom: 20px;
-  max-height: 600px;
+  max-height: 1300px;
   display: flex;
   flex-direction: column;
 }
@@ -153,7 +153,7 @@ onMounted(() => {
 }
 
 .timeline-content {
-  max-height: 500px;
+  max-height: 1200px;
   overflow-y: auto;
   overflow-x: hidden;
 }
