@@ -23,8 +23,14 @@
               :article="article"
           />
         </div>
-        <div v-if="hasMoreArticles" class="load-more-container">
-          <el-button plain type="primary" @click="loadMore">查看更多</el-button>
+        <div v-if="filteredArticles.length > pageSize" class="pagination-container">
+          <el-pagination
+            v-model:current-page="currentPage"
+            :page-size="pageSize"
+            :total="filteredArticles.length"
+            layout="prev, pager, next"
+            @current-change="handlePageChange"
+          />
         </div>
       </main>
       <aside class="tags-sidebar">
@@ -150,42 +156,42 @@ const filteredArticles = computed(() => {
   )
 })
 
-// 要显示的文章数量
-const displayCount = ref(5)
+// 分页相关
+const currentPage = ref(1)
+const pageSize = ref(5)
 
 // 实际显示在页面上的文章
 const displayedArticles = computed(() => {
-  return filteredArticles.value.slice(0, displayCount.value)
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return filteredArticles.value.slice(start, end)
 })
 
-// 检查是否还有更多文章可以加载
-const hasMoreArticles = computed(() => {
-  return displayCount.value < filteredArticles.value.length
-})
-
-// 加载更多文章
-const loadMore = () => {
-  displayCount.value += 5
+// 处理页码变化
+const handlePageChange = (page) => {
+  currentPage.value = page
+  // 滚动到顶部
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 // 处理分类选择事件
 const handleCategorySelected = (category) => {
   selectedCategory.value = category
   selectedTag.value = null // 重置标签筛选
-  displayCount.value = 5 // 重置显示数量
+  currentPage.value = 1 // 重置到第一页
 }
 
 // 处理标签选择事件
 const handleTagSelected = (tag) => {
   selectedTag.value = tag
-  displayCount.value = 5 // 重置显示数量
+  currentPage.value = 1 // 重置到第一页
 }
 
 // 清空筛选条件
 const clearFilters = () => {
   selectedCategory.value = null
   selectedTag.value = null
-  displayCount.value = 5
+  currentPage.value = 1
 }
 
 const handleScrollToArticle = (slug) => {
@@ -248,9 +254,10 @@ onMounted(async () => {
   gap: 20px;
 }
 
-.load-more-container {
-  margin-top: 20px;
-  text-align: center;
+.pagination-container {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
 }
 
 .tags-sidebar {
@@ -294,8 +301,8 @@ onMounted(async () => {
     gap: 15px;
   }
   
-  .load-more-container {
-    margin-top: 15px;
+  .pagination-container {
+    margin-top: 20px;
   }
 }
 
@@ -319,6 +326,10 @@ onMounted(async () => {
   
   .articles-grid {
     gap: 12px;
+  }
+  
+  .pagination-container {
+    margin-top: 15px;
   }
 }
 
@@ -344,13 +355,12 @@ onMounted(async () => {
     gap: 10px;
   }
   
-  .load-more-container {
+  .pagination-container {
     margin-top: 10px;
   }
   
-  :deep(.el-button) {
-    --el-button-font-size: 12px;
-    --el-button-padding-horizontal: 12px;
+  :deep(.el-pagination) {
+    --el-pagination-font-size: 12px;
   }
 }
 </style>

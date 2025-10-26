@@ -86,34 +86,34 @@ const allTags = computed<string[]>(() => {
   return Array.from(tagSet)
 })
 
-// 要显示的项目数量
-const displayCount = ref(6)
+// 分页相关
+const currentPage = ref(1)
+const pageSize = ref(5)
 
 // 实际显示在页面上的项目
 const displayedProjects = computed(() => {
-  return filteredProjects.value.slice(0, displayCount.value)
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return filteredProjects.value.slice(start, end)
 })
 
-// 检查是否还有更多项目可以加载
-const hasMoreProjects = computed(() => {
-  return displayCount.value < filteredProjects.value.length
-})
-
-// 加载更多项目
-const loadMore = () => {
-  displayCount.value += 6
+// 处理页码变化
+const handlePageChange = (page) => {
+  currentPage.value = page
+  // 滚动到顶部
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 // 处理标签选择事件
 const handleTagSelected = (tag) => {
   selectedTag.value = tag
-  displayCount.value = 6 // 重置显示数量
+  currentPage.value = 1 // 重置到第一页
 }
 
 // 清空筛选条件
 const clearFilters = () => {
   selectedTag.value = null
-  displayCount.value = 6
+  currentPage.value = 1
 }
 
 const handleScrollToProject = (slug) => {
@@ -154,8 +154,14 @@ onMounted(async () => {
               :project="project"
           />
         </div>
-        <div v-if="hasMoreProjects" class="load-more-container">
-          <el-button plain type="primary" @click="loadMore">查看更多</el-button>
+        <div v-if="filteredProjects.length > pageSize" class="pagination-container">
+          <el-pagination
+            v-model:current-page="currentPage"
+            :page-size="pageSize"
+            :total="filteredProjects.length"
+            layout="prev, pager, next"
+            @current-change="handlePageChange"
+          />
         </div>
       </main>
       <aside class="tags-sidebar">
@@ -218,7 +224,7 @@ onMounted(async () => {
   padding: 60px 20px;
 }
 
-.load-more-container {
+.pagination-container {
   text-align: center;
   margin-top: 30px;
 }
@@ -258,7 +264,7 @@ onMounted(async () => {
     order: 3; /* 文章 */
   }
   
-  .load-more-container {
+  .pagination-container {
     margin-top: 20px;
   }
 }
@@ -285,7 +291,7 @@ onMounted(async () => {
     gap: 15px;
   }
   
-  .load-more-container {
+  .pagination-container {
     margin-top: 15px;
   }
 }
@@ -312,13 +318,12 @@ onMounted(async () => {
     gap: 12px;
   }
   
-  .load-more-container {
+  .pagination-container {
     margin-top: 10px;
   }
   
-  :deep(.el-button) {
-    --el-button-font-size: 12px;
-    --el-button-padding-horizontal: 12px;
+  :deep(.el-pagination) {
+    --el-pagination-font-size: 12px;
   }
 }
 </style>
