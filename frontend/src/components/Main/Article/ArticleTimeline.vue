@@ -10,9 +10,8 @@
         </el-icon>
       </div>
     </template>
-    <div v-loading="loading">
+    <div v-loading="loading" class="timeline-content">
       <el-collapse-transition>
-        <!-- 修改：使用传入的articles而不是数据库数据，这样可以响应筛选 -->
         <el-timeline v-show="!isCollapsed && !loading && sortedArticles.length > 0">
           <el-timeline-item
               v-for="article in sortedArticles"
@@ -107,9 +106,12 @@ onMounted(() => {
 .timeline-card {
   border-radius: 15px;
   position: sticky;
-  top: 100px; /* Adjust based on your header height */
+  top: 100px;
   border: 1px solid var(--el-border-color-lighter);
   margin-bottom: 20px;
+  max-height: 600px;
+  display: flex;
+  flex-direction: column;
 }
 
 .card-header {
@@ -148,5 +150,29 @@ onMounted(() => {
 :deep(.el-timeline-item__timestamp) {
   color: var(--el-text-color-regular);
   font-size: 12px;
+}
+
+.timeline-content {
+  max-height: 500px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.timeline-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.timeline-content::-webkit-scrollbar-track {
+  background: var(--el-fill-color-lighter);
+  border-radius: 3px;
+}
+
+.timeline-content::-webkit-scrollbar-thumb {
+  background: var(--el-border-color);
+  border-radius: 3px;
+}
+
+.timeline-content::-webkit-scrollbar-thumb:hover {
+  background: var(--el-border-color-dark);
 }
 </style>
